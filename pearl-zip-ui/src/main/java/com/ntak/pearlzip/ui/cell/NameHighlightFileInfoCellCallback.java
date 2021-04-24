@@ -36,7 +36,7 @@ public class NameHighlightFileInfoCellCallback extends AbstractHighlightFileInfo
                                             .get(KEY_ICON_REF))
                             .orElse("")
                             .toString()).isEmpty()) {
-                new Image(iconRef);
+                    icon.setImage(new Image(iconRef));
             } else { // Use default values
                 if (info.isFolder()) {
                     icon.setImage(folderIcon);

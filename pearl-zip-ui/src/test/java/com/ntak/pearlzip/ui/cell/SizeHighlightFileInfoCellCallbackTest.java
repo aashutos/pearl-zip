@@ -11,9 +11,9 @@ import org.junit.jupiter.api.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-public class CommentsHighlightFileInfoCellCallbackTest {
+public class SizeHighlightFileInfoCellCallbackTest {
 
-    CommentsHighlightFileInfoCellCallback callback = new CommentsHighlightFileInfoCellCallback();
+    SizeHighlightFileInfoCellCallback callback = new SizeHighlightFileInfoCellCallback();
 
     /*
          Test cases:
@@ -35,12 +35,15 @@ public class CommentsHighlightFileInfoCellCallbackTest {
     }
 
     @Test
-    @DisplayName("Test: Set Comments field successfully")
+    @DisplayName("Test: Set Size field successfully")
     public void testSetField_ValidParameters_Success() {
         final TableCell<FileInfo,FileInfo> cell = new TableCell<>();
-        FileInfo info = new FileInfo(0, 0, "filename", 0, 0, 0, LocalDateTime.now(), LocalDateTime.now(),
-                                     LocalDateTime.now(), "user", "group", 0, "some comments", false, false, Collections.emptyMap());
+        FileInfo info = new FileInfo(0, 0, "filename", 0, 0, 2048,
+                                     LocalDateTime.now(),
+                                     LocalDateTime.now(), LocalDateTime.now(), "user", "group", 0, "some comments", false,
+                                     false,
+                                     Collections.emptyMap());
         callback.setField(cell, info);
-        Assertions.assertEquals("some comments", cell.getText(), "Fields were not set as expected");
+        Assertions.assertEquals("2048", cell.getText(), "Fields were not set as expected");
     }
 }

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-public class CommentsHighlightFileInfoCellCallbackTest {
+public class HashHighlightFileInfoCellCallbackTest {
 
-    CommentsHighlightFileInfoCellCallback callback = new CommentsHighlightFileInfoCellCallback();
+    HashHighlightFileInfoCellCallback callback = new HashHighlightFileInfoCellCallback();
 
     /*
          Test cases:
@@ -35,12 +35,14 @@ public class CommentsHighlightFileInfoCellCallbackTest {
     }
 
     @Test
-    @DisplayName("Test: Set Comments field successfully")
+    @DisplayName("Test: Set Hash field successfully")
     public void testSetField_ValidParameters_Success() {
         final TableCell<FileInfo,FileInfo> cell = new TableCell<>();
-        FileInfo info = new FileInfo(0, 0, "filename", 0, 0, 0, LocalDateTime.now(), LocalDateTime.now(),
-                                     LocalDateTime.now(), "user", "group", 0, "some comments", false, false, Collections.emptyMap());
+        FileInfo info = new FileInfo(0, 0, "filename", 232432432, 0, 0, LocalDateTime.now(), LocalDateTime.now(),
+                                     LocalDateTime.now(), "user", "group", 0, "some comments", false,
+                                     false,
+                                     Collections.emptyMap());
         callback.setField(cell, info);
-        Assertions.assertEquals("some comments", cell.getText(), "Fields were not set as expected");
+        Assertions.assertEquals("0xDDAA330", cell.getText(), "Fields were not set as expected");
     }
 }
