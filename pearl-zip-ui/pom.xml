@@ -161,8 +161,6 @@
                     <target>15</target>
                     <compilerArgs>
                         <arg>--enable-preview</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
