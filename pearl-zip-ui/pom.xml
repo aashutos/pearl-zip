@@ -163,8 +163,6 @@
                         <arg>--enable-preview</arg>
                         <arg>--add-opens</arg>
                         <arg>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</arg>
-                        <arg>--add-opens</arg>
-                        <arg>openjfx.monocle/com.sun.glass.ui.monocle=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
