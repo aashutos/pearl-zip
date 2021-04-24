@@ -198,7 +198,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M5</version>
                     <configuration>
-                        <argLine>--enable-preview --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens openjfx.monocle/com.sun.glass.ui.monocle=ALL-UNNAMED</argLine>
+                        <argLine>--enable-preview</argLine>
                         <includes>
                             <include>**/*TestSuite.class</include>
                         </includes>
