@@ -167,10 +167,6 @@
                     <target>15</target>
                     <compilerArgs>
                         <arg>--enable-preview</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</arg>
-                        <arg>--patch-module</arg>
-                        <arg>openjfx.monocle=~/.m2/repository/org/testfx/openjfx-monocle/jdk-12.0.1+2/openjfx-monocle-jdk-12.0.1+2.jar</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

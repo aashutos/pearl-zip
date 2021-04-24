@@ -7,8 +7,7 @@ to stabilise and sure-up the application.
 
 ## Build Status
 Compilation build of Pearl Zip from the Jenkins Build Server:<br/>
-![Build Status](https://jenkins.92ak.co.uk:8443/buildStatus/icon?job=COMPILE+-+PearlZip&build=last:${params.branch=origin/master})
-
+![Build Status](https://jenkins.92ak.co.uk:8443/buildStatus/icon?job=COMPILE-PearlZip&build=last:${params.branch=origin/master})
 ## Installation Instructions
 Pearl Zip is prepackaged as an Apple App native executable package and will be able for download from the releases page.
 This can be placed in the Applications folder as per usual.
