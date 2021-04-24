@@ -92,6 +92,12 @@
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <version>${openjfx-monocle.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
