@@ -87,8 +87,13 @@ public class ZipState {
                     String currPriority = System.getProperty(currentProvKey, "1");
                     String newPriority = System.getProperty(newProvKey, "0");
 
-                    if (newPriority.compareTo(currPriority) > 0) {
-                        cache.put(format, service);
+                    try {
+                        if (Integer.valueOf(newPriority)
+                                   .compareTo(Integer.valueOf(currPriority)) > 0) {
+                            cache.put(format, service);
+                        }
+                    } catch (NumberFormatException|NullPointerException e) {
+
                     }
                 }
             }
