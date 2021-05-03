@@ -15,10 +15,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.InstanceField;
 
@@ -31,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.when;
 
+@Tag("Excluded")
 public class FrmMainControllerTest {
     private static FrmMainController controller;
     private static Stage stage;

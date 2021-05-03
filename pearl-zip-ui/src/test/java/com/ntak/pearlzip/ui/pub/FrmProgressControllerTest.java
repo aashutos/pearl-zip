@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PROGRESS;
 import static java.lang.Thread.MIN_PRIORITY;
 
+@Tag("Excluded")
 public class FrmProgressControllerTest {
    private static FrmProgressController controller;
    private static CountDownLatch latch = new CountDownLatch(1);

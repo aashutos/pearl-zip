@@ -25,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.mockito.Mockito.when;
 
+@Tag("Excluded")
 public class ContextMenuControllerTest {
 
     private static ContextMenuController controller;
