@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
 import static org.mockito.Mockito.when;
 
 public class ContextMenuControllerTest {
@@ -58,6 +59,7 @@ public class ContextMenuControllerTest {
     @BeforeAll
     public static void setUpOnce() throws NoSuchFieldException, InterruptedException {
         try {
+            System.setProperty(CNS_RES_BUNDLE, "pearlzipui");
             Platform.startup(() -> latch.countDown());
         } catch (Exception e) {
             latch.countDown();
