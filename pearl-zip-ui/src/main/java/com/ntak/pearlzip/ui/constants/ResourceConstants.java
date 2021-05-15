@@ -10,6 +10,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY;
 
@@ -24,7 +25,10 @@ public class ResourceConstants {
     public static final BackgroundFill DEFAULT_HIGHLIGHT = new BackgroundFill(Color.GOLDENROD, CornerRadii.EMPTY,
                                                                               Insets.EMPTY);
 
-    public static final DateTimeFormatter DTF_YYYY = DateTimeFormatter.ofPattern(
-            "yyyy");
+    public static final DateTimeFormatter DTF_YYYY = DateTimeFormatter.ofPattern("yyyy");
+    public static final Pattern DSV = Pattern.compile(Pattern.quote("."));
+    public static final Pattern CSV = Pattern.compile(Pattern.quote(","));
+    public static final Pattern SSV = Pattern.compile(Pattern.quote("/"));
+
     public static final int NO_FILES_HISTORY = Integer.parseInt(System.getProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5"));
 }

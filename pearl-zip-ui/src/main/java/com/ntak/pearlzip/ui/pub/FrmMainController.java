@@ -187,4 +187,8 @@ public class FrmMainController {
     public Button getBtnUp() {
         return btnUp;
     }
+
+    public FXArchiveInfo getFXArchiveInfo() {
+        return FXArchiveInfo;
+    }
 }

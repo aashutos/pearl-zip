@@ -1,0 +1,22 @@
+<!--
+  ~ Copyright © 2021 92AK
+  -->
+
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ApacheCommonsCompressTestSuite" type="JUnit" factoryName="JUnit" folderName="Test Suites" nameIsGenerated="true">
+    <module name="pearl-zip-archive-acc" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.ntak.pearlzip.archive.acc.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="com.ntak.pearlzip.archive.acc" />
+    <option name="MAIN_CLASS_NAME" value="com.ntak.pearlzip.archive.acc.ApacheCommonsCompressTestSuite" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

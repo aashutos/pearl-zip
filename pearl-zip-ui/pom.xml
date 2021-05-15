@@ -32,6 +32,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>ntak-testfx-util</artifactId>
+            <version>${parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>

@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui;
 
 import org.junit.platform.runner.JUnitPlatform;
+import org.junit.platform.suite.api.IncludeClassNamePatterns;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.SuiteDisplayName;
 import org.junit.runner.RunWith;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
  */
 @RunWith(JUnitPlatform.class)
 @SelectPackages("com.ntak.pearlzip")
+@IncludeClassNamePatterns("^.*Test$")
 @SuiteDisplayName("PearlZip UI module tests")
 public class UITestSuiteAll {
 

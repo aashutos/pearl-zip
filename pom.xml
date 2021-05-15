@@ -36,6 +36,7 @@
         <module>pearl-zip-ui</module>
         <module>pearl-zip-assembly-osx</module>
         <module>pearl-zip-deploy-common</module>
+        <module>ntak-testfx-util</module>
     </modules>
 
     <licenses>

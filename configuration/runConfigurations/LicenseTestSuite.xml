@@ -1,0 +1,23 @@
+<!--
+  ~ Copyright © 2021 92AK
+  -->
+
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LicenseTestSuite" type="JUnit" factoryName="JUnit" folderName="Test Suites" nameIsGenerated="true">
+    <module name="pearl-zip-license" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.ntak.pearlzip.license.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="com.ntak.pearlzip.license" />
+    <option name="MAIN_CLASS_NAME" value="com.ntak.pearlzip.license.LicenseTestSuite" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <option name="VM_PARAMETERS" value="-ea --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

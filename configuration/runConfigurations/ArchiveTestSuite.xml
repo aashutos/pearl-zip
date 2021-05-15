@@ -1,0 +1,22 @@
+<!--
+  ~ Copyright © 2021 92AK
+  -->
+
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ArchiveTestSuite" type="JUnit" factoryName="JUnit" folderName="Test Suites" nameIsGenerated="true">
+    <module name="pearl-zip-archive" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.ntak.pearlzip.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="com.ntak.pearlzip" />
+    <option name="MAIN_CLASS_NAME" value="com.ntak.pearlzip.ArchiveTestSuite" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

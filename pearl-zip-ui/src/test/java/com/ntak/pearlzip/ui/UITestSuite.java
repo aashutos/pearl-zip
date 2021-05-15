@@ -19,7 +19,7 @@ import java.nio.file.Path;
 @RunWith(JUnitPlatform.class)
 @SelectPackages("com.ntak.pearlzip")
 @SuiteDisplayName("PearlZip UI module tests")
-@ExcludeTags("Excluded")
+@ExcludeTags({"Excluded","fx-test"})
 public class UITestSuite {
 
     public static void clearDirectory(Path directory) throws IOException {
