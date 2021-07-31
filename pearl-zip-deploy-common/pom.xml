@@ -52,6 +52,41 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>publish-javadoc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/bash/publish-javadoc.sh</argument>
+                                <argument>${project.version}</argument>
+                                <argument>LATEST</argument>
+                            </arguments>
+                            <environmentVariables>
+                                <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                            </environmentVariables>
+                            <async>false</async>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>

@@ -36,7 +36,7 @@ public class ZipStateTest {
         }
 
         @Override
-        public boolean addFile(long sessionId, String archivePath, FileInfo... file) {
+        public boolean addFile(long sessionId, String archivePath, FileInfo... files) {
             return false;
         }
 
@@ -51,7 +51,7 @@ public class ZipStateTest {
         }
 
         @Override
-        public boolean deleteFile(long sessionId, ArchiveInfo archivePath, FileInfo file) {
+        public boolean deleteFile(long sessionId, ArchiveInfo archiveInfo, FileInfo file) {
             return false;
         }
 

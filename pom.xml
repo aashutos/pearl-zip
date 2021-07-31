@@ -224,6 +224,22 @@
                         </includes>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <reportOutputDirectory>${project.build.directory}</reportOutputDirectory>
+                        <destDir>${project.version}</destDir>
+                        <additionalJOptions>
+                            <additionalJOption>--enable-preview</additionalJOption>
+                            <additionalJOption>--release</additionalJOption>
+                            <additionalJOption>15</additionalJOption>
+                            <additionalJOption>-Xdoclint:none</additionalJOption>
+                        </additionalJOptions>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

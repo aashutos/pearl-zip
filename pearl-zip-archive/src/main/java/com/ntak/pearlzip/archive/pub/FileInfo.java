@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- *   Java bean which stores normalised data about a particular entry in a zip archive.
+ *  Java bean which stores normalised data about a particular entry in a zip archive.
  *  @author Aashutos Kakshepati
  */
 public class FileInfo {
