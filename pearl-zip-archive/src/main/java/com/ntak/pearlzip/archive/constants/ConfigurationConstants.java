@@ -24,7 +24,6 @@ public class ConfigurationConstants {
     public static final String KEY_ICON_REF = "icon-ref";
     public static final String KEY_DEFAULT = "default";
 
-
     public static final String TMP_DIR_PREFIX = System.getProperty(CNS_TMP_DIR_PREFIX,"pz");
     public static final String REGEX_TIMESTAMP_DIR = "pz\\d+";
 }

@@ -5,6 +5,11 @@ package com.ntak.pearlzip.archive.pub;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ERROR;
 
+/**
+ *  A POJO object used to transmit an error message from back-end services to the front-end UI. Error Messages are
+ *  consumed by the ErrorAlertConsumer. An alert is then raised to provide information to the user along with a stack
+ *  trace.
+ */
 public class ErrorMessage extends ProgressMessage {
 
     private final String title;

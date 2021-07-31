@@ -23,6 +23,16 @@ public interface ArchiveService {
 
     CommunicationBus DEFAULT_BUS = initializeBus();
 
+    /**
+     *   This method decouples the implementation of the internal communication bus from PearlZip by utilising the
+     *   CommunicationBus façade. The default implementation used and, which is bundled with the UI package is
+     *   EventBus. The implementation can be configured by specifying the canonical name of the implementation factory
+     *   with the key:
+     *   <br/><br/>
+     *   {@code configuration.ntak.com-bus-factory=com.ntak.pearlzip.ui.util.EventBusFactory}
+     *
+     *   @return CommunicationBus - The implementation of a CommunicationBus for internal communication within PearlZip
+     */
     static CommunicationBus initializeBus() {
         try {
             CommunicationBusFactory factory = (CommunicationBusFactory) Class.forName(
@@ -46,6 +56,13 @@ public interface ArchiveService {
         }
     }
 
+    /**
+     *  Generated the minimal default ArchiveInfo for a given archive path. It sets the path and the archive format
+     *  as well as the maximum compression level.
+     *
+     *  @param archivePath
+     *  @return ArchiveInfo - Minimal configuration for an archive in PearlZip
+     */
     static ArchiveInfo generateDefaultArchiveInfo(String archivePath) {
         ArchiveInfo archiveInfo = new ArchiveInfo();
 
@@ -56,6 +73,17 @@ public interface ArchiveService {
         return archiveInfo;
     }
 
+    /**
+     *   Specifies whether an Archive Service is enabled for use by PearlZip. By default, every achive service
+     *   implementation is enabled. The Archive Implementation can be disabled by adding a property to the bootstrap
+     *   configuration:
+     *   <br/><br/>
+     *   {@code configuration.ntak.pearl-zip.provider.priority.enabled.[Canonical name of Archive
+     *   Service
+     *   implementation]=false}
+     *
+     *   @return boolean - returns true if the implementation is enabled and to be used by PearlZip
+     */
     default boolean isEnabled() {
         return Boolean.parseBoolean(System.getProperty(
                 String.format("configuration.ntak.pearl-zip.provider.priority.enabled.%s",
@@ -65,6 +93,14 @@ public interface ArchiveService {
         );
     }
 
+    /**
+     *  Returns a Set of archive formats, which PearlZip identifies as being a compressor archive i.e. an archive
+     *  system that can only compress a single file and does not provide any extra functionality such as encryption.
+     *  All formats are aggregated together as a unique set. Hence, any additional formats can be specified by the
+     *  implementation to augment.
+     *
+     *  @return Set&lt;String&gt; - List of compressor archives to be identified by PearlZip
+     */
     default Set<String> getCompressorArchives() {
         return Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz");
     }
@@ -79,7 +115,22 @@ public interface ArchiveService {
      */
     default Set<String> getAliasFormats() { return Set.of("tgz"); }
 
+    /**
+     *   Generates a tab for the archive implementation in the Options dialog to provide some global settings for the
+     *   underlying implementation as required. The object returned consists of a Pair with a String key representing
+     *   the tab title text on the Options dialog and a Node as the root JavaFX object that will be found under the
+     *   JavaFX Tab object.
+     *
+     *   @return Optional&lt;Pair&lt;String,Node&gt;&gt; - The representation of the Options tab for the archive
+     *   service implementation
+     */
     default Optional<Pair<String,Node>> getOptionsPane() { return Optional.empty(); }
 
+    /**
+     *   Provides a ResourceBundle containing the logging keys for the underlying archive service implementation.
+     *
+     *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
+     *   or empty if not required
+     */
     default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
 }
