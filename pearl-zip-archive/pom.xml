@@ -19,9 +19,20 @@
     <name>PearlZip Archive Logic</name>
     <packaging>jar</packaging>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Pearl Zip Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/aashutos/pearl-zip</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <maven.compiler.source>15</maven.compiler.source>
         <maven.compiler.target>15</maven.compiler.target>
+        <pearlzip.sign.store.password>SET STORE PASSWORD</pearlzip.sign.store.password>
+        <pearlzip.sign.key.password>SET KEY PASSWORD</pearlzip.sign.key.password>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <licenses>
@@ -81,6 +92,70 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sign-pz-lib</id>
+            <properties>
+                <maven.deploy.skip>false</maven.deploy.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/scripts/sign-lib.sh</argument>
+                                <argument>${project.version}</argument>
+                            </arguments>
+                            <environmentVariables>
+                                <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                            </environmentVariables>
+                            <async>false</async>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/scripts/clear-mvn-package.sh</argument>
+                                <argument>${project.version}</argument>
+                            </arguments>
+                            <environmentVariables>
+                                <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                            </environmentVariables>
+                            <async>false</async>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
