@@ -1,0 +1,13 @@
+#
+# Copyright © 2021 92AK
+#
+
+#####################################################################
+#  GITHUB CONFIGURATION                                             #
+#####################################################################
+GITHUB_API=
+GITHUB_UPLOAD_API=
+REPO_OWNER=
+REPOSITORY=
+GITHUB_API_TOKEN=
+PACKAGE_NAME=
