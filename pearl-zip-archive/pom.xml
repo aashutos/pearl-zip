@@ -33,6 +33,7 @@
         <pearlzip.sign.store.password>SET STORE PASSWORD</pearlzip.sign.store.password>
         <pearlzip.sign.key.password>SET KEY PASSWORD</pearlzip.sign.key.password>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <deploy.settings.loc>${project.basedir}/scripts/settings.properties</deploy.settings.loc>
     </properties>
 
     <licenses>
@@ -150,6 +151,7 @@
                             <arguments>
                                 <argument>${project.basedir}/scripts/clear-mvn-package.sh</argument>
                                 <argument>${project.version}</argument>
+                                <argument>${deploy.settings.loc}</argument>
                             </arguments>
                             <environmentVariables>
                                 <JAVA_HOME>${jdk.location}</JAVA_HOME>
