@@ -138,12 +138,12 @@
             </licenses>
         </dependency>
         <dependency>
-            <groupId>org.apache</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.2.1</version>
             <licenses>
                 <license>
-                    <name>The Apache License, Version 2.0</name>
+                    <name>Apache License, Version 2.0</name>
                     <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
                     <file>apache license v2.0 - license-2.0.txt</file>
                 </license>
