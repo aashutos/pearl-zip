@@ -53,7 +53,7 @@ rm -rf $rootDir/pz-runtime
 rm -rf $rootDir/target/PearlZip.app
 
 echo "Generating Dependencies..."
-mvn dependency:build-classpath -Dmdep.outputFile=$rootDir/deps.lst -f ../pearl-zip-ui/pom.xml
+mvn dependency:build-classpath -X -Dmdep.outputFile=$rootDir/deps.lst -f ../pearl-zip-ui/pom.xml
 
 echo "Retrieving Dependencies..."
 mkdir -p $rootDir/mods
@@ -95,7 +95,7 @@ done
 
 echo "Manual override with pre-compiled modules..."
 cp $rootDir/src/main/resources/lib/org.apache.logging.log4j.core/log4j-core-2.14.0.jar mods/
-cp $rootDir/src/main/resources/lib/org.apache.commons.compress/commons-compress-1.20.jar mods/
+cp $rootDir/src/main/resources/lib/org.apache.commons.compress/commons-compress-1.21.jar mods/
 cp $rootDir/src/main/resources/lib/com.sun.jna/jna-5.6.0.jar mods/
 
 echo "Create shared archive..."
