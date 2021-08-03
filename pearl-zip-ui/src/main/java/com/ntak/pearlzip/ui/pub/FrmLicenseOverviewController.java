@@ -77,55 +77,57 @@ public class FrmLicenseOverviewController {
                 try {
                     LicenseInfo info = tblLicenseInfo.getSelectionModel()
                                                      .getSelectedItem();
-                    String fileName = info.licenseFile();
-                    if (Objects.nonNull(fileName)) {
-                        final URL refRootFolder = FrmLicenseOverviewController.class
-                                .getClassLoader()
-                                .getResource("ref");
-                        Path licenseUri;
-                        if (Objects.nonNull(refRootFolder)) {
-                            licenseUri =
-                                    Paths.get(new URL(String.format("%s/%s", refRootFolder,
-                                                                    fileName)).getPath()).toAbsolutePath();
-                        } else {
-                            // Check module file system for resource...
-                            try {
-                                licenseUri = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.license",
-                                                                     String.format("ref/%s", fileName)).toAbsolutePath();
-                            } catch(InvalidPathException ipe) {
-                                licenseUri = null;
+                    if (Objects.nonNull(info)) {
+                        String fileName = info.licenseFile();
+                        if (Objects.nonNull(fileName)) {
+                            final URL refRootFolder = FrmLicenseOverviewController.class
+                                    .getClassLoader()
+                                    .getResource("ref");
+                            Path licenseUri;
+                            if (Objects.nonNull(refRootFolder)) {
+                                licenseUri =
+                                        Paths.get(new URL(String.format("%s/%s", refRootFolder,
+                                                                        fileName)).getPath()).toAbsolutePath();
+                            } else {
+                                // Check module file system for resource...
+                                try {
+                                    licenseUri = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.license",
+                                                                         String.format("ref/%s", fileName)).toAbsolutePath();
+                                } catch(InvalidPathException ipe) {
+                                    licenseUri = null;
+                                }
                             }
+
+                            // LOG: License file URI: %s; Exists: %s
+                            LOGGER.info(resolveTextKey(LOG_LICENSE_FILE_INFO,
+                                                       licenseUri, Files.exists(licenseUri)));
+                            StringBuilder sb = new StringBuilder();
+                            try(BufferedReader br = Files.newBufferedReader(licenseUri)) {
+                                br.lines()
+                                  .map(l -> info.licenseFile().endsWith("txt") ? String.format("%s<br/>", l) : l)
+                                  .forEach(sb::append);
+                            }
+                            Stage licDetailsStage = new Stage();
+
+                            FXMLLoader loader = new FXMLLoader();
+                            loader.setLocation(ZipLauncher.class.getClassLoader()
+                                                                .getResource("frmLicenseDetails.fxml"));
+                            loader.setResources(LOG_BUNDLE);
+                            AnchorPane root = loader.load();
+
+                            FrmLicenseDetailsController controller = loader.getController();
+                            controller.initData(sb.toString());
+
+                            Scene scene = new Scene(root);
+                            // License Details : %s
+                            licDetailsStage.setTitle(resolveTextKey(TITLE_LICENSE_DETAILS, info.licenseFile()));
+                            licDetailsStage.setScene(scene);
+                            licDetailsStage.setResizable(false);
+
+                            licDetailsStage.show();
+                            licDetailsStage.setAlwaysOnTop(true);
+                            licDetailsStage.setAlwaysOnTop(false);
                         }
-
-                        // LOG: License file URI: %s; Exists: %s
-                        LOGGER.info(resolveTextKey(LOG_LICENSE_FILE_INFO,
-                                                   licenseUri, Files.exists(licenseUri)));
-                        StringBuilder sb = new StringBuilder();
-                        try(BufferedReader br = Files.newBufferedReader(licenseUri)) {
-                            br.lines()
-                              .map(l->info.licenseFile().endsWith("txt") ? String.format("%s<br/>",l)  : l)
-                              .forEach(sb::append);
-                        }
-                        Stage licDetailsStage = new Stage();
-
-                        FXMLLoader loader = new FXMLLoader();
-                        loader.setLocation(ZipLauncher.class.getClassLoader()
-                                                            .getResource("frmLicenseDetails.fxml"));
-                        loader.setResources(LOG_BUNDLE);
-                        AnchorPane root = loader.load();
-
-                        FrmLicenseDetailsController controller = loader.getController();
-                        controller.initData(sb.toString());
-
-                        Scene scene = new Scene(root);
-                        // License Details : %s
-                        licDetailsStage.setTitle(resolveTextKey(TITLE_LICENSE_DETAILS, info.licenseFile()));
-                        licDetailsStage.setScene(scene);
-                        licDetailsStage.setResizable(false);
-
-                        licDetailsStage.show();
-                        licDetailsStage.setAlwaysOnTop(true);
-                        licDetailsStage.setAlwaysOnTop(false);
                     }
                 } catch (Exception exc) {
                     // LOG: Issue creating stage.\nException type: %s\nMessage:%s\nStack trace:\n%s

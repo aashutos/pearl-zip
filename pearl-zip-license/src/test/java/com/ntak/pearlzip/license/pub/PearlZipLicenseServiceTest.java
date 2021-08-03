@@ -37,6 +37,7 @@ public class PearlZipLicenseServiceTest {
         String[] expectedKeys = {
                 "org.apache.logging.log4j.log4j-api:Apache License, Version 2.0",
                 "org.apache.logging.log4j.log4j-core:Apache License, Version 2.0",
+                "org.apache.commons.commons-compress:Apache License, Version 2.0",
                 "org.greenrobot.eventbus:The Apache Software License, Version 2.0",
                 "org.opentest4j.opentest4j:The Apache License, Version 2.0",
                 "org.apiguardian.apiguardian-api:The Apache License, Version 2.0",
@@ -60,7 +61,7 @@ public class PearlZipLicenseServiceTest {
 
         Map<String,LicenseInfo> licenses = licenseService.retrieveDeclaredLicenses();
         Assertions.assertNotNull(licenses, "Licenses was unexpectedly null");
-        Assertions.assertEquals(22, licenses.size(), "The expected licenses were not retrieved");
+        Assertions.assertEquals(23, licenses.size(), "The expected licenses were not retrieved");
 
         for (String key : expectedKeys) {
             Assertions.assertTrue(licenses.containsKey(key), String.format("key '%s' was not found", key));
