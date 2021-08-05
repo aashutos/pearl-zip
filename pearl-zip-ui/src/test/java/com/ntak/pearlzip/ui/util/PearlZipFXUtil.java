@@ -166,6 +166,12 @@ public class PearlZipFXUtil {
                 List<String> expectationList = new LinkedList<>();
                 final String[] sisterFiles = expectations.get(i)
                                                          .get(root);
+                if (!root.isEmpty()) {
+                    var parentFolder = simTraversalArchive(robot, archiveName, "#fileContentsView", (t) -> {},
+                                        Arrays.asList(SSV.split(root))
+                                              .toArray(new String[0])).get();
+                    robot.doubleClickOn(parentFolder);
+                }
                 for (String sibling : sisterFiles) {
                     Consumer<TableRow<FileInfo>> rowConsumer =
                             (t) -> t.getTableView()
@@ -179,15 +185,15 @@ public class PearlZipFXUtil {
                                     .map(FileInfo::getFileName)
                                     .forEach(f -> fail(String.format("The file %s was not found", f)));
                     if (!root.isEmpty()) {
-                        expectationList.addAll(Arrays.asList(SSV.split(root)));
+                        expectationList.add(String.format("%s/%s",root,sibling));
                     }
-                    expectationList.add(sibling);
+
                     simTraversalArchive(robot, archiveName, "#fileContentsView", rowConsumer,
                                         expectationList.toArray(new String[0]));
                     expectationList.clear();
-                    for (int j = i; j > 0; j--) {
-                        PearlZipFXUtil.simUp(robot);
-                    }
+                }
+                for (int j = i; j > 0; j--) {
+                    PearlZipFXUtil.simUp(robot);
                 }
             }
         }

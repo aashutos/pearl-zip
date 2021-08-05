@@ -68,7 +68,7 @@ public class AboutTestFX extends AbstractPearlZipTestFX {
     }
 
     @Test
-    @DisplayName("Test: Open about form, check labels and close")
+    @DisplayName("Test: Open about form, check dependency licenses and close")
     public void testFX_OpenDependencyLicenses_Success() throws InterruptedException {
         // Show about form...
         clickOn(Point2D.ZERO.add(80, 10)).clickOn(Point2D.ZERO.add(80, 30));
