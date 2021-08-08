@@ -197,6 +197,8 @@ public class BtnCopySelectedEventHandler implements CheckEventHandler<ActionEven
                                                                           fxArchiveInfo.getArchivePath()));
 
                                                               }
+
+                                                              Files.deleteIfExists(tempFile);
                                                               removeBackupArchive(tempArchive);
                                                           },
                                                      (s) -> {

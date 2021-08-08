@@ -47,7 +47,7 @@ public class ZipConstants {
     public static final String LOG_THREAD_EXECUTION_ISSUE = "logging.ntak.pearl-zip.thread-execution-issue";
     public static final String LOG_ISSUE_RUNNING_BACKGROUND_PROCESS = "logging.ntak.pearl-zip.issue-running-background-process";
     public static final String LOG_PROGRESS_MSG = "logging.ntak.pearl-zip.progress-msg";
-    public static final String LOG_OS_TEMP_DIRS_TO_DELETE = "logging.ntak.pearl-zip.os-temp-dirs-to-delete";
+    public static final String LOG_TEMP_DIRS_TO_DELETE = "logging.ntak.pearl-zip.temp-dirs-to-delete";
 
     public static final String LOG_ISSUE_RETRIEVE_META = "logging.ntak.pearl-zip.dragboard.issue-retrieve-meta";
 
