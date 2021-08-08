@@ -423,4 +423,35 @@ public class ArchiveUtil {
             }
         }
     }
+
+    public static void deleteDirectory(Path d) {
+        try {
+            // Delete all files in directory
+            Files.walk(d)
+                 .filter(p -> !Files.isDirectory(p))
+                 .forEach(p -> {
+                     try {
+                         Files.deleteIfExists(p);
+                     } catch(IOException ioException) {
+                     }
+                 });
+
+            // Delete nested directories
+            Files.walk(d)
+                 .filter(Files::isDirectory)
+                 .sorted(Comparator.comparingInt((Path f) -> f.toAbsolutePath()
+                                                       .toString()
+                                                       .length()).reversed())
+                 .forEach(p -> {
+                     try {
+                         Files.deleteIfExists(p);
+                     } catch(IOException ioException) {
+                     }
+                 });
+
+            // Delete top-level directory itself
+            Files.deleteIfExists(d);
+        } catch(IOException ioe) {
+        }
+    }
 }

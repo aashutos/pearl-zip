@@ -165,6 +165,8 @@ public class BtnMoveSelectedEventHandler implements CheckEventHandler<ActionEven
                                                                   throw new IOException(resolveTextKey(LOG_ISSUE_ADDING_FILE_FOR_COPY, fileName.toString(),
                                                                                                        fxArchiveInfo.getArchivePath()));
                                                               }
+
+                                                              Files.deleteIfExists(tempFile);
                                                               removeBackupArchive(tempArchive);
                                                           },
                                                           (e)->{

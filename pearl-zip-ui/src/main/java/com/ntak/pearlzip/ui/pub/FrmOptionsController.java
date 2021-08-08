@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -256,35 +257,19 @@ public class FrmOptionsController {
                                                           dirs.forEach(tempDirectories::add);
                                                      }
 
-                                                     // LOG: OS Temporary directories to be deleted: %s
-                                                     LOGGER.debug(resolveTextKey(LOG_OS_TEMP_DIRS_TO_DELETE,
+                                                     // Remove nested pz directory in .pz/temp directory
+                                                     Files.newDirectoryStream(ZipConstants.STORE_TEMP,
+                                                                              f -> f.getFileName()
+                                                                                    .toString()
+                                                                                    .startsWith(TMP_DIR_PREFIX) || f.getFileName().toString().matches(
+                                                                                      REGEX_TIMESTAMP_DIR))
+                                                          .forEach(tempDirectories::add);
+
+                                                     // LOG: Temporary directories to be deleted: %s
+                                                     LOGGER.debug(resolveTextKey(LOG_TEMP_DIRS_TO_DELETE,
                                                                                  tempDirectories));
                                                      tempDirectories.stream()
-                                                                    .forEach(d -> {
-                                                                        try {
-                                                                            // Delete all files in directory
-                                                                            Files.walk(d)
-                                                                                 .filter(p -> !Files.isDirectory(p))
-                                                                                 .forEach(p -> {
-                                                                                     try {
-                                                                                         Files.deleteIfExists(p);
-                                                                                     } catch(IOException ioException) {
-                                                                                     }
-                                                                                 });
-                                                                            // Delete nested directories
-                                                                            Files.walk(d)
-                                                                                 .filter(Files::isDirectory)
-                                                                                 .forEach(p -> {
-                                                                                     try {
-                                                                                         Files.deleteIfExists(p);
-                                                                                     } catch(IOException ioException) {
-                                                                                     }
-                                                                                 });
-                                                                            // Delete top-level directory itself
-                                                                            Files.deleteIfExists(d);
-                                                                        } catch(IOException ioException) {
-                                                                        }
-                                                                    });
+                                                                    .forEach(ArchiveUtil::deleteDirectory);
                                                  } else {
                                                      ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
                                                                                                          PROGRESS,
