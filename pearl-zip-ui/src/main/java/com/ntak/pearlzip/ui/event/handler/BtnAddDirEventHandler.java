@@ -72,7 +72,8 @@ public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
                                                  ()-> {
                         List<FileInfo> files = ArchiveUtil.handleDirectory(prefix, dirPath.getParent(), dirPath, depth+1, index);
                         files.add(new FileInfo((index+1), depth,
-                                                dirPath.getFileName().toString(),
+                                                depth>0?String.format("%s/%s",prefix,
+                                                                      dirPath.getFileName().toString()):dirPath.getFileName().toString(),
                                                 -1, 0,
                                                 0, null,
                                                 null, null,
