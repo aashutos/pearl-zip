@@ -17,6 +17,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
@@ -79,24 +82,33 @@ public class FrmMainController {
     {
         name.setCellFactory(new NameHighlightFileInfoCellCallback());
         name.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        name.setComparator(Comparator.comparing(FileInfo::getFileName));
 
         size.setCellFactory(new SizeHighlightFileInfoCellCallback());
         size.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        size.setComparator(Comparator.comparing(FileInfo::getRawSize));
 
         packedSize.setCellFactory(new PackedSizeHighlightFileInfoCellCallback());
         packedSize.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        packedSize.setComparator(Comparator.comparing(FileInfo::getPackedSize));
 
         modified.setCellFactory(new ModifiedHighlightFileInfoCellCallback());
         modified.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        modified.setComparator((v,w) -> Optional.ofNullable(v.getLastWriteTime()).orElse(LocalDateTime.MIN).compareTo(Optional.ofNullable(w.getLastWriteTime()).orElse(LocalDateTime.MAX)));
 
         created.setCellFactory(new CreatedHighlightFileInfoCellCallback());
         created.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        created.setComparator((v,w) -> Optional.ofNullable(v.getCreationTime()).orElse(LocalDateTime.MIN).compareTo(Optional.ofNullable(w.getCreationTime()).orElse(LocalDateTime.MAX)));
 
         hash.setCellFactory(new HashHighlightFileInfoCellCallback());
         hash.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        hash.setComparator(Comparator.comparing(v -> Long.toHexString(v.getCrcHash())
+                                                         .toUpperCase()));
 
         comments.setCellFactory(new CommentsHighlightFileInfoCellCallback());
         comments.setCellValueFactory(new PropertyValueFactory<>("Self"));
+        comments.setComparator(Comparator.comparing(v -> Optional.ofNullable(v.getComments())
+                                                                 .orElse("")));
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
