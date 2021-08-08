@@ -28,7 +28,7 @@ public class ErrorAlertConsumer {
             Stage rootStage =
                     JFXUtil.getMainStageInstances()
                            .stream()
-                           .filter(s -> s.getTitle().contains(errorMessage.getArchiveInfo().getArchivePath()))
+                           .filter(s -> Objects.nonNull(s) && Objects.nonNull(s.getTitle()) && Objects.nonNull(errorMessage.getArchiveInfo().getArchivePath())  && s.getTitle().contains(errorMessage.getArchiveInfo().getArchivePath()))
                            .findFirst()
                            .orElse(null);
 
