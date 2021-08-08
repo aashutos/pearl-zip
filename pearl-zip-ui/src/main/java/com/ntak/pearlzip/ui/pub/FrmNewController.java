@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.ntak.pearlzip.archive.constants.ArchiveConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
@@ -98,7 +99,14 @@ public class FrmNewController {
                                        }
         );
 
-        btnCreate.setOnMouseClicked(new BtnCreateEventHandler(stage, isRendered, archiveInfo));
+        btnCreate.setOnMouseClicked((e)->{
+            boolean failed = ArchiveConstants.NEW_ARCHIVE_VALIDATORS
+                                             .stream()
+                                             .anyMatch((v)->!v.test(archiveInfo));
+            if (!failed) {
+                new BtnCreateEventHandler(stage, isRendered, archiveInfo).handle(e);
+            }
+        });
     }
 
     private void setTabVisibilityByFormat(String format) {
