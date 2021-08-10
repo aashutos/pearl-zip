@@ -94,11 +94,13 @@ public class FrmMainController {
 
         modified.setCellFactory(new ModifiedHighlightFileInfoCellCallback());
         modified.setCellValueFactory(new PropertyValueFactory<>("Self"));
-        modified.setComparator((v,w) -> Optional.ofNullable(v.getLastWriteTime()).orElse(LocalDateTime.MIN).compareTo(Optional.ofNullable(w.getLastWriteTime()).orElse(LocalDateTime.MAX)));
+        modified.setComparator(Comparator.comparing(v -> Optional.ofNullable(v.getLastWriteTime())
+                                                                 .orElse(LocalDateTime.MIN)));
 
         created.setCellFactory(new CreatedHighlightFileInfoCellCallback());
         created.setCellValueFactory(new PropertyValueFactory<>("Self"));
-        created.setComparator((v,w) -> Optional.ofNullable(v.getCreationTime()).orElse(LocalDateTime.MIN).compareTo(Optional.ofNullable(w.getCreationTime()).orElse(LocalDateTime.MAX)));
+        created.setComparator(Comparator.comparing(v -> Optional.ofNullable(v.getCreationTime())
+                                                                .orElse(LocalDateTime.MIN)));
 
         hash.setCellFactory(new HashHighlightFileInfoCellCallback());
         hash.setCellValueFactory(new PropertyValueFactory<>("Self"));
@@ -137,6 +139,7 @@ public class FrmMainController {
                         CONTEXT_MENU_INSTANCES.forEach(ContextMenu::hide);
                         CONTEXT_MENU_INSTANCES.clear();
                     }
+                    fileContentsView.refresh();
                     return;
                 }
 
