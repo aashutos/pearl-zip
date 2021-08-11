@@ -127,7 +127,7 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                                                                                    nestedArchiveInfo.getArchivePath(),
                                                                                    nestedArchiveReadService,
                                                                                    nestedArchiveWriteService, nestedArchiveInfo);
-
+                                                            fxArchiveInfo.getController().get().getWrapper().setDisable(true);
                                                          Platform.runLater(()->launchMainStage(archiveInfo));
 
                                                      },

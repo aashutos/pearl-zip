@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,8 @@ import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 */
 public class FrmMainController {
 
+    @FXML
+    private VBox wrapper;
     @FXML
     private TableView<FileInfo> fileContentsView;
     @FXML
@@ -219,6 +222,10 @@ public class FrmMainController {
 
             stage.setOnCloseRequest(new ConfirmCloseEventHandler(stage, fxArchiveInfo));
         }
+    }
+
+    public VBox getWrapper() {
+        return wrapper;
     }
 
     public MenuButton getBtnNew() {
