@@ -6,12 +6,8 @@ package com.ntak.pearlzip.ui.pub;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.ProgressMessage;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
-import com.ntak.pearlzip.ui.model.FXArchiveInfo;
-import com.ntak.pearlzip.ui.model.FXMigrationInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
+import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -28,24 +24,22 @@ import org.apache.logging.log4j.core.LoggerContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.REGEX_TIMESTAMP_DIR;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.PROGRESS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_NEW_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.JFXUtil.*;
-import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
+import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
+import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 
 /**
  *  Controller for the Options dialog.
@@ -215,77 +209,8 @@ public class FrmOptionsController {
                 if (response.isPresent() && response.get()
                                                     .getButtonData()
                                                     .equals(ButtonBar.ButtonData.YES)) {
-                    executeBackgroundProcess(sessionId, stage, () -> {
-                                                 // Clearing up temporary storage location...
-                                                 ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
-                                                                                                     resolveTextKey(LBL_CLEAR_UP_TEMP_STORAGE),
-                                                                                                     INDETERMINATE_PROGRESS, 1));
-                                                 List<String> openFiles =
-                                                         getMainStageInstances().stream()
-                                                                                .map(s -> ((FXArchiveInfo) s.getUserData()).getArchivePath())
-                                                                                .collect(
-                                                                                        Collectors.toList());
-                                                 Files.newDirectoryStream(ZipConstants.STORE_TEMP,
-                                                                          (f) -> !openFiles.contains(f.toAbsolutePath().toString()))
-                                                      .forEach(f -> {
-                                                          try {
-                                                              Files.deleteIfExists(f);
-                                                          } catch(IOException ioException) {
-                                                          }
-                                                      });
-
-                                                 // Cleaning up OS temporary data..
-                                                 long activeMigrationsCount =
-                                                         getMainStageInstances().stream()
-                                                                                .map(s -> ((FXArchiveInfo) s.getUserData()).getMigrationInfo().getType())
-                                                         .filter(t->!t.equals(FXMigrationInfo.MigrationType.NONE))
-                                                         .count();
-                                                 if (activeMigrationsCount == 0) {
-                                                     ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
-                                                                                                         PROGRESS,
-                                                                                                         resolveTextKey(
-                                                                                                                 LBL_CLEAR_UP_OS_TEMP),
-                                                                                                         INDETERMINATE_PROGRESS,
-                                                                                                         1));
-                                                     LinkedList<Path> tempDirectories = new LinkedList<>();
-                                                     try (DirectoryStream<Path> dirs =
-                                                                  Files.newDirectoryStream(ZipConstants.LOCAL_TEMP,
-                                                                              (f) -> f.getFileName()
-                                                                                      .toString()
-                                                                                      .startsWith(TMP_DIR_PREFIX) || f.getFileName().toString().matches(
-                                                                                      REGEX_TIMESTAMP_DIR))) {
-                                                          dirs.forEach(tempDirectories::add);
-                                                     }
-
-                                                     // Remove nested pz directory in .pz/temp directory
-                                                     Files.newDirectoryStream(ZipConstants.STORE_TEMP,
-                                                                              f -> f.getFileName()
-                                                                                    .toString()
-                                                                                    .startsWith(TMP_DIR_PREFIX) || f.getFileName().toString().matches(
-                                                                                      REGEX_TIMESTAMP_DIR))
-                                                          .forEach(tempDirectories::add);
-
-                                                     // LOG: Temporary directories to be deleted: %s
-                                                     LOGGER.debug(resolveTextKey(LOG_TEMP_DIRS_TO_DELETE,
-                                                                                 tempDirectories));
-                                                     tempDirectories.stream()
-                                                                    .forEach(ArchiveUtil::deleteDirectory);
-                                                 } else {
-                                                     ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
-                                                                                                         PROGRESS,
-                                                                                                         resolveTextKey(
-                                                                                                                 LBL_SKIP_OS_TEMP_CLEAN),
-                                                                                                         INDETERMINATE_PROGRESS,
-                                                                                                         1));
-                                                 }
-
-                                                 // Clearing up recently open files...
-                                                 ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
-                                                                                                     resolveTextKey(LBL_CLEAR_UP_RECENTS),
-                                                                                                     INDETERMINATE_PROGRESS, 1));
-                                                 Files.deleteIfExists(ZipConstants.RECENT_FILE);
-                                             },
-                                             System.out::println,
+                    executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, false),
+                                             LOGGER::error,
                                              (s) -> {});
                 }
             } finally {

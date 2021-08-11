@@ -203,4 +203,15 @@ public class JFXUtil {
         stage.setAlwaysOnTop(true);
         stage.showAndWait();
     }
+
+    public static Optional<FXArchiveInfo> lookupArchiveInfo(String archiveName) {
+        return Optional.of((FXArchiveInfo) Stage.getWindows()
+                                                .stream()
+                                                .map(Stage.class::cast)
+                                                .filter(s->s.getTitle() != null)
+                                                .filter((s)->s.getTitle().matches(String.format(".*%s$", archiveName)))
+                                                .findFirst()
+                                                .get()
+                                                .getUserData());
+    }
 }
