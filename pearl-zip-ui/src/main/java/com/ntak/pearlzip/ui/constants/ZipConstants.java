@@ -231,6 +231,11 @@ public class ZipConstants {
     public static final String TITLE_CLEAR_CACHE_BLOCKED = "title.ntak.pearl-zip.clear-cache-blocked";
     public static final String BODY_CLEAR_CACHE_BLOCKED = "body.ntak.pearl-zip.clear-cache-blocked";
 
+    public static final String LOG_ISSUE_ADD_DRAG_DROP = "logging.ntak.pearl-zip.issue-add-drag-drop";
+    public static final String TITLE_ISSUE_ADD_DRAG_DROP = "title.ntak.pearl-zip.issue-add-drag-drop";
+    public static final String HEADER_ISSUE_ADD_DRAG_DROP = "header.ntak.pearl-zip.issue-add-drag-drop";
+    public static final String BODY_ISSUE_ADD_DRAG_DROP = "body.ntak.pearl-zip.issue-add-drag-drop";
+
     public static final String LOG_INVALID_ARCHIVE_SETUP = "logging.ntak.pearl-zip.invalid-archive-setup";
 
     public static final String LOG_ISSUE_SAVE_ARCHIVE = "logging.ntak.pearl-zip.issue-save-archive";

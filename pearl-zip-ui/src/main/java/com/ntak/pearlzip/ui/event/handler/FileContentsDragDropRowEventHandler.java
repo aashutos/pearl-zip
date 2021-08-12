@@ -3,8 +3,8 @@
  */
 package com.ntak.pearlzip.ui.event.handler;
 
-import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.ErrorMessage;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
@@ -31,6 +31,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PROGRESS;
+import static com.ntak.pearlzip.archive.pub.ArchiveService.DEFAULT_BUS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.handleDirectory;
@@ -88,45 +89,72 @@ public class FileContentsDragDropRowEventHandler implements CheckEventHandler<Dr
                                                    .size();
 
 
-                          for (File file : db.getFiles()) {
-                              try {
-                                  if (file.isFile()) {
-                                      // Retrieving metadata for file %s
-                                      ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
-                                                                                          resolveTextKey(LBL_RETRIEVE_FILE_META, file.getAbsolutePath()),
-                                                                                          INDETERMINATE_PROGRESS, 1));
-                                      Path destFile = Paths.get(prefix,
-                                                                file.toPath()
-                                                                    .getFileName()
-                                                                    .toString());
-                                      FileInfo fileInfo = new FileInfo(index++, depth, destFile.toString(),
-                                                                       -1, 0, 0, null, null, null,
-                                                                       "", "", 0, "",
-                                                                       file.isDirectory(), false,
-                                                                       Collections.singletonMap(KEY_FILE_PATH,
-                                                                                                file.getAbsoluteFile()
-                                                                                                    .toString()));
-                                      files.add(fileInfo);
-                                  } else { // folder
-                                          // Retrieving metadata for files in folder %s
-                                          ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
-                                                                                              resolveTextKey(LBL_RETRIEVE_FOLDER_META, file.getAbsolutePath()),
-                                                                                          INDETERMINATE_PROGRESS, 1));
-                                          List<FileInfo> genFiles = handleDirectory(prefix,
-                                                                                    file.toPath().getParent(),
-                                                                                    file.toPath(),
-                                                                                    depth,
-                                                                                    fxArchiveInfo.getFiles()
-                                                                                                 .size());
-                                          files.addAll(genFiles);
+                          try {
+                              for (File file : db.getFiles()) {
+                                  try {
+                                      if (file.isFile()) {
+                                          // Retrieving metadata for file %s
+                                          DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
+                                                                                              resolveTextKey(LBL_RETRIEVE_FILE_META, file.getAbsolutePath()),
+                                                                                              INDETERMINATE_PROGRESS, 1));
+                                          Path destFile = Paths.get(prefix,
+                                                                    file.toPath()
+                                                                        .getFileName()
+                                                                        .toString());
+                                          FileInfo fileInfo = new FileInfo(index++, depth, destFile.toString(),
+                                                                           -1, 0, 0, null, null, null,
+                                                                           "", "", 0, "",
+                                                                           file.isDirectory(), false,
+                                                                           Collections.singletonMap(KEY_FILE_PATH,
+                                                                                                    file.getAbsoluteFile()
+                                                                                                        .toString()));
+                                          files.add(fileInfo);
+                                      } else { // folder
+                                              // Retrieving metadata for files in folder %s
+                                              DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
+                                                                                                  resolveTextKey(LBL_RETRIEVE_FOLDER_META, file.getAbsolutePath()),
+                                                                                              INDETERMINATE_PROGRESS, 1));
+                                              List<FileInfo> genFiles = handleDirectory(prefix,
+                                                                                        file.toPath().getParent(),
+                                                                                        file.toPath(),
+                                                                                        depth,
+                                                                                        fxArchiveInfo.getFiles()
+                                                                                                     .size());
+                                              files.addAll(genFiles);
 
+                                              // Empty directory case...
+                                              if (genFiles.size() == 0) {
+                                                  files.add(new FileInfo((index + 1), depth,
+                                                                         depth > 0 ? String.format("%s/%s", prefix,
+                                                                                                   file.getName()) :
+                                                                                 file.getName(),
+                                                                         -1, 0,
+                                                                         0, null,
+                                                                         null, null,
+                                                                         "", "", 0, "",
+                                                                         true, false,
+                                                                         Collections.singletonMap(KEY_FILE_PATH,
+                                                                                                  file.getAbsolutePath())));
+                                              }
+                                      }
+                                  } catch(Exception e) {
+                                      // LOG: Issue obtaining meta data for file/folder %s
+                                      LOGGER.warn(resolveTextKey(LOG_ISSUE_RETRIEVE_META, file.getAbsolutePath()));
                                   }
-                              } catch(Exception e) {
-                                  // LOG: Issue obtaining meta data for file/folder %s
-                                  LOGGER.warn(resolveTextKey(LOG_ISSUE_RETRIEVE_META, file.getAbsolutePath()));
-                              } finally {
-                                  latch.countDown();
                               }
+                          } catch (Exception e) {
+                              // LOG: Issue occurred adding files [%s] via Drag and Drop.
+                              // TITLE: ERROR: Issue with adding files (via Drag and Drop)
+                              // HEADER: Exception occurred when adding file(s)
+                              // BODY: Could not add files (%s) to the archive. Please check stack trace below for more details:
+                              LOGGER.warn(resolveTextKey(LOG_ISSUE_ADD_DRAG_DROP, event.getDragboard().getFiles()));
+                              DEFAULT_BUS.post(new ErrorMessage(sessionId, resolveTextKey(TITLE_ISSUE_ADD_DRAG_DROP),
+                                                                resolveTextKey(HEADER_ISSUE_ADD_DRAG_DROP),
+                                                                resolveTextKey(BODY_ISSUE_ADD_DRAG_DROP,
+                                                                               event.getDragboard().getFiles()), e,
+                                                                null));
+                          } finally {
+                              latch.countDown();
                           }
                           });
                         latch.await();
@@ -139,6 +167,15 @@ public class FileContentsDragDropRowEventHandler implements CheckEventHandler<Dr
                 }
             }
         } catch (Exception e) {
+            // LOG: Issue occurred adding files [%s] via Drag and Drop.
+            // TITLE: ERROR: Issue with adding files (via Drag and Drop)
+            // HEADER: Exception occurred when adding file(s)
+            // BODY: Could not add files (%s) to the archive. Please check stack trace below for more details:
+            LOGGER.warn(resolveTextKey(LOG_ISSUE_ADD_DRAG_DROP, event.getDragboard().getFiles()));
+            raiseAlert(Alert.AlertType.ERROR, resolveTextKey(TITLE_ISSUE_ADD_DRAG_DROP),
+                       resolveTextKey(HEADER_ISSUE_ADD_DRAG_DROP),
+                       resolveTextKey(BODY_ISSUE_ADD_DRAG_DROP, event.getDragboard().getFiles()), e,
+                       fileContentsView.getScene().getWindow());
         }
     }
 
