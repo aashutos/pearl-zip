@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
@@ -424,11 +425,11 @@ public class ArchiveUtil {
         }
     }
 
-    public static void deleteDirectory(Path d) {
+    public static void deleteDirectory(Path d, Predicate<Path> exclusionPattern) {
         try {
             // Delete all files in directory
             Files.walk(d)
-                 .filter(p -> !Files.isDirectory(p))
+                 .filter(p -> !Files.isDirectory(p) && !exclusionPattern.test(p))
                  .forEach(p -> {
                      try {
                          Files.deleteIfExists(p);

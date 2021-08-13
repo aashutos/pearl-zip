@@ -104,7 +104,8 @@ public class ClearCacheRunnable implements CaughtRunnable {
             LOGGER.debug(resolveTextKey(LOG_TEMP_DIRS_TO_DELETE,
                                         tempDirectories));
             tempDirectories.stream()
-                           .forEach(ArchiveUtil::deleteDirectory);
+                           .forEach(p -> ArchiveUtil.deleteDirectory(p,
+                                                                     (f)->openFiles.contains(f.toAbsolutePath().toString())));
         } else {
             ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
                                                                 PROGRESS,
