@@ -154,4 +154,11 @@ public class ZipState {
 
         return supportedWriteFormats;
     }
+
+    public static HashSet<String> getRawSupportedCompressorWriteFormats() {
+        return new HashSet<>(getCompressorArchives().stream()
+                                                    .filter(f-> supportedWriteArchives().contains(f))
+                                                    .collect(Collectors.toList())
+        );
+    }
 }

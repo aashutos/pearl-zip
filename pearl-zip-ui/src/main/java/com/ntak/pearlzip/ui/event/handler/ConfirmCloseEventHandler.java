@@ -117,7 +117,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                                 JFXUtil.executeBackgroundProcess(sessionId, stage,
                                                                  () -> {
                                                                      // Check if a compressor archive
-                                                                     if (ZipState.getSupportedCompressorWriteFormats()
+                                                                     if (ZipState.getRawSupportedCompressorWriteFormats()
                                                                                  .contains(this.fxArchiveInfo.getParentArchiveInfo()
                                                                                                              .getArchiveFormat()
                                                                                                              .toLowerCase())) {
