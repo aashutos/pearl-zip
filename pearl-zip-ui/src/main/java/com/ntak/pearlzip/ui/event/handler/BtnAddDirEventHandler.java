@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -27,8 +29,10 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 
 /**
@@ -70,6 +74,9 @@ public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
                 long sessionId = System.currentTimeMillis();
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                                  ()-> {
+                        Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
+                        Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
+
                         List<FileInfo> files = ArchiveUtil.handleDirectory(prefix, dirPath.getParent(), dirPath, depth+1, index);
                         files.add(new FileInfo((index+1), depth,
                                                 depth>0?String.format("%s/%s",prefix,
@@ -86,10 +93,29 @@ public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
                             LOGGER.warn(resolveTextKey(LOG_SKIP_ADD_SELF));
                         }
 
-                        archiveWriteService.addFile(sessionId, fxArchiveInfo.getArchiveInfo(),
+                        boolean success = archiveWriteService.addFile(sessionId, fxArchiveInfo.getArchiveInfo(),
                                                     files.toArray(new FileInfo[0]));
+                        if (!success) {
+                            restoreBackupArchive(tempArchive,
+                                                 Paths.get(fxArchiveInfo.getArchivePath()));
+                            Platform.runLater(fxArchiveInfo::refresh);
+
+                            // LOG: Issue adding directory %s
+                            // TITLE: ERROR: Failed to add directory to archive
+                            // HEADER: Directory %s could not be added to archive %s
+                            // BODY: Archive has been reverted to the last stable state.
+                            LOGGER.error(resolveTextKey(LOG_ISSUE_ADDING_DIR, dir.getAbsolutePath()));
+                            raiseAlert(Alert.AlertType.ERROR,
+                                       resolveTextKey(TITLE_ISSUE_ADDING_DIR),
+                                       resolveTextKey(HEADER_ISSUE_ADDING_DIR),
+                                       resolveTextKey(BODY_ISSUE_ADDING_DIR),
+                                       null
+                            );
+                        }
+
+                        removeBackupArchive(tempArchive);
                     },
-                                                 (s)->JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
+                    (s)->JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
                 );
             }
         } catch (Exception e) {

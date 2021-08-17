@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -20,6 +21,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,8 +32,11 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.createBackupArchive;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.restoreBackupArchive;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 
 /**
@@ -89,8 +95,12 @@ public class BtnAddFileEventHandler implements CheckEventHandler<ActionEvent> {
 
         JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                          ()-> {
+                                                  Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
+                                                  Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
+
                                                   ArchiveWriteService service = ZipState.getWriteArchiveServiceForFile(
                                                          fxArchiveInfo.getArchivePath()).get();
+                                                  boolean success;
                                                   if (rawFile.isFile()) {
                                                       FileInfo fileToAdd = new FileInfo(fxArchiveInfo.getFiles()
                                                                                                      .size(),
@@ -115,15 +125,35 @@ public class BtnAddFileEventHandler implements CheckEventHandler<ActionEvent> {
                                                                                                 KEY_FILE_PATH,
                                                                                                 rawFile.getAbsoluteFile()
                                                                                                        .getPath()));
-                                                      service.addFile(sessionId,
+                                                      success = service.addFile(sessionId,
                                                                       fxArchiveInfo.getArchiveInfo(),
                                                                       fileToAdd);
                                                   } else { // Mac App is a directory
                                                       List<FileInfo> files = ArchiveUtil.handleDirectory(prefix,
                                                                                                          rawFile.toPath().getParent(), rawFile.toPath(), depth+1, index);
-                                                      service.addFile(sessionId, fxArchiveInfo.getArchiveInfo(),
+                                                      success = service.addFile(sessionId,
+                                                                               fxArchiveInfo.getArchiveInfo(),
                                                                                   files.toArray(new FileInfo[0]));
                                                   }
+
+                                                 if (!success) {
+                                                     restoreBackupArchive(tempArchive,
+                                                                          Paths.get(fxArchiveInfo.getArchivePath()));
+                                                     Platform.runLater(fxArchiveInfo::refresh);
+
+                                                     // LOG: Issue adding file %s
+                                                     // TITLE: ERROR: Failed to add file to archive
+                                                     // HEADER: File %s could not be added to archive %s
+                                                     // BODY: Archive has been reverted to the last stable state.
+                                                     LOGGER.error(resolveTextKey(LOG_ISSUE_ADDING_FILE,
+                                                                                 rawFile.getAbsolutePath()));
+                                                     raiseAlert(Alert.AlertType.ERROR,
+                                                                resolveTextKey(TITLE_ISSUE_ADDING_FILE),
+                                                                resolveTextKey(HEADER_ISSUE_ADDING_FILE),
+                                                                resolveTextKey(BODY_ISSUE_ADDING_FILE),
+                                                                null
+                                                     );
+                                                 }
                                               },
                                          (s)-> JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
         );

@@ -38,27 +38,29 @@ public class FXArchiveInfo {
     private final AtomicBoolean closeBypass = new AtomicBoolean(false);
     private final ArchiveInfo parentArchiveInfo;
     private final ArchiveInfo archiveInfo;
+    private final FileInfo nestedFileInfoParent;
 
     private String prefix = "";
     private ObservableList<FileInfo> files;
 
     public FXArchiveInfo(String archivePath, ArchiveReadService readService, ArchiveWriteService writeService) {
-        this(null, archivePath, readService, writeService);
+        this(null, archivePath, readService, writeService, null);
     }
 
     public FXArchiveInfo(String parentPath, String archivePath, ArchiveReadService readService,
-            ArchiveWriteService writeService) {
+            ArchiveWriteService writeService, FileInfo nestedFileInfoParent) {
         this(Objects.nonNull(parentPath) ?
                      ZipState.getReadArchiveServiceForFile(parentPath).get().generateArchiveMetaData(parentPath)
                      : null,
              archivePath,
              readService,
              writeService,
-             readService.generateArchiveMetaData(archivePath));
+             readService.generateArchiveMetaData(archivePath),
+             nestedFileInfoParent);
     }
 
     public FXArchiveInfo(ArchiveInfo parentArchiveInfo, String archivePath, ArchiveReadService readService,
-            ArchiveWriteService writeService, ArchiveInfo archiveInfo) {
+            ArchiveWriteService writeService, ArchiveInfo archiveInfo, FileInfo nestedFileInfoParent) {
         // LOG: Archive path should be valid
         assert Files.exists(Paths.get(archivePath)) : resolveTextKey(LOG_ARCHIVE_INFO_ASSERT_PATH);
         // LOG: Read service should not be null
@@ -66,6 +68,7 @@ public class FXArchiveInfo {
 
         this.parentArchiveInfo = parentArchiveInfo;
         this.parentPath = Objects.nonNull(parentArchiveInfo) ? parentArchiveInfo.getArchivePath() : null;
+        this.nestedFileInfoParent = Objects.nonNull(parentArchiveInfo) ? nestedFileInfoParent : null;
         this.archivePath = archivePath;
         this.readService = readService;
         this.writeService = writeService;
@@ -140,5 +143,9 @@ public class FXArchiveInfo {
 
     public ArchiveInfo getParentArchiveInfo() {
         return parentArchiveInfo;
+    }
+
+    public FileInfo getNestedFileInfoParent() {
+        return nestedFileInfoParent;
     }
 }

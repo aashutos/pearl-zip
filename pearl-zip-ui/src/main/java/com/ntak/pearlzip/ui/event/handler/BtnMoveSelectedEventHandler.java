@@ -173,6 +173,16 @@ public class BtnMoveSelectedEventHandler implements CheckEventHandler<ActionEven
                                                               // LOG: Issue occurred on pasting migration item (root item: %s). Migration has been cancelled.
                                                               LOGGER.error(resolveTextKey(LOG_PASTE_EXCEPTION, migrationInfo
                                                                     .getFile()));
+
+                                                              // TITLE: ERROR: Issue occurred on migration
+                                                              // HEADER: There was while performing migration
+                                                              // BODY: Upon initiating function '%s', an issue occurred on attempting the migration. Migration has been cancelled.
+                                                              raiseAlert(Alert.AlertType.ERROR,
+                                                                         resolveTextKey(TITLE_PASTE_EXCEPTION),
+                                                                         resolveTextKey(HEADER_PASTE_EXCEPTION),
+                                                                         resolveTextKey(BODY_PASTE_EXCEPTION, this.getClass().getName()),
+                                                                         null
+                                                              );
                                                           },
                                                           (s)->{
                                                               // finally: clear Migration Info, Enable move and delete button, update Copy button look

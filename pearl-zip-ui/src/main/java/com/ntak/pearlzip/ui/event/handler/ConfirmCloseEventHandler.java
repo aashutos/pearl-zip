@@ -28,12 +28,14 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.removeBackupArchive;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 
 /**
@@ -59,11 +61,11 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                     archivePath)) {
                 // If a nested file from a parent archive an option is given to update it
                 final String archiveFilePath = fxArchiveInfo.getArchivePath();
-                final String parentPath = fxArchiveInfo.getParentPath();
-                if (Objects.nonNull(parentPath)) {
-                    try {
+                final String parentFilePath = fxArchiveInfo.getParentPath();
+
+                if (Objects.nonNull(parentFilePath)) {
                         ArchiveWriteService archiveWriteService =
-                                ZipState.getWriteArchiveServiceForFile(parentPath)
+                                ZipState.getWriteArchiveServiceForFile(parentFilePath)
                                         .orElse(null);
                         if (Objects.nonNull(archiveWriteService)) {
                             // Nested archive - Ask user to update parent archive
@@ -73,73 +75,138 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                             Optional<ButtonType> response = raiseAlert(Alert.AlertType.CONFIRMATION,
                                                                        resolveTextKey(TITLE_CONFIRM_SAVE_NESTED_ARCHIVE),
                                                                        resolveTextKey(HEADER_CONFIRM_SAVE_NESTED_ARCHIVE,
-                                                                                      parentPath),
+                                                                                      parentFilePath),
                                                                        resolveTextKey(BODY_CONFIRM_SAVE_NESTED_ARCHIVE,
                                                                                       archiveFilePath,
-                                                                                      parentPath),
+                                                                                      parentFilePath),
                                                                        null,
                                                                        stage,
                                                                        ButtonType.YES, ButtonType.NO);
 
+                            final FXArchiveInfo parentFXArchiveInfo = lookupArchiveInfo(this.fxArchiveInfo.getParentArchiveInfo()
+                                                                                                    .getArchivePath()).get();
                             if (response.get()
                                         .getButtonData() == ButtonBar.ButtonData.YES) {
                                 long sessionId = System.currentTimeMillis();
-                                Path parentTempArchive = Paths.get(LOCAL_TEMP.toString(),
-                                                                   String.format("pz%d", sessionId),
-                                                                   parentPath);
-                                Files.createDirectories(parentTempArchive.getParent());
+                                AtomicReference<Path> parentTempArchive = new AtomicReference<>();
+                                // Expects the archive to already exist in the parent archive otherwise something really
+                                // wrong...
+                                FileInfo existingFileInfo = fxArchiveInfo.getNestedFileInfoParent();
+                                final FileInfo nestedArchiveFileInfo = new FileInfo(
+                                        existingFileInfo.getIndex(),
+                                        existingFileInfo.getLevel(),
+                                        existingFileInfo.getFileName(),
+                                        0,
+                                        0,
+                                        0,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        0,
+                                        "updated via PearlZip",
+                                        false,
+                                        false,
+                                        Collections.singletonMap(
+                                                KEY_FILE_PATH,
+                                                archiveFilePath)
+                                );
+                                AtomicBoolean success = new AtomicBoolean(false);
+                                final Path parentPath = Paths.get(parentFilePath);
                                 JFXUtil.executeBackgroundProcess(sessionId, stage,
-                                                                 () -> archiveWriteService.createArchive(sessionId,
-                                                                                                         fxArchiveInfo.getParentArchiveInfo(),
-                                                                                                         new FileInfo(0,
-                                                                                                                      0,
-                                                                                                                      Paths.get(
-                                                                                                                                   archiveFilePath)
-                                                                                                                           .getFileName()
-                                                                                                                           .toString(),
-                                                                                                                      0,
-                                                                                                                      0,
-                                                                                                                      0,
-                                                                                                                      null,
-                                                                                                                      null,
-                                                                                                                      null,
-                                                                                                                      null,
-                                                                                                                      null,
-                                                                                                                      0,
-                                                                                                                      "updated via PearlZip",
-                                                                                                                      false,
-                                                                                                                      false,
-                                                                                                                      Collections.singletonMap(
-                                                                                                                              KEY_FILE_PATH,
-                                                                                                                              fxArchiveInfo.getArchivePath())
-                                                                                                         )),
-                                                                 (s) -> {
-                                                                     if (Files.exists(parentTempArchive)) {
-                                                                         try {
-                                                                             Files.move(parentTempArchive,
-                                                                                        Paths.get(parentPath),
-                                                                                        StandardCopyOption.REPLACE_EXISTING);
-                                                                         } catch(IOException e) {
-                                                                             // LOG: Error integrating changes from %s to %s
-                                                                             LOGGER.error(resolveTextKey(
-                                                                                     LOG_ISSUE_INTEGRATING_CHANGES,
-                                                                                     parentTempArchive,
-                                                                                     Paths.get(parentPath)));
+                                                                 () -> {
+                                                                     // Check if a compressor archive
+                                                                     if (ZipState.getSupportedCompressorWriteFormats()
+                                                                                 .contains(this.fxArchiveInfo.getParentArchiveInfo()
+                                                                                                             .getArchiveFormat()
+                                                                                                             .toLowerCase())) {
+                                                                         // Back up archive...
+                                                                         parentTempArchive.set(createBackupArchive(
+                                                                                 lookupArchiveInfo(this.fxArchiveInfo.getParentPath()).get(),
+                                                                                 Files.createTempDirectory(
+                                                                                         TMP_DIR_PREFIX)));
+
+                                                                         // Create new single-file compressor archive...
+                                                                         Files.deleteIfExists(parentPath);
+                                                                         archiveWriteService.createArchive(sessionId,
+                                                                                                           parentFXArchiveInfo.getArchiveInfo(),
+                                                                                                           nestedArchiveFileInfo);
+
+                                                                         // Check to ensure integrity of the newly created archive
+                                                                         if (Files.exists(parentPath)) {
+                                                                             success.set(true);
                                                                          }
+                                                                     } else {
+                                                                         // Non-compressor archive
+                                                                         parentTempArchive.set(createBackupArchive(
+                                                                                 lookupArchiveInfo(this.fxArchiveInfo.getParentPath()).get(),
+                                                                                 Files.createTempDirectory(
+                                                                                         TMP_DIR_PREFIX)));
+
+                                                                         // Expect the archive to pre-exist in wrapper archive, so removing prior to re-add
+                                                                         archiveWriteService.deleteFile(sessionId,
+                                                                                                        this.fxArchiveInfo.getParentArchiveInfo(), nestedArchiveFileInfo);
+                                                                         success.set(archiveWriteService.addFile(
+                                                                                 sessionId,
+                                                                                 this.fxArchiveInfo.getParentArchiveInfo(),
+                                                                                 nestedArchiveFileInfo));
+                                                                     }
+                                                                 },
+                                                                 (s) -> {
+                                                                     try {
+                                                                         if (!success.get()) {
+                                                                             // Restore back up
+                                                                             if (Files.exists(parentTempArchive.get())) {
+                                                                                 Files.move(parentTempArchive.get(),
+                                                                                            parentPath,
+                                                                                            StandardCopyOption.REPLACE_EXISTING);
+                                                                             }
+
+                                                                             // LOG: Error integrating changes from %s to %s
+                                                                             throw new IOException(resolveTextKey(
+                                                                                     LOG_ISSUE_INTEGRATING_CHANGES,
+                                                                                     parentTempArchive.get(),
+                                                                                     parentPath));
+                                                                         }
+                                                                     } catch(IOException e) {
+                                                                         // LOG: Error integrating changes from %s to %s
+                                                                         // TITLE: ERROR: Issue integrating nested archive
+                                                                         // HEADER: Error integrating changes from %s to %s
+                                                                         // BODY: Archive has been reverted to the last stable state.
+
+                                                                         LOGGER.error(resolveTextKey(
+                                                                                 LOG_ISSUE_INTEGRATING_CHANGES,
+                                                                                 parentTempArchive.get(),
+                                                                                 parentPath));
+
+                                                                         raiseAlert(Alert.AlertType.ERROR,
+                                                                                    resolveTextKey(TITLE_ISSUE_INTEGRATING_CHANGES),
+                                                                                    resolveTextKey(resolveTextKey(
+                                                                                            HEADER_ISSUE_INTEGRATING_CHANGES,
+                                                                                            parentTempArchive.get(),
+                                                                                            parentPath)),
+                                                                                    resolveTextKey(BODY_ISSUE_INTEGRATING_CHANGES),
+                                                                                    e,
+                                                                                    null
+                                                                         );
+                                                                     } finally {
+                                                                         // Enable parent archive (Handle success/failure on reintegration)
+                                                                         parentFXArchiveInfo.getController()
+                                                                                            .get()
+                                                                                            .getWrapper()
+                                                                                            .setDisable(false);
                                                                      }
                                                                  }
                                 );
+                            } else {
+                                    // Enable parent archive (Handle no reintegration scenario)
+                                    parentFXArchiveInfo.getController()
+                                                       .get()
+                                                       .getWrapper()
+                                                       .setDisable(false);
                             }
                         }
-                    } finally {
-                        // Enable parent archive
-                        lookupArchiveInfo(fxArchiveInfo.getParentArchiveInfo()
-                                                       .getArchivePath()).get()
-                                                                         .getController()
-                                                                         .get()
-                                                                         .getWrapper()
-                                                                         .setDisable(false);
-                    }
                     return;
                 }
 
@@ -187,15 +254,16 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
             // Issue with IO Process when saving down archive %s
             LOGGER.warn(resolveTextKey(LOG_ISSUE_SAVE_ARCHIVE, fxArchiveInfo.getArchivePath()));
         } finally {
+            // If there are no other PearlZip instances apart from this open (Last PearlZip instance open)
             if (JFXUtil.getMainStageInstances()
                        .stream()
                        .map(Stage.class::cast)
-                       .filter(s -> s.getTitle() != null)
-                       .allMatch((s) -> s.getTitle()
-                                         .matches(String.format(".*%s$", fxArchiveInfo.getArchivePath())))) {
+                       .filter(s -> s.getTitle() != null && !s.getTitle()
+                                                              .matches(String.format(".*%s$", fxArchiveInfo.getArchivePath())))
+                       .count() == 0) {
                 // Clear up temporary files if on final exit
                 long sessionId = System.currentTimeMillis();
-                executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, false),
+                executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, true),
                                          LOGGER::error,
                                          (s) -> {});
             }
