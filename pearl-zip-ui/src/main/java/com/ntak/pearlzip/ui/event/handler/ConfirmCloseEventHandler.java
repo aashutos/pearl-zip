@@ -112,9 +112,9 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                                                 KEY_FILE_PATH,
                                                 archiveFilePath)
                                 );
-                                AtomicBoolean success = new AtomicBoolean(false);
+                                AtomicBoolean success = new AtomicBoolean(true);
                                 final Path parentPath = Paths.get(parentFilePath);
-                                JFXUtil.executeBackgroundProcess(sessionId, stage,
+                                executeBackgroundProcess(sessionId, stage,
                                                                  () -> {
                                                                      // Check if a compressor archive
                                                                      if (ZipState.getRawSupportedCompressorWriteFormats()
@@ -146,7 +146,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
 
                                                                          // Expect the archive to pre-exist in wrapper archive, so removing prior to re-add
                                                                          archiveWriteService.deleteFile(sessionId,
-                                                                                                        this.fxArchiveInfo.getParentArchiveInfo(), nestedArchiveFileInfo);
+                                                                                                        this.fxArchiveInfo.getParentArchiveInfo(), existingFileInfo);
                                                                          success.set(archiveWriteService.addFile(
                                                                                  sessionId,
                                                                                  this.fxArchiveInfo.getParentArchiveInfo(),
@@ -182,10 +182,10 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
 
                                                                          raiseAlert(Alert.AlertType.ERROR,
                                                                                     resolveTextKey(TITLE_ISSUE_INTEGRATING_CHANGES),
-                                                                                    resolveTextKey(resolveTextKey(
+                                                                                    resolveTextKey(
                                                                                             HEADER_ISSUE_INTEGRATING_CHANGES,
                                                                                             parentTempArchive.get(),
-                                                                                            parentPath)),
+                                                                                            parentPath),
                                                                                     resolveTextKey(BODY_ISSUE_INTEGRATING_CHANGES),
                                                                                     e,
                                                                                     null
