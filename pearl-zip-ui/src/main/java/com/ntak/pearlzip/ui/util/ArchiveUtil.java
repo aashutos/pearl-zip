@@ -122,7 +122,7 @@ public class ArchiveUtil {
     public static Path createBackupArchive(FXArchiveInfo fxArchiveInfo, Path tempDir) throws IOException {
         Path backupArchive =  Paths.get(tempDir.toString(),
                                      Paths.get(fxArchiveInfo.getArchivePath()).getFileName().toString());
-        Files.copy(Path.of(fxArchiveInfo.getArchivePath()), backupArchive);
+        Files.copy(Path.of(fxArchiveInfo.getArchivePath()), backupArchive, StandardCopyOption.REPLACE_EXISTING);
         return backupArchive;
     }
 
@@ -262,7 +262,8 @@ public class ArchiveUtil {
                                                         archive.getAbsolutePath(),
                                                         ZipState.getReadArchiveServiceForFile(archive.getName()).get(),
                                                         writeService,
-                                                        archiveInfo);
+                                                        archiveInfo,
+                                                        null);
         Platform.runLater(() -> launchMainStage(fxArchiveInfo));
         addToRecentFile(archive);
     }

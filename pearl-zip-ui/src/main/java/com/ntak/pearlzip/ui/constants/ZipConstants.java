@@ -55,7 +55,20 @@ public class ZipConstants {
 
     public static final String LOG_OS_TRIGGER_DETECTED = "logging.ntak.pearl-zip.os-trigger-detected";
 
+    public static final String TITLE_ISSUE_INTEGRATING_CHANGES = "title.ntak.pearl-zip.issue-integrating-changes";
+    public static final String HEADER_ISSUE_INTEGRATING_CHANGES = "header.ntak.pearl-zip.issue-integrating-changes";
+    public static final String BODY_ISSUE_INTEGRATING_CHANGES = "body.ntak.pearl-zip.issue-integrating-changes";
     public static final String LOG_ISSUE_INTEGRATING_CHANGES = "logging.ntak.pearl-zip.issue-integrating-changes";
+
+    public static final String LOG_ISSUE_ADDING_FILE = "logging.ntak.pearl-zip.issue-adding-file";
+    public static final String TITLE_ISSUE_ADDING_FILE = "title.ntak.pearl-zip.issue-adding-file";
+    public static final String HEADER_ISSUE_ADDING_FILE = "header.ntak.pearl-zip.issue-adding-file";
+    public static final String BODY_ISSUE_ADDING_FILE = "body.ntak.pearl-zip.issue-adding-file";
+
+    public static final String LOG_ISSUE_ADDING_DIR = "logging.ntak.pearl-zip.issue-adding-dir";
+    public static final String TITLE_ISSUE_ADDING_DIR = "title.ntak.pearl-zip.issue-adding-dir";
+    public static final String HEADER_ISSUE_ADDING_DIR = "header.ntak.pearl-zip.issue-adding-dir";
+    public static final String BODY_ISSUE_ADDING_DIR = "body.ntak.pearl-zip.issue-adding-dir";
 
     public static final String LOG_CREATE_ARCHIVE = "logging.ntak.pearl-zip.log-create-archive";
 
