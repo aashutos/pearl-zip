@@ -49,25 +49,58 @@ import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 
 /**
- *  Loads the main UI screen for the Zip Application.
- *  @author Aashutos Kakshepati
-*/
+ * Loads the main UI screen for the Zip Application.
+ *
+ * @author Aashutos Kakshepati
+ */
 public class MacZipLauncher extends Application {
 
     static {
-            Desktop.getDesktop().setOpenFileHandler((e)-> e.getFiles()
-                                                       .stream()
-                                                       .peek(LoggingConstants.ROOT_LOGGER::info)
-                                                       .map(f -> f.toPath()
-                        .toAbsolutePath()
-                        .toString())
-                                                       .forEach(f -> Platform.runLater(()-> {
-                                                       Stage stage = new Stage();
-                                                       ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(f).get();
-                                                       ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(f).orElse(null);
-                                                       final FXArchiveInfo fxArchiveInfo = new FXArchiveInfo(f, readService, writeService);
-                                                       launchMainStage(stage, fxArchiveInfo);
-                                                      })));
+        Desktop.getDesktop()
+               .setOpenFileHandler((e) -> e.getFiles()
+                                           .stream()
+                                           .peek(LoggingConstants.ROOT_LOGGER::info)
+                                           .map(f -> f.toPath()
+                                                      .toAbsolutePath()
+                                                      .toString())
+                                           .forEach(f -> Platform.runLater(() -> {
+                                               Stage stage = new Stage();
+
+                                               ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(f)
+                                                                                        .get();
+                                               ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(
+                                                                                                  f)
+                                                                                          .orElse(null);
+                                               final FXArchiveInfo fxArchiveInfo = new FXArchiveInfo(f,
+                                                                                                     readService,
+                                                                                                     writeService);
+
+                                               // Generates PreOpen dialog, if required
+                                               Optional<Node> optNode;
+                                               if ((optNode = readService.getOpenArchiveOptionsPane(fxArchiveInfo.getArchiveInfo())).isPresent()) {
+                                                   Stage preOpenStage = new Stage();
+                                                   Node root = optNode.get();
+                                                   JFXUtil.loadPreOpenDialog(preOpenStage, root);
+
+                                                   Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
+
+                                                   if (Objects.nonNull(result) && Objects.nonNull(result.getKey()) && !result.getKey()
+                                                                                                                             .get()) {
+                                                       // LOG: Issue occurred when opening archive %s. Issue reason: %s
+                                                       ROOT_LOGGER.error(resolveTextKey(
+                                                               LOG_INVALID_ARCHIVE_SETUP,
+                                                               fxArchiveInfo.getArchivePath(),
+                                                               result.getValue()));
+
+                                                       Platform.runLater(() -> stage.fireEvent(new WindowEvent(
+                                                               stage,
+                                                               WindowEvent.WINDOW_CLOSE_REQUEST)));
+                                                       return;
+                                                   }
+                                               }
+                                               stage.initStyle(StageStyle.DECORATED);
+                                               launchMainStage(stage, fxArchiveInfo);
+                                           })));
     }
 
     @Override
@@ -88,17 +121,20 @@ public class MacZipLauncher extends Application {
         //////////////////////////////////////////
 
         // Create temporary store folder
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "temp");
+        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                      .toString(), "temp");
         if (!Files.exists(STORE_TEMP)) {
             Files.createDirectories(STORE_TEMP);
         }
 
         // Providers
-        Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "providers");
+        Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                .toString(), "providers");
         Files.createDirectories(providerPath);
 
         // Recent files
-        RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "rf");
+        RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
+                                          .toString(), "rf");
         if (!Files.exists(RECENT_FILE)) {
             Files.createFile(RECENT_FILE);
         }
@@ -113,7 +149,8 @@ public class MacZipLauncher extends Application {
 
         // Setting about form...
         FXMLLoader aboutLoader = new FXMLLoader();
-        aboutLoader.setLocation(MacZipLauncher.class.getClassLoader().getResource("frmAbout.fxml"));
+        aboutLoader.setLocation(MacZipLauncher.class.getClassLoader()
+                                                    .getResource("frmAbout.fxml"));
         aboutLoader.setResources(LOG_BUNDLE);
         VBox abtRoot = aboutLoader.load();
         FrmAboutController abtController = aboutLoader.getController();
@@ -124,16 +161,19 @@ public class MacZipLauncher extends Application {
         aboutStage.initStyle(StageStyle.UNDECORATED);
 
         sysMenu.setUseSystemMenuBar(true);
-        sysMenu.getMenus().add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
+        sysMenu.getMenus()
+               .add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
 
         // Add some more Menus...
         FXMLLoader menuLoader = new FXMLLoader();
-        menuLoader.setLocation(MacZipLauncher.class.getClassLoader().getResource("sysmenu.fxml"));
+        menuLoader.setLocation(MacZipLauncher.class.getClassLoader()
+                                                   .getResource("sysmenu.fxml"));
         menuLoader.setResources(LOG_BUNDLE);
         MenuBar additionalMenu = menuLoader.load();
         SysMenuController menuController = menuLoader.getController();
         menuController.initData();
-        sysMenu.getMenus().addAll(additionalMenu.getMenus());
+        sysMenu.getMenus()
+               .addAll(additionalMenu.getMenus());
 
         // Use the menu sysMenu for all stages including new ones
         MENU_TOOLKIT.setAppearanceMode(AppearanceMode.DARK);
@@ -143,12 +183,14 @@ public class MacZipLauncher extends Application {
         readyLatch.countDown();
         FXArchiveInfo fxArchiveInfo;
         String archivePath;
-        if (APP.getParameters().getRaw().size() > 0 && Files.exists(Paths.get(APP.getParameters()
-                                                                                 .getRaw()
-                                                                                 .get(0)))) {
+        if (APP.getParameters()
+               .getRaw()
+               .size() > 0 && Files.exists(Paths.get(APP.getParameters()
+                                                        .getRaw()
+                                                        .get(0)))) {
             archivePath = APP.getParameters()
-                                    .getRaw()
-                                    .get(0);
+                             .getRaw()
+                             .get(0);
             addToRecentFile(new File(archivePath));
         } else if (OS_FILES.size() > 0) {
             // LOG: OS Trigger detected...
@@ -161,14 +203,20 @@ public class MacZipLauncher extends Application {
             archivePath = OS_FILES.remove(0);
         } else {
             archivePath = Paths.get(STORE_TEMP.toString(),
-                                    String.format("a%s.zip", System.currentTimeMillis())).toAbsolutePath().toString();
-            ZipState.getWriteArchiveServiceForFile(archivePath).get().createArchive(System.currentTimeMillis(), archivePath);
+                                    String.format("a%s.zip", System.currentTimeMillis()))
+                               .toAbsolutePath()
+                               .toString();
+            ZipState.getWriteArchiveServiceForFile(archivePath)
+                    .get()
+                    .createArchive(System.currentTimeMillis(), archivePath);
         }
 
-        ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(archivePath).get();
-        ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(archivePath).orElse(null);
-                fxArchiveInfo = new FXArchiveInfo(archivePath,
-                                                  readService, writeService);
+        ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(archivePath)
+                                                 .get();
+        ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(archivePath)
+                                                   .orElse(null);
+        fxArchiveInfo = new FXArchiveInfo(archivePath,
+                                          readService, writeService);
 
         // Generates PreOpen dialog, if required
         Optional<Node> optNode;
@@ -180,18 +228,19 @@ public class MacZipLauncher extends Application {
             Node root = optNode.get();
             JFXUtil.loadPreOpenDialog(preOpenStage, root);
 
-            Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean, String>) root.getUserData();
+            Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
 
-            if (Objects.nonNull(result) && Objects.nonNull(result.getKey()) && !result.getKey().get()) {
+            if (Objects.nonNull(result) && Objects.nonNull(result.getKey()) && !result.getKey()
+                                                                                      .get()) {
                 // LOG: Issue occurred when opening archive %s. Issue reason: %s
                 ROOT_LOGGER.error(resolveTextKey(LOG_INVALID_ARCHIVE_SETUP, fxArchiveInfo.getArchivePath(),
                                                  result.getValue()));
 
-                Platform.runLater(()-> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+                Platform.runLater(() -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
                 return;
             }
 
-            Platform.runLater(()-> {
+            Platform.runLater(() -> {
                 launchMainStage(new Stage(), fxArchiveInfo);
                 stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
             });
