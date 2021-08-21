@@ -90,7 +90,7 @@ echo "Uploading asset ${INSTALLER} to ${P_REPOSITORY} for tag ${P_RELEASE}... "
 ID=$(curl -X GET -sH "${P_TOKEN_HEADER}" https://api.github.com/repos/aashutos/pearl-zip/releases | grep -A1 "\"html_url\": \".*${P_RELEASE}\"" | grep id | tr ',' ' ' | cut -d: -f2)
 ID=${ID//[$'\t\r\n ']}
 
-if [ "$ID" -gt 0 ]
+if [ ${ID:-0} -gt 0 ]
 then
   ECHO "Existing release detected..."
 else
@@ -105,12 +105,12 @@ shasum -a 512 "${INSTALLER}" | cut -d" " -f1 > "${INSTALLER_HASH}"
 
 echo "Uploading asset ${INSTALLER}"
 sleep 10
-curl --progress-bar -sH "${P_TOKEN_HEADER}" --data-binary @"${INSTALLER}" -H "Content-Type: application/octet-stream" "${P_GITHUB_UPLOAD_API}/repos/${P_REPO_OWNER}/${P_REPOSITORY}/releases/${ID}/assets?name=$(basename "${INSTALLER}")"
+curl --progress-bar -sH "${P_TOKEN_HEADER}" --data-binary @"${INSTALLER}" -H "Content-Type: application/octet-stream" "${P_GITHUB_UPLOAD_API}/repos/${P_REPO_OWNER}/${P_REPOSITORY}/releases/$(echo $ID)/assets?name=$(basename "${INSTALLER}")"
 sleep 5
 
 echo "Uploading asset ${INSTALLER_HASH}"
 sleep 10
-curl --progress-bar -sH "${P_TOKEN_HEADER}" --data-binary @"${INSTALLER_HASH}" -H "Content-Type: application/octet-stream" "${P_GITHUB_UPLOAD_API}/repos/${P_REPO_OWNER}/${P_REPOSITORY}/releases/${ID}/assets?name=$(basename "${INSTALLER_HASH}")"
+curl --progress-bar -sH "${P_TOKEN_HEADER}" --data-binary @"${INSTALLER_HASH}" -H "Content-Type: application/octet-stream" "${P_GITHUB_UPLOAD_API}/repos/${P_REPO_OWNER}/${P_REPOSITORY}/releases/$(echo $ID)/assets?name=$(basename "${INSTALLER_HASH}")"
 
 echo 'resetting to master branch...'
 git checkout master
