@@ -110,54 +110,43 @@
                         <version>1.6.0</version>
                         <executions>
                             <execution>
+                                <id>sign-lib</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <configuration>
+                                    <executable>sh</executable>
+                                    <arguments>
+                                        <argument>${project.basedir}/scripts/sign-lib.sh</argument>
+                                        <argument>${project.version}</argument>
+                                    </arguments>
+                                    <environmentVariables>
+                                        <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                                    </environmentVariables>
+                                    <async>false</async>
+                                </configuration>
                             </execution>
-                        </executions>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>${project.basedir}/scripts/sign-lib.sh</argument>
-                                <argument>${project.version}</argument>
-                            </arguments>
-                            <environmentVariables>
-                                <JAVA_HOME>${jdk.location}</JAVA_HOME>
-                            </environmentVariables>
-                            <async>false</async>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
                             <execution>
+                                <id>clean-mvn-package</id>
                                 <phase>clean</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <configuration>
+                                    <executable>sh</executable>
+                                    <arguments>
+                                        <argument>${project.basedir}/scripts/clear-mvn-package.sh</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>${deploy.settings.loc}</argument>
+                                    </arguments>
+                                    <environmentVariables>
+                                        <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                                    </environmentVariables>
+                                    <async>false</async>
+                                </configuration>
                             </execution>
                         </executions>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>${project.basedir}/scripts/clear-mvn-package.sh</argument>
-                                <argument>${project.version}</argument>
-                                <argument>${deploy.settings.loc}</argument>
-                            </arguments>
-                            <environmentVariables>
-                                <JAVA_HOME>${jdk.location}</JAVA_HOME>
-                            </environmentVariables>
-                            <async>false</async>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
