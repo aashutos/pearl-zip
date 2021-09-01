@@ -11,6 +11,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ButtonType;
@@ -117,7 +118,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
         Path fileToBeKept =
                 Files.list(STORE_TEMP)
-                     .filter(f->!f.getFileName().toString().endsWith("a1234567890.zip"))
+                     .filter(f->!f.getFileName().toString().endsWith("a1234567890.zip") && Files.isRegularFile(f))
                      .findFirst()
                      .get();
 
@@ -153,13 +154,17 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     @DisplayName("Test: Clear cache with a saved archive. All temp files are removed")
     public void testFX_ClearCacheSavedArchiveOpen_MatchExpectations() throws IOException {
         // Verify initial state
-        final List<Path> filesToBeDeleted = Files.list(STORE_TEMP)
-                                             .filter(Files::isRegularFile).collect(Collectors.toList());
+        final List<Path> filesToBeDeleted = new LinkedList<>();
+        filesToBeDeleted.addAll(Files.list(STORE_TEMP).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
+        filesToBeDeleted.addAll(Files.list(tempPZDir).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
         Assertions.assertEquals(2, filesToBeDeleted.size(), "Initial files have not been setup");
 
         Assertions.assertTrue(Files.exists(tempOSDir), "Temp directory was not initialised");
         Assertions.assertTrue(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
                               "Temp file was not initialised");
+        Assertions.assertTrue(Files.exists(tempPZDir), "Temp directory (.pz) was not initialised");
+        Assertions.assertTrue(Files.exists(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar")),
+                              "Temp file (.pz) was not initialised");
 
         // Open existing archive in current window
         clickOn(Point2D.ZERO.add(110, 10))
@@ -190,7 +195,12 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(filesToBeDeleted.stream().noneMatch(Files::exists), "Some temp files were not deleted");
         Assertions.assertFalse(Files.exists(tempOSDir), "Temporary directory in OS ephemeral store was not deleted");
         Assertions.assertFalse(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
-                               "temp file in OS ephemeral storage was not deleted");
+                               "temp file in pz ephemeral storage was not deleted");
+        Assertions.assertFalse(Files.exists(tempPZDir), "Temporary directory in OS ephemeral store was not " +
+                "deleted");
+        Assertions.assertFalse(Files.exists(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar")),
+                               "temp file in pz ephemeral storage was not deleted");
+
     }
 
     @Test
