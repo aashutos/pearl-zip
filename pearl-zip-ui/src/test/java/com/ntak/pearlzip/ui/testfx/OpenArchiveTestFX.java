@@ -11,6 +11,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -21,10 +22,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 
 public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
     /*
@@ -34,6 +38,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
      * + Open recent files up (non-replacing entries: 1-5)
      * + Open sixth recent file which replaces the oldest entry in rf file
      * + Double click text file to open externally
+     * + Item ordering in archive
      */
 
     @AfterEach
@@ -549,5 +554,92 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
         DialogPane dialogPane = lookup(".dialog-pane").query();
         Assertions.assertTrue(dialogPane.getContentText().startsWith("Choosing yes will open a temporary copy of the selected file in an external application"),
                               "The text in confirmation dialog was not matched as expected");
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    ////////// OTHER TEST CASES ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    @DisplayName("Test: Open zip archive and check ordering functionality of items in main screen")
+    public void testFX_OpenZipArchiveCheckOrdering_Success() {
+        // Hard coded movement to open MenuItem
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+        final Path archivePath = Paths.get("src", "test", "resources", "order-test.zip")
+                                      .toAbsolutePath();
+        // Via Sys menu
+        simOpenArchive(this, archivePath, false, false);
+        sleep(50, TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(),"Expected archive " +
+                "was not present");
+
+        // Select Name Header and check item order
+        TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
+        clickOn(new Point2D(350,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
+
+        List<String> expectations = new LinkedList<>(List.of("FILE-1", "FILE-1.md5", "nested-dir"));
+        List<FileInfo> files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
+
+        clickOn(new Point2D(350,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        Collections.reverse(expectations);
+        files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
+
+        simTraversalArchive(this, archivePath.toString(), "#fileContentsView", (r)->{}, "nested-dir",".DS_Store");
+        sleep(250,TimeUnit.MILLISECONDS);
+
+        // Select Size and check item order
+        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        expectations = new LinkedList<>(List.of("nested-dir/FILE-2", "nested-dir/FILE-3.md5", "nested-dir/FILE-3", "nested-dir/.DS_Store"));
+        files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
+
+        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        Collections.reverse(expectations);
+        files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
+
+        // Select Modified timestamp and check item order
+        clickOn(new Point2D(700,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        expectations = new LinkedList<>(List.of("nested-dir/.DS_Store", "nested-dir/FILE-2", "nested-dir/FILE-3",
+                                                "nested-dir/FILE-3.md5"));
+        files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
+
+        clickOn(new Point2D(700,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        Collections.reverse(expectations);
+        files = new ArrayList<>(fileContentsView.getItems());
+        Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
+
+        for (int i = 0; i < expectations.size(); i++) {
+            Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
+                                    String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
+        }
     }
 }
