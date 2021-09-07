@@ -66,6 +66,15 @@ public class FormUtil {
         robot.push(new KeyCode[]{KeyCode.ENTER});
     }
 
+    public static void resetComboBox(FxRobot robot, ComboBox comboDefaultCompressionLevel) {
+        robot.clickOn(comboDefaultCompressionLevel);
+        for (int i = 0; i < comboDefaultCompressionLevel.getItems()
+                                                        .size(); i++) {
+            robot.push(KeyCode.UP).sleep(50, MILLISECONDS);
+        }
+        robot.push(KeyCode.ENTER);
+    }
+
     public static <T extends Node> T lookupNode(Predicate<Stage> stageExtractor, String id) {
         return (T)Stage.getWindows()
                     .stream()
