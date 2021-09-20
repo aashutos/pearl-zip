@@ -16,8 +16,8 @@
     <artifactId>pearl-zip-archive-acc</artifactId>
 
     <properties>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <commons-compress.version>1.21</commons-compress.version>
         <xz.version>1.8</xz.version>
     </properties>
