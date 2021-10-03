@@ -34,9 +34,9 @@ then
 fi
 
 # Does java exist
-if [ $(${JAVA_ROOT}java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. -f1) -lt 15 ]
+if [ $(${JAVA_ROOT}java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. -f1) -lt 17 ]
 then
-  echo "Java >= 15 has not been installed. Exiting..."
+  echo "Java >= 17 has not been installed. Exiting..."
   exit 1
 fi
 

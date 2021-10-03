@@ -8,7 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.InstanceField;
 
@@ -16,13 +19,10 @@ import java.time.LocalDate;
 import java.util.concurrent.CountDownLatch;
 
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DTF_YYYY;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-@Tag("Excluded")
 public class FrmAboutControllerTest {
     private static FrmAboutController controller;
-    private static Stage mockStage;
+    private static Stage aboutStage;
 
     private static VBox vbAbout;
     private static Label lblAppName;
@@ -40,14 +40,17 @@ public class FrmAboutControllerTest {
     @BeforeAll
     public static void setUpOnce() throws InterruptedException, NoSuchFieldException {
         try {
-            Platform.startup(() -> latch.countDown());
+            Platform.startup(() -> {
+                aboutStage = new Stage();
+                latch.countDown();
+            });
+
         } catch (Exception e) {
             latch.countDown();
         } finally {
             latch.await();
 
             controller = new FrmAboutController();
-            mockStage = Mockito.mock(Stage.class);
 
             // Initialise objects
             vbAbout = new VBox();
@@ -91,7 +94,8 @@ public class FrmAboutControllerTest {
         Assertions.assertEquals("0.0.0.0", lblVersion.getText(), "Version not as expected");
         Assertions.assertEquals("https://pearlzip.92ak.co.uk", lblWeblink.getText(), "Weblink not as expected");
 
-        controller.initData(mockStage);
-        verify(mockStage, times(1)).setAlwaysOnTop(true);
+        aboutStage = Mockito.mock(Stage.class);
+        controller.initData(aboutStage);
+        Assertions.assertTrue(aboutStage.isAlwaysOnTop(), "Always On Top was not set to true");
     }
 }
