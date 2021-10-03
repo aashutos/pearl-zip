@@ -6,7 +6,7 @@
 <licenseSummary>
     <dependencies>
         <dependency>
-            <groupId>net.sf.sevenzipjbinding</groupId>
+            <groupId>com.ntak</groupId>
             <artifactId>sevenzipjbinding</artifactId>
             <version>16.02-2.01</version>
             <licenses>
