@@ -79,38 +79,4 @@
             </build>
         </profile>
     </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>mvn</executable>
-                    <arguments>
-                        <argument>install:install-file</argument>
-                        <argument>-Dfile=${project.basedir}/lib/sevenzipjbinding-16.02-2.01.jar</argument>
-                        <argument>-DgroupId=com.ntak</argument>
-                        <argument>-DartifactId=sevenzipjbinding</argument>
-                        <argument>-Dversion=16.02-2.01</argument>
-                        <argument>-Dpackaging=jar</argument>
-                        <argument>-DgeneratePom=true</argument>
-                    </arguments>
-                    <async>false</async>
-                </configuration>
-                <goals>
-                    <goal>exec</goal>
-                </goals>
-            </plugin>
-        </plugins>
-    </build>
 </project>
