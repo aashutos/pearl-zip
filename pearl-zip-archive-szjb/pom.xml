@@ -28,11 +28,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.sf.sevenzipjbinding</groupId>
+            <groupId>com.ntak</groupId>
             <artifactId>sevenzipjbinding</artifactId>
             <version>16.02-2.01</version>
-            <systemPath>${basedir}/lib/sevenzipjbinding-16.02-2.01.jar</systemPath>
-            <scope>system</scope>
         </dependency>
         <dependency>
             <groupId>com.ntak</groupId>

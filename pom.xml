@@ -29,6 +29,7 @@
     </properties>
 
     <modules>
+        <module>pearl-zip-archive-lib</module>
         <module>pearl-zip-lang-pack-en-GB</module>
         <module>pearl-zip-archive</module>
         <module>pearl-zip-archive-acc</module>
