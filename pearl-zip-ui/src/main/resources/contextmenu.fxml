@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <ContextMenu fx:id="ctxMenu" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.ContextMenuController">
   <items>
-      <MenuItem fx:id="mnuOpen" mnemonicParsing="false" text="%ctxMenu.open.text" />
+      <MenuItem fx:id="mnuPeek" mnemonicParsing="false" text="%ctxMenu.peek.text" />
       <MenuItem fx:id="mnuExtract" mnemonicParsing="false" text="%ctxMenu.extract.text" />
       <MenuItem fx:id="mnuCopy" mnemonicParsing="false" text="%ctxMenu.copy.text" />
       <MenuItem fx:id="mnuMove" mnemonicParsing="false" text="%ctxMenu.move.text" />
