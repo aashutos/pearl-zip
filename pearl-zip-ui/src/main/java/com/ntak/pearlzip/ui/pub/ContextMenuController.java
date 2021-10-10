@@ -32,7 +32,7 @@ public class ContextMenuController {
     @FXML
     private ContextMenu ctxMenu;
     @FXML
-    private MenuItem mnuOpen;
+    private MenuItem mnuPeek;
     @FXML
     private MenuItem mnuExtract;
     @FXML
@@ -104,7 +104,7 @@ public class ContextMenuController {
             mnuDelete.setDisable(true);
         }
 
-        mnuOpen.setOnAction((e)->{
+        mnuPeek.setOnAction((e)->{
             if (Objects.isNull(fileInfo) || fileInfo.isFolder()) {
                 // LOG: No file has been selected from archive %s
                 LoggingConstants.ROOT_LOGGER.warn(resolveTextKey(LOG_NO_FILE_SELECTED, archiveInfo.getArchivePath()));
