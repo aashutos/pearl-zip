@@ -31,6 +31,7 @@ public class ResourceConstants {
     public static final Pattern SSV = Pattern.compile(Pattern.quote("/"));
 
     public static final String PATTERN_FXID_NEW_OPTIONS = "%s.new-options";
+    public static final String PATTERN_FXID_OPTIONS = "%s.options";
 
     public static final int NO_FILES_HISTORY = Integer.parseInt(System.getProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5"));
 }
