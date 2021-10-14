@@ -8,7 +8,7 @@ import com.ntak.pearlzip.license.pub.LicenseService;
 import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
-import javafx.application.Platform;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.control.Label;
@@ -85,28 +85,35 @@ public class AboutTestFX extends AbstractPearlZipTestFX {
             tblLicenses.getSelectionModel()
                        .select(i);
             final LicenseInfo license = tblLicenses.getSelectionModel()
-                                                        .getSelectedItem();
+                                                   .getSelectedItem();
             System.out.printf("Selected: %s%n", license.canonicalName());
             TableRow<LicenseInfo> row =
-                    ((TableCell<LicenseInfo,String>)tblLicenses.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
-                                                            i, 0)).getTableRow();
+                    ((TableCell<LicenseInfo,String>) tblLicenses.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
+                                                                                          i, 0)).getTableRow();
             sleep(50, MILLISECONDS);
             final int finalI = i;
             CountDownLatch latch = new CountDownLatch(1);
-            Platform.runLater(()->{try{tblLicenses.scrollTo(finalI);}finally{latch.countDown();}});
+            JFXUtil.runLater(() -> {
+                try {
+                    tblLicenses.scrollTo(finalI);
+                } finally {
+                    latch.countDown();
+                }
+            });
             latch.await();
             doubleClickOn(row);
             sleep(1, SECONDS);
 
             // Verify contents...
             final WebView page = lookup("#webLicense").queryAs(WebView.class);
-            final Stage stage = (Stage) page.getScene().getWindow();
+            final Stage stage = (Stage) page.getScene()
+                                            .getWindow();
             Assertions.assertEquals(String.format("License Details : %s", license.licenseFile()), stage.getTitle(),
                                     "License file was not as expected");
 
             // Close stage
             CountDownLatch scrollLatch = new CountDownLatch(1);
-            Platform.runLater(() -> {
+            JFXUtil.runLater(() -> {
                 try {
                     stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
                 } finally {

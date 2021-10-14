@@ -8,7 +8,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.event.handler.*;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
-import javafx.application.Platform;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -83,21 +83,22 @@ public class ContextMenuController {
 
         FrmMainController controller;
         if (archiveInfo.getController().isPresent()) {
-            controller = archiveInfo.getController().get();
-            mnuMove.setOnAction((e)->Platform.runLater(()->new BtnMoveSelectedEventHandler(row.getTableView(),
-                                                                               controller.getBtnCopy(),
-                                                                               controller.getBtnMove(),
-                                                                               controller.getBtnDelete(),
-                                                                               archiveInfo).handle(e))
+            controller = archiveInfo.getController()
+                                    .get();
+            mnuMove.setOnAction((e) -> JFXUtil.runLater(() -> new BtnMoveSelectedEventHandler(row.getTableView(),
+                                                                                              controller.getBtnCopy(),
+                                                                                              controller.getBtnMove(),
+                                                                                              controller.getBtnDelete(),
+                                                                                              archiveInfo).handle(e))
             );
-            mnuCopy.setOnAction((e)->Platform.runLater(()->new BtnCopySelectedEventHandler(row.getTableView(),
-                                                                              controller.getBtnCopy(),
-                                                                     controller.getBtnMove(),
-                                                                     controller.getBtnDelete(),
-                                                                     archiveInfo).handle(e))
+            mnuCopy.setOnAction((e) -> JFXUtil.runLater(() -> new BtnCopySelectedEventHandler(row.getTableView(),
+                                                                                              controller.getBtnCopy(),
+                                                                                              controller.getBtnMove(),
+                                                                                              controller.getBtnDelete(),
+                                                                                              archiveInfo).handle(e))
             );
-            mnuDelete.setOnAction((e)->Platform.runLater(()->new BtnDeleteEventHandler(row.getTableView(),
-                                                                                      archiveInfo).handle(null)));
+            mnuDelete.setOnAction((e) -> JFXUtil.runLater(() -> new BtnDeleteEventHandler(row.getTableView(),
+                                                                                          archiveInfo).handle(null)));
         } else {
             mnuCopy.setDisable(true);
             mnuMove.setDisable(true);

@@ -16,7 +16,6 @@ import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
 import de.jangassen.model.AppearanceMode;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -63,7 +62,7 @@ public class MacZipLauncher extends Application {
                                            .map(f -> f.toPath()
                                                       .toAbsolutePath()
                                                       .toString())
-                                           .forEach(f -> Platform.runLater(() -> {
+                                           .forEach(f -> JFXUtil.runLater(() -> {
                                                Stage stage = new Stage();
 
                                                ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(f)
@@ -92,7 +91,7 @@ public class MacZipLauncher extends Application {
                                                                fxArchiveInfo.getArchivePath(),
                                                                result.getValue()));
 
-                                                       Platform.runLater(() -> stage.fireEvent(new WindowEvent(
+                                                       JFXUtil.runLater(() -> stage.fireEvent(new WindowEvent(
                                                                stage,
                                                                WindowEvent.WINDOW_CLOSE_REQUEST)));
                                                        return;
@@ -236,11 +235,11 @@ public class MacZipLauncher extends Application {
                 ROOT_LOGGER.error(resolveTextKey(LOG_INVALID_ARCHIVE_SETUP, fxArchiveInfo.getArchivePath(),
                                                  result.getValue()));
 
-                Platform.runLater(() -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+                JFXUtil.runLater(() -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
                 return;
             }
 
-            Platform.runLater(() -> {
+            JFXUtil.runLater(() -> {
                 launchMainStage(new Stage(), fxArchiveInfo);
                 stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
             });

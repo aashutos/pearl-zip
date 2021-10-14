@@ -30,7 +30,7 @@ public class ContextMenuControllerTest {
 
     private static ContextMenuController controller;
     static ContextMenu ctxMenu;
-    private static MenuItem mnuOpen;
+    private static MenuItem mnuPeek;
     private static MenuItem mnuExtract;
     private static MenuItem mnuCopy;
     private static MenuItem mnuMove;
@@ -95,7 +95,7 @@ public class ContextMenuControllerTest {
     @BeforeEach
     public void setUp() throws NoSuchFieldException {
         // Set up of menu items
-        mnuOpen = new MenuItem();
+        mnuPeek = new MenuItem();
         mnuExtract = new MenuItem();
         mnuCopy = new MenuItem();
         mnuMove = new MenuItem();
@@ -103,7 +103,7 @@ public class ContextMenuControllerTest {
         mnuFileInfo = new MenuItem();
 
         // Validate menu items
-        Assertions.assertNull(mnuOpen.getOnAction(), "mnuOpen onAction was not initialised as expected");
+        Assertions.assertNull(mnuPeek.getOnAction(), "mnuPeek onAction was not initialised as expected");
         Assertions.assertNull(mnuExtract.getOnAction(), "mnuExtract onAction was not initialised as expected");
         Assertions.assertNull(mnuCopy.getOnAction(), "mnuCopy onAction was not initialised as expected");
         Assertions.assertNull(mnuMove.getOnAction(), "mnuMove onAction was not initialised as expected");
@@ -111,17 +111,19 @@ public class ContextMenuControllerTest {
         Assertions.assertNull(mnuFileInfo.getOnAction(), "mnuFileInfo onAction was not initialised as expected");
 
         // Initialise in Controller
-        final Field mnuOpen = ContextMenuController.class.getDeclaredField("mnuOpen");
-        InstanceField fieldMnuOpen = new InstanceField(mnuOpen, controller);
-        fieldMnuOpen.set(ContextMenuControllerTest.mnuOpen);
+        final Field mnuPeek = ContextMenuController.class.getDeclaredField("mnuPeek");
+        InstanceField fieldMnuPeek = new InstanceField(mnuPeek, controller);
+        fieldMnuPeek.set(ContextMenuControllerTest.mnuPeek);
 
         final Field mnuExtract = ContextMenuController.class.getDeclaredField("mnuExtract");
         InstanceField fieldMnuExtract = new InstanceField(mnuExtract, controller);
 
         fieldMnuExtract.set(ContextMenuControllerTest.mnuExtract);
-        InstanceField fieldMnuCopy = new InstanceField(ContextMenuController.class.getDeclaredField("mnuCopy"), controller);
+        InstanceField fieldMnuCopy = new InstanceField(ContextMenuController.class.getDeclaredField("mnuCopy"),
+                                                       controller);
         fieldMnuCopy.set(mnuCopy);
-        InstanceField fieldMnuMove = new InstanceField(ContextMenuController.class.getDeclaredField("mnuMove"), controller);
+        InstanceField fieldMnuMove = new InstanceField(ContextMenuController.class.getDeclaredField("mnuMove"),
+                                                       controller);
         fieldMnuMove.set(mnuMove);
         InstanceField fieldMnuDelete = new InstanceField(ContextMenuController.class.getDeclaredField("mnuDelete"),
                                                          controller);

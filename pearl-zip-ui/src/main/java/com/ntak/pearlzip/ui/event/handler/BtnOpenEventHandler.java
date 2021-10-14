@@ -5,7 +5,7 @@ package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
-import javafx.application.Platform;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -83,8 +83,8 @@ public class BtnOpenEventHandler implements EventHandler<MouseEvent> {
                                              if (openSuccess.get() && response.isPresent() && response.get()
                                                                                  .getButtonData()
                                                                                  .equals(ButtonBar.ButtonData.NO)) {
-                                                 Platform.runLater(() -> this.stage.fireEvent(new WindowEvent(this.stage,
-                                                                                                              WindowEvent.WINDOW_CLOSE_REQUEST)));
+                                                 JFXUtil.runLater(() -> this.stage.fireEvent(new WindowEvent(this.stage,
+                                                                                                             WindowEvent.WINDOW_CLOSE_REQUEST)));
                                              } else {
                                                  this.stage.toFront();
                                                  Stage currentStage =

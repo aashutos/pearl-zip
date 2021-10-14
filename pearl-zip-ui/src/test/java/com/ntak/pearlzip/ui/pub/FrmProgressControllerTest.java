@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -44,7 +45,7 @@ public class FrmProgressControllerTest {
        } finally {
            latch.await();
            CountDownLatch secondLatch = new CountDownLatch(1);
-           Platform.runLater(()->{
+           JFXUtil.runLater(() -> {
                stage = new Stage();
                secondLatch.countDown();
            });

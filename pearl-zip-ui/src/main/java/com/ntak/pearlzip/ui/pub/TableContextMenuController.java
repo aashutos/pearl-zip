@@ -10,7 +10,7 @@ import com.ntak.pearlzip.ui.event.handler.BtnCopySelectedEventHandler;
 import com.ntak.pearlzip.ui.event.handler.BtnMoveSelectedEventHandler;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
-import javafx.application.Platform;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -53,23 +53,23 @@ public class TableContextMenuController {
             TableView<FileInfo> fileContentsView = controller.getFileContentsView();
             mnuDrop.setOnAction((e) -> {
                 try {
-                    Platform.runLater(() ->
-                    new BtnMoveSelectedEventHandler(fileContentsView,
-                                                    controller.getBtnCopy(),
-                                                    controller.getBtnMove(),
-                                                    controller.getBtnDelete(),
-                                                    archiveInfo).handle(e));
+                    JFXUtil.runLater(() ->
+                                             new BtnMoveSelectedEventHandler(fileContentsView,
+                                                                             controller.getBtnCopy(),
+                                                                             controller.getBtnMove(),
+                                                                             controller.getBtnDelete(),
+                                                                             archiveInfo).handle(e));
                 } finally {
                     ROW_TRIGGER.set(false);
                 }
             });
             mnuPaste.setOnAction((e) -> {
                 try {
-                    Platform.runLater(() -> new BtnCopySelectedEventHandler(fileContentsView,
-                                                                            controller.getBtnCopy(),
-                                                                            controller.getBtnMove(),
-                                                                            controller.getBtnDelete(),
-                                                                            archiveInfo).handle(e));
+                    JFXUtil.runLater(() -> new BtnCopySelectedEventHandler(fileContentsView,
+                                                                           controller.getBtnCopy(),
+                                                                           controller.getBtnMove(),
+                                                                           controller.getBtnDelete(),
+                                                                           archiveInfo).handle(e));
                 } finally {
                     ROW_TRIGGER.set(false);
                 }

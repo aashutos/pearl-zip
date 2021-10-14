@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -208,10 +209,19 @@ public class JFXUtil {
         return Optional.of((FXArchiveInfo) Stage.getWindows()
                                                 .stream()
                                                 .map(Stage.class::cast)
-                                                .filter(s->s.getTitle() != null)
-                                                .filter((s)->s.getTitle().matches(String.format(".*%s$", archiveName)))
+                                                .filter(s -> s.getTitle() != null)
+                                                .filter((s) -> s.getTitle()
+                                                                .matches(String.format(".*%s$", archiveName)))
                                                 .findFirst()
                                                 .get()
                                                 .getUserData());
+    }
+
+    public static void runLater(final Runnable runnable) {
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            Platform.runLater(runnable);
+        }
     }
 }

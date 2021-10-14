@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -76,7 +77,7 @@ public class FrmFileInfoControllerTest {
             latch.await();
             controller = new FrmFileInfoController();
             CountDownLatch secondLatch = new CountDownLatch(1);
-            Platform.runLater(()->{
+            JFXUtil.runLater(() -> {
                 stage = new Stage();
                 secondLatch.countDown();
             });
@@ -199,7 +200,7 @@ public class FrmFileInfoControllerTest {
     @DisplayName("Test: Loading FileInfo form will correctly load all expected fields into the dialog")
     public void testInitData_ValidFileInfoParameter_MatchExpectations() throws InterruptedException {
         CountDownLatch testLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JFXUtil.runLater(() -> {
             controller.initData(stage, fileInfo, atoBool);
             testLatch.countDown();
         });
