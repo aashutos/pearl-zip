@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_NEW_OPTIONS;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
@@ -176,7 +176,7 @@ public class FrmOptionsController {
 
                 Tab customTab = new Tab();
                 customTab.setText(tab.getKey());
-                customTab.setId(String.format(PATTERN_FXID_NEW_OPTIONS,
+                customTab.setId(String.format(PATTERN_FXID_OPTIONS,
                                               service.getClass()
                                                      .getCanonicalName()));
                 customTab.setContent(tab.getValue());
