@@ -128,10 +128,24 @@ ${JAVA_ROOT}jlink --module-path=$rootDir/mods/ --add-modules=ALL-MODULE-PATH --o
 
 echo "Generate App Image"
 mkdir -p target/${LOCALE}
-${JAVA_ROOT}jpackage --dest target/${LOCALE} --type app-image --app-version $MAC_APP_VERSION --copyright "© copyright 2021 92AK" --description "A JavaFX front-end wrapper for some common archive formats" --name PearlZip --vendor 92AK --verbose --java-options "-XX:SharedArchiveFile=pz-shared.jsa -XX:+UseZGC" --icon "$rootDir/src/main/resources/pz-icon.icns" --mac-package-identifier com.ntak.pearl-zip --mac-package-identifier PearlZip  --module-path $rootDir/mods/ -m com.ntak.pearlzip.ui/com.ntak.pearlzip.ui.pub.ZipLauncher --file-associations $rootDir/src/main/resources/file-associations/fa-xz.properties --file-associations $rootDir/src/main/resources/file-associations/fa-bz2.properties --file-associations $rootDir/src/main/resources/file-associations/fa-zip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-gzip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-tar.properties --file-associations $rootDir/src/main/resources/file-associations/fa-jar.properties --runtime-image $rootDir/pz-runtime --verbose
-echo "Adding root configurations..."
-$rootDir/src/main/bash/slip.sh "./target/${LOCALE}/PearlZip.app/Contents/Info.plist" "./target/${LOCALE}/PearlZip.app/Contents/tmp.plist" "<key>CFBundleDocumentTypes</key>" "src/main/resources/file-associations/fa-root.xml" 1
-mv "./target/${LOCALE}/PearlZip.app/Contents/tmp.plist" "./target/${LOCALE}/PearlZip.app/Contents/Info.plist"
+
+${JAVA_ROOT}jpackage --dest target/${LOCALE} --type app-image --app-version $MAC_APP_VERSION --copyright "© copyright 2021 92AK" --description "A JavaFX front-end wrapper for some common archive formats" --name PearlZip --vendor 92AK --verbose --java-options "-XX:SharedArchiveFile=pz-shared.jsa -XX:+UseZGC" --icon "$rootDir/src/main/resources/pz-icon.icns" --mac-package-identifier com.ntak.pearl-zip --mac-package-identifier PearlZip  --module-path $rootDir/mods/ -m com.ntak.pearlzip.ui/com.ntak.pearlzip.ui.pub.ZipLauncher --file-associations $rootDir/src/main/resources/file-associations/fa-xz.properties --file-associations $rootDir/src/main/resources/file-associations/fa-bz2.properties --file-associations $rootDir/src/main/resources/file-associations/fa-zip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-gzip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-tar.properties --file-associations $rootDir/src/main/resources/file-associations/fa-jar.properties --runtime-image $rootDir/pz-runtime
+for f in $(ls $rootDir/src/main/resources/file-associations/Icons)
+do
+ echo "Adding icon $f..."
+ cp "$rootDir/src/main/resources/file-associations/Icons/$f" "target/${LOCALE}/PearlZip.app/Contents/Resources/$f"
+ ext=$(echo $f | cut -d- -f2)
+
+ echo "Adding configuration for extension $ext..."
+ printf "    <key>CFBundleTypeIconFile</key>\n    <string>pz-${ext}-icon.icns</string>\n			<key>CFBundleTypeExtensions</key>\n			<array>\n				<string>${ext}</string>\n			</array>\n" > ${ext}.xml
+ cat ${ext}.xml
+ $rootDir/src/main/bash/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "${ext}.xml" 1
+ mv "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist"
+ rm ${ext}.xml
+
+ $rootDir/src/main/bash/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "$rootDir/src/main/resources/file-associations/fa-${ext}.cfg" 0
+ mv "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist"
+done
 mkdir -p components
 echo "Generating changelog"
 # Retrieve Change Log for release

@@ -15,9 +15,11 @@ OFFSET=${5:-1}
 
 echo "$SRC_FILE $NEW_FILE $PATTERN $EXTRA_FILE $OFFSET"
 
-topLines=$(expr $(cat $SRC_FILE | grep "$PATTERN" -n | cut -d: -f1) + $OFFSET)
+topLines=$(expr $(cat $SRC_FILE | grep "$PATTERN" -n | cut -d: -f1 | head -1) + $OFFSET)
 total=$(cat $SRC_FILE | wc -l)
 bottomLines=$(expr $total - $topLines)
+
+echo "Top: $topLines; Bottom: $bottomLines"
 
 # Add header files
 head -n $topLines $SRC_FILE > $NEW_FILE
