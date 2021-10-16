@@ -9,7 +9,6 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -47,7 +46,7 @@ public class BtnTestEventHandler implements CheckEventHandler<MouseEvent> {
                                                                        .getFileName()
                                                                        .toString();
 
-                                             Platform.runLater(() -> {
+                                             JFXUtil.runLater(() -> {
                                                  if (success) {
                                                      // TITLE: Test successful
                                                      // HEADER: Successful test of archive %s
@@ -55,9 +54,9 @@ public class BtnTestEventHandler implements CheckEventHandler<MouseEvent> {
                                                      raiseAlert(Alert.AlertType.INFORMATION,
                                                                 resolveTextKey(TITLE_TEST_ARCHIVE_SUCCESS),
                                                                 resolveTextKey(HEADER_TEST_ARCHIVE_SUCCESS,
-                                                                                           archiveName),
+                                                                               archiveName),
                                                                 resolveTextKey(BODY_TEST_ARCHIVE_SUCCESS,
-                                                                                           archiveName),
+                                                                               archiveName),
                                                                 stage
                                                      );
                                                  } else {

@@ -312,7 +312,7 @@ public class ArchiveUtilTest {
         testAddRecentFile_NoOverwrite_Success();
         CountDownLatch latch = new CountDownLatch(1);
 
-        Platform.runLater(()->{
+        JFXUtil.runLater(() -> {
             ArchiveUtil.refreshRecentFileMenu(menuRecent);
             latch.countDown();
         });
@@ -347,7 +347,7 @@ public class ArchiveUtilTest {
 
             CountDownLatch latch = new CountDownLatch(1);
 
-            Platform.runLater(()->{
+            JFXUtil.runLater(() -> {
                 ArchiveUtil.refreshRecentFileMenu(menuRecent);
                 latch.countDown();
             });

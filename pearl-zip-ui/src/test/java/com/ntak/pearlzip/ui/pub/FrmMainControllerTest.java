@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
@@ -70,7 +71,7 @@ public class FrmMainControllerTest {
         } finally {
             latch.await();
             CountDownLatch secondaryLatch = new CountDownLatch(1);
-            Platform.runLater(()->{
+            JFXUtil.runLater(() -> {
                 stage = new Stage();
                 secondaryLatch.countDown();
             });

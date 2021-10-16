@@ -15,7 +15,6 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
@@ -80,11 +79,13 @@ public class BtnDeleteEventHandler implements CheckEventHandler<MouseEvent> {
                             // TITLE: Error: Issue deleting file from archive
                             // HEADER: File could not be removed from the archive
                             // BODY: File %s has not been removed from the archive. The backup of archive has been restored.
-                            Platform.runLater(()-> raiseAlert(Alert.AlertType.ERROR,
+                            JFXUtil.runLater(() -> raiseAlert(Alert.AlertType.ERROR,
                                                               resolveTextKey(TITLE_ISSUE_DELETE_FILE),
                                                               resolveTextKey(HEADER_ISSUE_DELETE_FILE),
-                                                              resolveTextKey(BODY_ISSUE_DELETE_FILE, fileToDelete.getFileName()),
-                                                              fileContentsView.getScene().getWindow())
+                                                              resolveTextKey(BODY_ISSUE_DELETE_FILE,
+                                                                             fileToDelete.getFileName()),
+                                                              fileContentsView.getScene()
+                                                                              .getWindow())
                             );
                             ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
                                                                                 resolveTextKey(LBL_PROGRESS_LOADING),

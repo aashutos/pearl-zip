@@ -6,6 +6,7 @@ package com.ntak.pearlzip.ui.cell;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
@@ -67,7 +68,7 @@ public class AbstractHighlightFileInfoCellCallbackTest {
             firstLatch.await();
         } catch (Exception e) {
             final CountDownLatch secondLatch = new CountDownLatch(1);
-            Platform.runLater(()->{
+            JFXUtil.runLater(() -> {
                 stage = new Stage();
                 tableView = new TableView();
                 scene = new Scene(tableView);

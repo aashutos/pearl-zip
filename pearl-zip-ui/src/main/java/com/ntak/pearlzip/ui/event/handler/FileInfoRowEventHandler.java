@@ -15,7 +15,6 @@ import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -91,7 +90,7 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                 if (ZipState.supportedReadArchives().stream().anyMatch(e -> clickedRow.getFileName().endsWith(String.format(".%s", e)))) {
                     JFXUtil.executeBackgroundProcess(sessionId, thisStage,
                                                      ()-> {
-                                                         Platform.runLater(()->row.setDisable(true));
+                                                         JFXUtil.runLater(() -> row.setDisable(true));
 
                                                          // LOG: An archive which can be extracted...
                                                          LOGGER.debug(resolveTextKey(LOG_ARCHIVE_CAN_EXTRACT));
@@ -120,7 +119,8 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
 
                                                          // Check for any pre-open dialogs then launch and process as
                                                          // necessary
-                                                         checkPreOpenDialog(nestedArchiveReadService, nestedArchiveInfo);
+                                                         checkPreOpenDialog(nestedArchiveReadService,
+                                                                            nestedArchiveInfo);
 
                                                          FXArchiveInfo archiveInfo =
                                                                  new FXArchiveInfo(fxArchiveInfo.getArchiveInfo(),
@@ -129,24 +129,34 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                                                                                    nestedArchiveWriteService,
                                                                                    nestedArchiveInfo,
                                                                                    clickedRow);
-                                                            fxArchiveInfo.getController().get().getWrapper().setDisable(true);
-                                                         Platform.runLater(()->launchMainStage(archiveInfo));
+                                                         fxArchiveInfo.getController()
+                                                                      .get()
+                                                                      .getWrapper()
+                                                                      .setDisable(true);
+                                                         JFXUtil.runLater(() -> launchMainStage(archiveInfo));
 
                                                      },
-                                                     (e)->{
+                                                     (e)-> {
                                                          // LOG: %s occurred on trying to open nested tar ball. Message: %s
-                                                         LOGGER.error(resolveTextKey(LOG_ERR_OPEN_NESTED_TARBALL, e.getClass().getCanonicalName(), e.getMessage()));
+                                                         LOGGER.error(resolveTextKey(LOG_ERR_OPEN_NESTED_TARBALL,
+                                                                                     e.getClass()
+                                                                                      .getCanonicalName(),
+                                                                                     e.getMessage()));
                                                          // TITLE: Error: On extracting tarball
                                                          // HEADER: Issue extracting tarball
                                                          // BODY: An issue occurred on loading tar file: %s
-                                                         Platform.runLater(
-                                                                 ()-> raiseAlert(Alert.AlertType.WARNING,
-                                                                                 resolveTextKey(TITLE_ERR_OPEN_NESTED_TARBALL),
-                                                                                 resolveTextKey(HEADER_ERR_OPEN_NESTED_TARBALL),
-                                                                                 resolveTextKey(BODY_ERR_OPEN_NESTED_TARBALL,
-                                                                                   clickedRow.getFileName()),
-                                                                                 (Exception)e,
-                                                                                 fileContentsView.getScene().getWindow()));
+                                                         JFXUtil.runLater(
+                                                                 () -> raiseAlert(Alert.AlertType.WARNING,
+                                                                                  resolveTextKey(
+                                                                                          TITLE_ERR_OPEN_NESTED_TARBALL),
+                                                                                  resolveTextKey(
+                                                                                          HEADER_ERR_OPEN_NESTED_TARBALL),
+                                                                                  resolveTextKey(
+                                                                                          BODY_ERR_OPEN_NESTED_TARBALL,
+                                                                                          clickedRow.getFileName()),
+                                                                                  (Exception) e,
+                                                                                  fileContentsView.getScene()
+                                                                                                  .getWindow()));
                                                      },
                                                      (s)->{
                                                          final KeyFrame step1 = new KeyFrame(Duration.millis(300),
@@ -164,7 +174,7 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                                                                                              }
                                                          });
                                                          final Timeline timeline = new Timeline(step1);
-                                                         Platform.runLater(timeline::play);
+                                                         JFXUtil.runLater(timeline::play);
                                                      }
                     );
                     return;

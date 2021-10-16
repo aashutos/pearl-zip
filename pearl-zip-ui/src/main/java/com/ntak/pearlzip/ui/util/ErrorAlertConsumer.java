@@ -5,7 +5,6 @@ package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.ErrorMessage;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -32,7 +31,7 @@ public class ErrorAlertConsumer {
                            .findFirst()
                            .orElse(null);
 
-            Platform.runLater(() -> {
+            JFXUtil.runLater(() -> {
                 raiseAlert(
                         Alert.AlertType.ERROR,
                         errorMessage.getTitle(),

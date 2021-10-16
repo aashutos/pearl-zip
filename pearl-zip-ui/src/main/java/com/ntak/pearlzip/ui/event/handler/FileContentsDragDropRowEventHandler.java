@@ -12,7 +12,6 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -84,27 +83,28 @@ public class FileContentsDragDropRowEventHandler implements CheckEventHandler<Dr
                     JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                       ()->{
                           CountDownLatch latch = new CountDownLatch(1);
-                          Platform.runLater(() -> {
-                          int index = fxArchiveInfo.getFiles()
-                                                   .size();
+                          JFXUtil.runLater(() -> {
+                              int index = fxArchiveInfo.getFiles()
+                                                       .size();
 
 
-                          try {
-                              for (File file : db.getFiles()) {
-                                  try {
-                                      if (file.isFile()) {
-                                          // Retrieving metadata for file %s
-                                          DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
-                                                                                              resolveTextKey(LBL_RETRIEVE_FILE_META, file.getAbsolutePath()),
-                                                                                              INDETERMINATE_PROGRESS, 1));
-                                          Path destFile = Paths.get(prefix,
-                                                                    file.toPath()
-                                                                        .getFileName()
-                                                                        .toString());
-                                          FileInfo fileInfo = new FileInfo(index++, depth, destFile.toString(),
-                                                                           -1, 0, 0, null, null, null,
-                                                                           "", "", 0, "",
-                                                                           file.isDirectory(), false,
+                              try {
+                                  for (File file : db.getFiles()) {
+                                      try {
+                                          if (file.isFile()) {
+                                              // Retrieving metadata for file %s
+                                              DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
+                                                                                   resolveTextKey(LBL_RETRIEVE_FILE_META,
+                                                                                                  file.getAbsolutePath()),
+                                                                                   INDETERMINATE_PROGRESS, 1));
+                                              Path destFile = Paths.get(prefix,
+                                                                        file.toPath()
+                                                                            .getFileName()
+                                                                            .toString());
+                                              FileInfo fileInfo = new FileInfo(index++, depth, destFile.toString(),
+                                                                               -1, 0, 0, null, null, null,
+                                                                               "", "", 0, "",
+                                                                               file.isDirectory(), false,
                                                                            Collections.singletonMap(KEY_FILE_PATH,
                                                                                                     file.getAbsoluteFile()
                                                                                                         .toString()));

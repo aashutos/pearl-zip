@@ -12,7 +12,6 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
 import com.ntak.pearlzip.ui.pub.FrmProgressController;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -264,7 +263,7 @@ public class ArchiveUtil {
                                                         writeService,
                                                         archiveInfo,
                                                         null);
-        Platform.runLater(() -> launchMainStage(fxArchiveInfo));
+        JFXUtil.runLater(() -> launchMainStage(fxArchiveInfo));
         addToRecentFile(archive);
     }
 
@@ -284,7 +283,7 @@ public class ArchiveUtil {
 
             checkPreOpenDialog(readService, newFxArchiveInfo.getArchiveInfo());
 
-            Platform.runLater(() -> launchMainStage(newFxArchiveInfo));
+            JFXUtil.runLater(() -> launchMainStage(newFxArchiveInfo));
             addToRecentFile(file);
 
             return true;
@@ -300,7 +299,7 @@ public class ArchiveUtil {
             Node root = optNode.get();
 
             CountDownLatch latch = new CountDownLatch(1);
-            Platform.runLater(()->{
+            JFXUtil.runLater(() -> {
                 Stage preOpenStage = new Stage();
                 JFXUtil.loadPreOpenDialog(preOpenStage, root);
                 latch.countDown();
@@ -377,7 +376,7 @@ public class ArchiveUtil {
             controller.initData(progressStage, latch, callback, sessionId);
             progressStage.initStyle(StageStyle.UNDECORATED);
 
-            Platform.runLater(progressStage::show);
+            JFXUtil.runLater(progressStage::show);
         } catch (Exception e) {
         }
 

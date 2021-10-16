@@ -5,8 +5,8 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.animation.PauseTransition;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -57,10 +57,10 @@ public class FrmProgressController {
     public void consumeUpdate(ProgressMessage message) {
         if (message.type().equals(PROGRESS) && message.sessionId() == sessionId) {
             isStarted = true;
-            Platform.runLater(()-> {
+            JFXUtil.runLater(() -> {
                 lblProgress.setText(message.message());
                 if ((message.completed() / message.total()) >= 0) {
-                    barProgress.setProgress(barProgress.getProgress() + (message.completed()/message.total()));
+                    barProgress.setProgress(barProgress.getProgress() + (message.completed() / message.total()));
                 }
                 if (message.total() == ProgressIndicator.INDETERMINATE_PROGRESS) {
                     barProgress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -69,7 +69,7 @@ public class FrmProgressController {
         }
 
         if (isStarted && message.type().equals(COMPLETED) && message.sessionId() == sessionId) {
-            Platform.runLater(()-> {
+            JFXUtil.runLater(() -> {
                 try {
                     lblProgress.setText(resolveTextKey(LBL_PROGRESS_COMPLETION));
                     barProgress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -77,7 +77,8 @@ public class FrmProgressController {
                 } catch(Exception e) {
                 } finally {
                     PauseTransition delay = new PauseTransition(Duration.millis(100));
-                    delay.setOnFinished((e)->stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+                    delay.setOnFinished((e) -> stage.fireEvent(new WindowEvent(stage,
+                                                                               WindowEvent.WINDOW_CLOSE_REQUEST)));
                     delay.play();
                 }
             });

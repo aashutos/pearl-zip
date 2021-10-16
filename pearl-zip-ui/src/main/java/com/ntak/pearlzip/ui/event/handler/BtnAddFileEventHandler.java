@@ -11,7 +11,6 @@ import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -139,7 +138,7 @@ public class BtnAddFileEventHandler implements CheckEventHandler<ActionEvent> {
                                                  if (!success) {
                                                      restoreBackupArchive(tempArchive,
                                                                           Paths.get(fxArchiveInfo.getArchivePath()));
-                                                     Platform.runLater(fxArchiveInfo::refresh);
+                                                     JFXUtil.runLater(fxArchiveInfo::refresh);
 
                                                      // LOG: Issue adding file %s
                                                      // TITLE: ERROR: Failed to add file to archive
