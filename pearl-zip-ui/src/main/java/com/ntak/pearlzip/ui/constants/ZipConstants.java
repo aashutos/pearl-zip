@@ -38,6 +38,7 @@ public class ZipConstants {
     public static final String CNS_THREAD_POOL_SIZE = "configuration.ntak.pearl-zip.thread-pool-size";
     public static final String CNS_METRIC_FACTORY = "configuration.ntak.pearl-zip.metric-factory";
     public static final String CNS_CONCURRENCY_LOCK_POLL_TIMEOUT = "configuration.ntak.pearl-zip.concurrency.lock-poll-timeout";
+    public static final String CNS_SYSMENU_WINDOW_TEXT = "sysmenu.window.text";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -294,4 +295,6 @@ public class ZipConstants {
     public static Path RUNTIME_MODULE_PATH;
 
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
+
+    public static final String WINDOW_FOCUS_SYMBOL = " • ";
 }

@@ -24,4 +24,6 @@
     <Menu text="%sysmenu.tools.text">
         <MenuItem fx:id="mnuOptions" text="%sysmenu.tools.options.text"/>
     </Menu>
+    <Menu fx:id="mnuWindowWrapper" text="%sysmenu.window.text">
+    </Menu>
 </MenuBar>

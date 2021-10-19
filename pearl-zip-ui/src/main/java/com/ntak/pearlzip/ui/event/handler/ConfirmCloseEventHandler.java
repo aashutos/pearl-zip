@@ -13,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.*;
@@ -196,15 +198,24 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                                                                                             .get()
                                                                                             .getWrapper()
                                                                                             .setDisable(false);
+
+                                                                         // Show parent window
+                                                                         getMainStageByArchivePath(parentFilePath)
+                                                                                 .get()
+                                                                                 .toFront();
                                                                      }
                                                                  }
                                 );
                             } else {
-                                    // Enable parent archive (Handle no reintegration scenario)
-                                    parentFXArchiveInfo.getController()
-                                                       .get()
-                                                       .getWrapper()
-                                                       .setDisable(false);
+                                // Enable parent archive (Handle no reintegration scenario)
+                                parentFXArchiveInfo.getController()
+                                                   .get()
+                                                   .getWrapper()
+                                                   .setDisable(false);
+                                // Show parent window
+                                getMainStageByArchivePath(parentFilePath)
+                                        .get()
+                                        .toFront();
                             }
                         }
                     return;
@@ -254,13 +265,25 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
             // Issue with IO Process when saving down archive %s
             LOGGER.warn(resolveTextKey(LOG_ISSUE_SAVE_ARCHIVE, fxArchiveInfo.getArchivePath()));
         } finally {
+            // Remove window entry
+            synchronized(WINDOW_MENU) {
+                Optional<MenuItem> itemToRemove =
+                        WINDOW_MENU.getItems()
+                                   .stream()
+                                   .filter(m -> m.getText()
+                                                 .contains(fxArchiveInfo.getArchivePath()))
+                                   .findFirst();
+                itemToRemove.ifPresent(m -> WINDOW_MENU.getItems()
+                                                       .remove(m));
+            }
+
             // If there are no other PearlZip instances apart from this open (Last PearlZip instance open)
             if (JFXUtil.getMainStageInstances()
                        .stream()
                        .map(Stage.class::cast)
-                       .filter(s -> s.getTitle() != null && !s.getTitle()
-                                                              .matches(String.format(".*%s$", fxArchiveInfo.getArchivePath())))
-                       .count() == 0) {
+                       .noneMatch(s -> s.getTitle() != null && !s.getTitle()
+                                                                 .matches(String.format(".*%s$",
+                                                                                        fxArchiveInfo.getArchivePath())))) {
                 // Clear up temporary files if on final exit
                 long sessionId = System.currentTimeMillis();
                 executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, true),

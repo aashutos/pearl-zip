@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -173,6 +174,13 @@ public class MacZipLauncher extends Application {
         menuController.initData();
         sysMenu.getMenus()
                .addAll(additionalMenu.getMenus());
+        ResourceConstants.WINDOW_MENU =
+                sysMenu.getMenus()
+                       .stream()
+                       .filter(m -> m.getText()
+                                     .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
+                       .findFirst()
+                       .get();
 
         // Use the menu sysMenu for all stages including new ones
         MENU_TOOLKIT.setAppearanceMode(AppearanceMode.DARK);
