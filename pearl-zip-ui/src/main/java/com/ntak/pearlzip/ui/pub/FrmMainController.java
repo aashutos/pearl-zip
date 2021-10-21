@@ -255,9 +255,7 @@ public class FrmMainController {
                      if (!oldValue && newValue) {
                          synchronized(WINDOW_MENU) {
                              if (!optMenuItem.isPresent()) {
-                                 MenuItem archiveMenuItem = new MenuItem(String.format("%d. %s%s",
-                                                                                       WINDOW_MENU.getItems()
-                                                                                                  .size() + 1,
+                                 MenuItem archiveMenuItem = new MenuItem(String.format("%s%s",
                                                                                        fxArchiveInfo.getArchivePath(),
                                                                                        WINDOW_FOCUS_SYMBOL));
                                  WINDOW_MENU.getItems()
