@@ -47,6 +47,7 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
      *  + Create single file BZip compressor archive from main window
      *  + Open compressor archive and expand nested tarball and test window menu state is as expected
      *    before/after reintegration
+     *  + Close parent archive when nested not closed will yield warning dialog
      */
 
     @BeforeEach
@@ -648,5 +649,49 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                                                          .contains(String.format("%s%s",
                                                                                  archive.toAbsolutePath(), " • "))
                                          ), "Expected archive path not found as active");
+    }
+
+    @Test
+    @DisplayName("Test: Close parent archive when nested not closed will yield warning dialog")
+    public void testFX_OpenCompressorArchive_CloseParentArchive_Warn() throws IOException {
+        // 1. Prepare compressor archive
+        Path srcArchive = Paths.get("src", "test", "resources", "empty.tgz");
+        Path archive = Paths.get(tempDirRoot.toAbsolutePath()
+                                            .toString(), "temp.tar.gz");
+        Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+
+        // Load archive
+        simOpenArchive(this, archive, true, false);
+
+        // 1. Open nested archive
+        final String nestedArchiveName = archive.getFileName()
+                                                .toString()
+                                                .substring(0,
+                                                           archive.getFileName()
+                                                                  .toString()
+                                                                  .lastIndexOf("."));
+
+        TableRow row = PearlZipFXUtil.simTraversalArchive(this,
+                                                          archive.getFileName()
+                                                                 .toString(),
+                                                          "#fileContentsView",
+                                                          (r) -> {},
+                                                          nestedArchiveName)
+                                     .get();
+        sleep(250, MILLISECONDS);
+        doubleClickOn(row);
+
+        // 2. Change window using menu (to parent archive)
+        Assertions.assertTrue(simWindowSelect(this, archive), "Successfully changed window to parent archive");
+
+        // Exit nested archive and save archive into parent archive
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
+        sleep(50, MILLISECONDS);
+        DialogPane dialogPane = lookup(".dialog-pane").query();
+        Assertions.assertTrue(dialogPane.getContentText()
+                                        .startsWith(
+                                                "A nested archive is open, so parent archive will not be closed until it has been reintegrated or disposed of."));
+        clickOn(dialogPane.lookupButton(ButtonType.OK));
+        sleep(250, MILLISECONDS);
     }
 }
