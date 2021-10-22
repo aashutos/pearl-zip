@@ -4,27 +4,27 @@
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.ui.UITestSuite;
+import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import com.ntak.testfx.FormUtil;
 import javafx.geometry.Point2D;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.TableRow;
+import javafx.scene.control.*;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.checkArchiveFileHierarchy;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -38,14 +38,17 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
     private Path outputDir;
 
     /*
-         *  Test cases:
-         *  + Nest tarball into the compressor archive and verify contents is as expected
-         *  + Extract archive contents from nested tarball generates expected files/folders
-         *  + Create single file xz compressor archive
-         *  + Create single file GZip compressor archive
-         *  + Create single file BZip compressor archive
-         *  + Create single file BZip compressor archive from main window
-         */
+     *  Test cases:
+     *  + Nest tarball into the compressor archive and verify contents is as expected
+     *  + Extract archive contents from nested tarball generates expected files/folders
+     *  + Create single file xz compressor archive
+     *  + Create single file GZip compressor archive
+     *  + Create single file BZip compressor archive
+     *  + Create single file BZip compressor archive from main window
+     *  + Open compressor archive and expand nested tarball and test window menu state is as expected
+     *    before/after reintegration
+     *  + Close parent archive when nested not closed will yield warning dialog
+     */
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -519,12 +522,176 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                                                                                             format));
         // Check file is in archive...
         checkArchiveFileHierarchy(this,
-                                  Collections.singletonMap(0,Collections.singletonMap("", List.of("arbitrary-file" +
-                                                                                                          ".txt").toArray(new String[0]))),
+                                  Collections.singletonMap(0, Collections.singletonMap("", List.of("arbitrary-file" +
+                                                                                                           ".txt")
+                                                                                               .toArray(new String[0]))),
                                   pathArchive.toAbsolutePath()
                                              .toString()
         );
 
         Files.deleteIfExists(pathArchive);
+    }
+
+    @Test
+    @DisplayName("Test: Open compressor archive and expand nested tarball and test window menu state is as expected before/after reintegration")
+    public void testFX_OpenCompressorArchive_WindowMenuState_MatchExpectations() throws IOException {
+        // 1. Prepare compressor archive
+        Path srcArchive = Paths.get("src", "test", "resources", "empty.tgz");
+        Path archive = Paths.get(tempDirRoot.toAbsolutePath()
+                                            .toString(), "temp.tar.gz");
+        Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+
+        // Load archive
+        simOpenArchive(this, archive, true, false);
+
+        // Check window menu (incl. active window)
+        Assertions.assertEquals(1,
+                                WINDOW_MENU.getItems()
+                                           .size(),
+                                "Windows menu did not have the expected number of entries");
+        Assertions.assertTrue(WINDOW_MENU.getItems()
+                                         .get(0)
+                                         .getText()
+                                         .contains(String.format("%s%s", archive.toAbsolutePath(), " • ")),
+                              "Expected archive path not found");
+
+        // 2. Open nested archive
+        final String nestedArchiveName = archive.getFileName()
+                                                .toString()
+                                                .substring(0,
+                                                           archive.getFileName()
+                                                                  .toString()
+                                                                  .lastIndexOf("."));
+
+        // Open nested tar archive
+        TableRow row = PearlZipFXUtil.simTraversalArchive(this,
+                                                          archive.getFileName()
+                                                                 .toString(),
+                                                          "#fileContentsView",
+                                                          (r) -> {},
+                                                          nestedArchiveName)
+                                     .get();
+        sleep(250, MILLISECONDS);
+        doubleClickOn(row);
+
+        // Check window menu (incl. active window)
+        Assertions.assertEquals(2,
+                                WINDOW_MENU.getItems()
+                                           .size(),
+                                "Windows menu did not have the expected number of " +
+                                        "entries");
+        sleep(200, MILLISECONDS);
+
+        Assertions.assertTrue(WINDOW_MENU.getItems()
+                                         .stream()
+                                         .anyMatch(s -> s.getText()
+                                                         .contains(String.format("%s%s", nestedArchiveName, " • "))
+                                         ), "Expected archive path not found as active");
+        Assertions.assertTrue(WINDOW_MENU.getItems()
+                                         .stream()
+                                         .anyMatch(s -> s.getText()
+                                                         .contains(String.format("%s",
+                                                                                 archive.toAbsolutePath()))
+                                         ),
+                              "Expected archive path not found");
+        Assertions.assertTrue(JFXUtil.getMainStageInstances()
+                                     .stream()
+                                     .anyMatch(s -> s.isFocused() && s.getTitle()
+                                                                      .contains(nestedArchiveName) && !s.getTitle()
+                                                                                                        .contains(
+                                                                                                                archive.toAbsolutePath()
+                                                                                                                       .toString())),
+                              "Nested tar archive was not focused");
+
+        // 3. Change window using menu (to parent archive)
+        Assertions.assertTrue(simWindowSelect(this, archive), "Successfully changed window to parent archive");
+
+        // Checked focused window
+        Assertions.assertTrue(JFXUtil.getMainStageInstances()
+                                     .stream()
+                                     .anyMatch(s -> s.isFocused() && s.getTitle()
+                                                                      .contains(nestedArchiveName) && s.getTitle()
+                                                                                                       .contains(archive.toAbsolutePath()
+                                                                                                                        .toString())),
+                              "Nested tar archive was not focused");
+
+        // 4. Reintegrate nested archive
+        String nestedArchivePath =
+                WINDOW_MENU.getItems()
+                           .stream()
+                           .map(MenuItem::getText)
+                           .filter(t -> t.startsWith(ZipConstants.LOCAL_TEMP.toAbsolutePath()
+                                                                            .toString()))
+                           .findFirst()
+                           .get();
+        Assertions.assertTrue(simWindowSelect(this, Paths.get(nestedArchivePath)),
+                              "Could not select nested archive");
+
+        // Exit nested archive and save archive into parent archive
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
+        sleep(50, MILLISECONDS);
+        DialogPane dialogPane = lookup(".dialog-pane").query();
+        Assertions.assertTrue(dialogPane.getContentText()
+                                        .startsWith(
+                                                "Please specify if you wish to persist the changes of the nested archive"));
+        clickOn(dialogPane.lookupButton(ButtonType.YES));
+        sleep(250, MILLISECONDS);
+
+        // Check window menu (incl. active window)
+        Assertions.assertEquals(1,
+                                WINDOW_MENU.getItems()
+                                           .size(),
+                                "Windows menu did not have the expected number of " +
+                                        "entries");
+        Assertions.assertTrue(WINDOW_MENU.getItems()
+                                         .stream()
+                                         .anyMatch(s -> s.getText()
+                                                         .contains(String.format("%s%s",
+                                                                                 archive.toAbsolutePath(), " • "))
+                                         ), "Expected archive path not found as active");
+    }
+
+    @Test
+    @DisplayName("Test: Close parent archive when nested not closed will yield warning dialog")
+    public void testFX_OpenCompressorArchive_CloseParentArchive_Warn() throws IOException {
+        // 1. Prepare compressor archive
+        Path srcArchive = Paths.get("src", "test", "resources", "empty.tgz");
+        Path archive = Paths.get(tempDirRoot.toAbsolutePath()
+                                            .toString(), "temp.tar.gz");
+        Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+
+        // Load archive
+        simOpenArchive(this, archive, true, false);
+
+        // 1. Open nested archive
+        final String nestedArchiveName = archive.getFileName()
+                                                .toString()
+                                                .substring(0,
+                                                           archive.getFileName()
+                                                                  .toString()
+                                                                  .lastIndexOf("."));
+
+        TableRow row = PearlZipFXUtil.simTraversalArchive(this,
+                                                          archive.getFileName()
+                                                                 .toString(),
+                                                          "#fileContentsView",
+                                                          (r) -> {},
+                                                          nestedArchiveName)
+                                     .get();
+        sleep(250, MILLISECONDS);
+        doubleClickOn(row);
+
+        // 2. Change window using menu (to parent archive)
+        Assertions.assertTrue(simWindowSelect(this, archive), "Successfully changed window to parent archive");
+
+        // Exit nested archive and save archive into parent archive
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
+        sleep(50, MILLISECONDS);
+        DialogPane dialogPane = lookup(".dialog-pane").query();
+        Assertions.assertTrue(dialogPane.getContentText()
+                                        .startsWith(
+                                                "A nested archive is open, so parent archive will not be closed until it has been reintegrated or disposed of."));
+        clickOn(dialogPane.lookupButton(ButtonType.OK));
+        sleep(250, MILLISECONDS);
     }
 }

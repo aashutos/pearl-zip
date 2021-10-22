@@ -38,6 +38,7 @@ public class ZipConstants {
     public static final String CNS_THREAD_POOL_SIZE = "configuration.ntak.pearl-zip.thread-pool-size";
     public static final String CNS_METRIC_FACTORY = "configuration.ntak.pearl-zip.metric-factory";
     public static final String CNS_CONCURRENCY_LOCK_POLL_TIMEOUT = "configuration.ntak.pearl-zip.concurrency.lock-poll-timeout";
+    public static final String CNS_SYSMENU_WINDOW_TEXT = "sysmenu.window.text";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -249,6 +250,10 @@ public class ZipConstants {
     public static final String HEADER_ISSUE_ADD_DRAG_DROP = "header.ntak.pearl-zip.issue-add-drag-drop";
     public static final String BODY_ISSUE_ADD_DRAG_DROP = "body.ntak.pearl-zip.issue-add-drag-drop";
 
+    public static final String LOGGING_ARCHIVE_CANNOT_CLOSE = "logging.ntak.pearl-zip.archive-cannot-close";
+    public static final String TITLE_ARCHIVE_CANNOT_CLOSE = "title.ntak.pearl-zip.archive-cannot-close";
+    public static final String BODY_ARCHIVE_CANNOT_CLOSE = "body.ntak.pearl-zip.archive-cannot-close";
+
     public static final String LOG_INVALID_ARCHIVE_SETUP = "logging.ntak.pearl-zip.invalid-archive-setup";
 
     public static final String LOG_ISSUE_SAVE_ARCHIVE = "logging.ntak.pearl-zip.issue-save-archive";
@@ -294,4 +299,6 @@ public class ZipConstants {
     public static Path RUNTIME_MODULE_PATH;
 
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
+
+    public static final String WINDOW_FOCUS_SYMBOL = " • ";
 }

@@ -6,6 +6,7 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -47,8 +48,7 @@ import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTI
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -496,20 +496,31 @@ public class PearlZipFXUtil {
         aboutStage.initStyle(StageStyle.UNDECORATED);
 
         sysMenu.setUseSystemMenuBar(true);
-        sysMenu.getMenus().add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
+        sysMenu.getMenus()
+               .add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
 
         // Add some more Menus...
         FXMLLoader menuLoader = new FXMLLoader();
-        menuLoader.setLocation(MacZipLauncher.class.getClassLoader().getResource("sysmenu.fxml"));
+        menuLoader.setLocation(MacZipLauncher.class.getClassLoader()
+                                                   .getResource("sysmenu.fxml"));
         menuLoader.setResources(LOG_BUNDLE);
         MenuBar additionalMenu = menuLoader.load();
         SysMenuController menuController = menuLoader.getController();
         menuController.initData();
-        sysMenu.getMenus().addAll(additionalMenu.getMenus());
+        sysMenu.getMenus()
+               .addAll(additionalMenu.getMenus());
         sysMenu.setId("MenuBar");
 
         // Use the menu sysMenu for all stages including new ones
         MENU_TOOLKIT.setGlobalMenuBar(sysMenu);
+
+        // Set Windows menu variable...
+        WINDOW_MENU = sysMenu.getMenus()
+                             .stream()
+                             .filter(m -> m.getText()
+                                           .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
+                             .findFirst()
+                             .get();
     }
 
     private static FXArchiveInfo initFxArchiveInfo(Path archive) throws IOException {
@@ -544,11 +555,37 @@ public class PearlZipFXUtil {
             Map<String,String[]>... expectations) {
         Map<Integer,Map<String,String[]>> expectationMap = new HashMap<>();
 
-        expectationMap.put(0,Collections.singletonMap("",rootExpectation));
+        expectationMap.put(0, Collections.singletonMap("", rootExpectation));
         for (int i = 0; i < expectations.length; i++) {
-            expectationMap.put(i+1, expectations[i]);
+            expectationMap.put(i + 1, expectations[i]);
         }
 
         return expectationMap;
+    }
+
+    public static boolean simWindowSelect(FxRobot robot, Path archive) {
+        int index =
+                WINDOW_MENU.getItems()
+                           .stream()
+                           .map(MenuItem::getText)
+                           .collect(Collectors.toList())
+                           .indexOf(WINDOW_MENU.getItems()
+                                               .stream()
+                                               .map(MenuItem::getText)
+                                               .filter(s -> s.contains(
+                                                       archive.toAbsolutePath()
+                                                              .toString()))
+                                               .findFirst()
+                                               .orElse(""));
+        if (index >= 0) {
+            robot.clickOn(200, 0)
+                 .sleep(100, MILLISECONDS)
+                 .clickOn(200,
+                          ((1 + index) * 30));
+            robot.sleep(250, MILLISECONDS);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -107,9 +107,21 @@ public class JFXUtil {
         return Stage.getWindows()
                     .stream()
                     .map(Stage.class::cast)
-                    .filter(s -> s.isShowing() && Optional.ofNullable(s.getTitle()).orElse("")
-                                                   .matches(resolveTextKey(TITLE_FILE_PATTERN, ".*", ".*", ".*")))
+                    .filter(s -> s.isShowing() && Optional.ofNullable(s.getTitle())
+                                                          .orElse("")
+                                                          .matches(resolveTextKey(TITLE_FILE_PATTERN,
+                                                                                  ".*",
+                                                                                  ".*",
+                                                                                  ".*")))
                     .collect(Collectors.toList());
+    }
+
+    public static Optional<Stage> getMainStageByArchivePath(String archivePath) {
+        return getMainStageInstances()
+                .stream()
+                .filter(m -> m.getTitle()
+                              .contains(archivePath))
+                .findFirst();
     }
 
     public static void refreshFileView(TableView<FileInfo> fileInfoTableView, FXArchiveInfo fxArchiveInfo, int depth,

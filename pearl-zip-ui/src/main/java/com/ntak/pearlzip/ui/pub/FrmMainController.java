@@ -8,6 +8,7 @@ import com.ntak.pearlzip.ui.cell.*;
 import com.ntak.pearlzip.ui.event.handler.*;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,12 +26,11 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.BODY_NO_COMPRESSOR_WRITE_SERVICES;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.TITLE_NO_COMPRESSOR_WRITE_SERVICES;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
-import static com.ntak.pearlzip.ui.util.JFXUtil.getActiveStage;
-import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 
 /**
  *  Controller for the Main display dialog.
@@ -195,31 +195,92 @@ public class FrmMainController {
 
             btnCopy.getItems().stream().filter(m -> m.getId().equals("mnuCopySelected")).forEach(m -> m.setOnAction(new BtnCopySelectedEventHandler(
                     fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
-            btnCopy.getItems().stream().filter(m -> m.getId().equals("mnuCancelCopy")).forEach(m -> m.setOnAction(new BtnCancelEventHandler(
-                    fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
+            btnCopy.getItems()
+                   .stream()
+                   .filter(m -> m.getId()
+                                 .equals("mnuCancelCopy"))
+                   .forEach(m -> m.setOnAction(new BtnCancelEventHandler(
+                           fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
 
-            btnMove.getItems().stream().filter(m -> m.getId().equals("mnuMoveSelected")).forEach(m -> m.setOnAction(new BtnMoveSelectedEventHandler(
-                    fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
-            btnMove.getItems().stream().filter(m -> m.getId().equals("mnuCancelMove")).forEach(m -> m.setOnAction(new BtnCancelEventHandler(
-                    fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
+            btnMove.getItems()
+                   .stream()
+                   .filter(m -> m.getId()
+                                 .equals("mnuMoveSelected"))
+                   .forEach(m -> m.setOnAction(new BtnMoveSelectedEventHandler(
+                           fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
+            btnMove.getItems()
+                   .stream()
+                   .filter(m -> m.getId()
+                                 .equals("mnuCancelMove"))
+                   .forEach(m -> m.setOnAction(new BtnCancelEventHandler(
+                           fileContentsView, btnCopy, btnMove, btnDelete, fxArchiveInfo)));
 
             btnTest.setOnMouseClicked(new BtnTestEventHandler(stage, fxArchiveInfo));
 
-            btnExtract.getItems().stream().filter(m -> m.getId().equals("mnuExtractSelectedFile")).forEach(m -> m.setOnAction(new BtnExtractFileEventHandler(
-                                                                                             fileContentsView, fxArchiveInfo)));
-            btnExtract.getItems().stream().filter(m -> m.getId().equals("mnuExtractAll")).forEach(m -> m.setOnAction(new BtnExtractAllEventHandler(fileContentsView, fxArchiveInfo)));
+            btnExtract.getItems()
+                      .stream()
+                      .filter(m -> m.getId()
+                                    .equals("mnuExtractSelectedFile"))
+                      .forEach(m -> m.setOnAction(new BtnExtractFileEventHandler(
+                              fileContentsView, fxArchiveInfo)));
+            btnExtract.getItems()
+                      .stream()
+                      .filter(m -> m.getId()
+                                    .equals("mnuExtractAll"))
+                      .forEach(m -> m.setOnAction(new BtnExtractAllEventHandler(fileContentsView, fxArchiveInfo)));
 
             btnDelete.setOnMouseClicked(new BtnDeleteEventHandler(fileContentsView, fxArchiveInfo));
             btnInfo.setOnMouseClicked(new BtnFileInfoEventHandler(fileContentsView, fxArchiveInfo));
             btnUp.setOnMouseClicked(new BtnUpEventHandler(fileContentsView, fxArchiveInfo, btnUp));
 
-            if (ZipState.getCompressorArchives().contains(fxArchiveInfo.getArchivePath().substring(fxArchiveInfo.getArchivePath().lastIndexOf(".")+1))) {
+            if (ZipState.getCompressorArchives()
+                        .contains(fxArchiveInfo.getArchivePath()
+                                               .substring(fxArchiveInfo.getArchivePath()
+                                                                       .lastIndexOf(".") + 1))) {
                 btnAdd.setDisable(true);
                 btnCopy.setDisable(true);
                 btnMove.setDisable(true);
                 btnDelete.setDisable(true);
             }
 
+            stage.focusedProperty()
+                 .addListener((ObservableValue<? extends Boolean> observable,
+                                      Boolean oldValue,
+                                      Boolean newValue) -> {
+                     final Optional<MenuItem> optMenuItem = WINDOW_MENU.getItems()
+                                                                       .stream()
+                                                                       .filter(m -> m.getText()
+                                                                                     .contains(fxArchiveInfo.getArchivePath()))
+                                                                       .findFirst();
+                     if (!oldValue && newValue) {
+                         synchronized(WINDOW_MENU) {
+                             if (!optMenuItem.isPresent()) {
+                                 MenuItem archiveMenuItem = new MenuItem(String.format("%s%s",
+                                                                                       fxArchiveInfo.getArchivePath(),
+                                                                                       WINDOW_FOCUS_SYMBOL));
+                                 WINDOW_MENU.getItems()
+                                            .add(archiveMenuItem);
+                                 archiveMenuItem.setOnAction(e -> getMainStageByArchivePath(fxArchiveInfo.getArchivePath())
+                                         .get()
+                                         .toFront());
+                             } else {
+                                 optMenuItem.get()
+                                            .setText(String.format("%s%s",
+                                                                   optMenuItem.get()
+                                                                              .getText(),
+                                                                   WINDOW_FOCUS_SYMBOL));
+                             }
+                         }
+                     }
+
+                     if (oldValue && !newValue) {
+                         synchronized(WINDOW_MENU) {
+                             optMenuItem.ifPresent(m -> m.setText(String.format(m.getText()
+                                                                                 .replaceAll(WINDOW_FOCUS_SYMBOL
+                                                                                         , ""))));
+                         }
+                     }
+                 });
             stage.setOnCloseRequest(new ConfirmCloseEventHandler(stage, fxArchiveInfo));
         }
     }
