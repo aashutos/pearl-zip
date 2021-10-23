@@ -56,7 +56,11 @@ public class DeleteInArchiveTestFX extends AbstractPearlZipTestFX {
         for (Path dir :
                 Files.list(dir.getParent().getParent()).filter(p->p.getFileName().toString().startsWith("pz")).collect(
                         Collectors.toList())) {
-            UITestSuite.clearDirectory(dir);
+            try {
+                UITestSuite.clearDirectory(dir);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
