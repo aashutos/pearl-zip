@@ -15,12 +15,18 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,6 +46,7 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTI
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.ModuleUtil.loadModuleFromExtensionPackage;
 
 /**
  *  Controller for the Options dialog.
@@ -74,6 +81,10 @@ public class FrmOptionsController {
     private TableColumn<Pair<Boolean,ArchiveService>,Pair<Boolean,ArchiveService>> writeCapability;
     @FXML
     private TableColumn<Pair<Boolean,ArchiveService>,String> supportedFormat;
+
+    ///// Load Plugin Properties /////
+    @FXML
+    private Pane paneDropArea;
 
     @FXML
     private Button btnOk;
@@ -236,12 +247,69 @@ public class FrmOptionsController {
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         });
 
-        btnCancel.setOnMouseClicked(e->{
+        btnCancel.setOnMouseClicked(e -> {
             synchronized(CURRENT_SETTINGS) {
                 WORKING_SETTINGS.clear();
                 WORKING_SETTINGS.putAll(CURRENT_SETTINGS);
             }
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        });
+
+        paneDropArea.setOnDragOver(e -> e.acceptTransferModes(TransferMode.COPY));
+        paneDropArea.setOnDragDropped(e -> {
+            Dragboard db = e.getDragboard();
+            if (db.hasFiles()) {
+                List<File> pzaxArchives =
+                        db.getFiles()
+                          .stream()
+                          .filter(f -> f.isFile() && f.getName()
+                                                      .endsWith(".pzax"))
+                          .collect(Collectors.toList());
+
+                for (File pzaxArchive : pzaxArchives) {
+                    // TITLE: Confirm installation of Pearl Zip Extension
+                    // HEADER: New pzax installation file has been detected
+                    // CONFIRM: Please confirm whether you wish to install the pzax extension: %s
+                    Optional<ButtonType> response = raiseAlert(Alert.AlertType.CONFIRMATION,
+                                                               resolveTextKey(TITLE_CONFIRM_INSTALL_EXTENSION),
+                                                               resolveTextKey(HEADER_CONFIRM_INSTALL_EXTENSION),
+                                                               resolveTextKey(BODY_CONFIRM_INSTALL_EXTENSION,
+                                                                              pzaxArchive),
+                                                               null, stage,
+                                                               ButtonType.YES, ButtonType.NO);
+
+                    if (response.isPresent() && response.get()
+                                                        .equals(ButtonType.YES)) {
+                        loadModuleFromExtensionPackage(pzaxArchive.toPath());
+                    }
+                }
+            }
+        });
+        paneDropArea.setOnMouseClicked((e) -> {
+            try {
+                if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+                    stage.setAlwaysOnTop(false);
+
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle(resolveTextKey(TITLE_SELECT_INSTALL_EXTENSION));
+                    fileChooser.getExtensionFilters()
+                               .add(new FileChooser.ExtensionFilter("PearlZip Extensions (*.pzax)",
+                                                                    "pzax"));
+                    File pzaxArchive = fileChooser.showOpenDialog(new Stage());
+                    if (Objects.nonNull(pzaxArchive)) {
+                        try {
+                            ((Stage) tabPaneOptions.getScene()
+                                                   .getWindow()).setAlwaysOnTop(false);
+                            loadModuleFromExtensionPackage(pzaxArchive.toPath());
+                        } finally {
+                            ((Stage) tabPaneOptions.getScene()
+                                                   .getWindow()).setAlwaysOnTop(true);
+                        }
+                    }
+                }
+            } finally {
+                stage.setAlwaysOnTop(true);
+            }
         });
     }
 }

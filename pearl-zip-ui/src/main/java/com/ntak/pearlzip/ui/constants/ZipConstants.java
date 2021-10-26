@@ -234,10 +234,24 @@ public class ZipConstants {
     public static final String HEADER_FILE_NOT_UNIQUE = "header.ntak.pearl-zip.file-not-unique";
     public static final String BODY_FILE_NOT_UNIQUE = "body.ntak.pearl-zip.file-not-unique";
 
+    // License denied
+    public static final String TITLE_LICENSE_DENIED = "title.ntak.pearl-zip.license-denied";
+    public static final String BODY_LICENSE_DENIED = "body.ntak.pearl-zip.license-denied";
+
+    // Installed library
+    public static final String TITLE_LIB_INSTALLED = "title.ntak.pearl-zip.lib-installed";
+    public static final String BODY_LIB_INSTALLED = "body.ntak.pearl-zip.lib-installed";
+
     // Clear cache confirmation
     public static final String TITLE_CLEAR_CACHE = "title.ntak.pearl-zip.clear-cache";
     public static final String HEADER_CLEAR_CACHE = "header.ntak.pearl-zip.clear-cache";
     public static final String BODY_CLEAR_CACHE = "body.ntak.pearl-zip.clear-cache";
+
+    // Issue loading library
+    public static final String LOG_ISSUE_LOAD_LIB = "logging.ntak.pearl-zip.issue-load-lib";
+    public static final String TITLE_ISSUE_LOAD_LIB = "title.ntak.pearl-zip.issue-load-lib";
+    public static final String HEADER_ISSUE_LOAD_LIB = "header.ntak.pearl-zip.issue-load-lib";
+    public static final String BODY_ISSUE_LOAD_LIB = "body.ntak.pearl-zip.issue-load-lib";
 
     public static final String TITLE_NO_COMPRESSOR_WRITE_SERVICES = "title.ntak.pearl-zip.no-compressor-write-services";
     public static final String BODY_NO_COMPRESSOR_WRITE_SERVICES = "body.ntak.pearl-zip.no-compressor-write-services";
@@ -254,9 +268,17 @@ public class ZipConstants {
     public static final String TITLE_ARCHIVE_CANNOT_CLOSE = "title.ntak.pearl-zip.archive-cannot-close";
     public static final String BODY_ARCHIVE_CANNOT_CLOSE = "body.ntak.pearl-zip.archive-cannot-close";
 
+    // Confirm pzax extension installation
+    public static final String TITLE_CONFIRM_INSTALL_EXTENSION = "title.ntak.pearl-zip.confirm-install-extension";
+    public static final String HEADER_CONFIRM_INSTALL_EXTENSION = "header.ntak.pearl-zip.confirm-install-extension";
+    public static final String BODY_CONFIRM_INSTALL_EXTENSION = "body.ntak.pearl-zip.confirm-install-extension";
+
     public static final String LOG_INVALID_ARCHIVE_SETUP = "logging.ntak.pearl-zip.invalid-archive-setup";
 
     public static final String LOG_ISSUE_SAVE_ARCHIVE = "logging.ntak.pearl-zip.issue-save-archive";
+
+    public static final String LOG_REQUIRED_LICENSE_FILE_NOT_EXIST = "logging.ntak.pearl-zip.required-license-not-exist";
+    public static final String LOG_HASH_INTEGRITY_FAILURE = "logging.ntak.pearl-zip.hash-integrity-failure";
 
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
@@ -270,6 +292,7 @@ public class ZipConstants {
     public static final String TITLE_TARGET_ARCHIVE_LOCATION = "title.ntak.pearl-zip.target-archive-location";
     public static final String TITLE_SOURCE_DIR_LOCATION = "title.ntak.pearl-zip.source-dir-location";
     public static final String TITLE_TARGET_DIR_LOCATION = "title.ntak.pearl-zip.target-dir-location";
+    public static final String TITLE_SELECT_INSTALL_EXTENSION = "title.ntak.pearl-zip.select-install-extension";
 
     public static final String LBL_ARCHIVE_EXT_TYPE_PATTERN = "label.ntak.pearl-zip.archive-ext-type-pattern";
     public static final String LBL_BUTTON_MOVE = "label.ntak.pearl-zip.button.move";
@@ -283,6 +306,7 @@ public class ZipConstants {
     public static final String LBL_CLEAR_UP_OS_TEMP = "label.ntak.pearl-zip.clear-up-os-temp";
     public static final String LBL_SKIP_OS_TEMP_CLEAN = "label.ntak.pearl-zip.skip-os-temp-clean";
     public static final String LBL_CLEAR_UP_RECENTS = "label.ntak.pearl-zip.clear-up-recents";
+
     public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
 
     public static MacZipLauncher APP;

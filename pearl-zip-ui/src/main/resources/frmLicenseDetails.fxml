@@ -4,10 +4,17 @@
   ~ Copyright © 2021 92AK
   -->
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.web.WebView?>
-<AnchorPane prefHeight="575.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController">
-   <children>
-      <WebView fx:id="webLicense" prefHeight="575.0" prefWidth="600.0" />
-   </children>
+<AnchorPane fx:id="pane" prefHeight="573.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController">
+    <WebView fx:id="webLicense" prefHeight="573.0" prefWidth="600.0"/>
+    <ToolBar fx:id="tbBottom" prefHeight="40.0" prefWidth="600.0" visible="false">
+        <Button fx:id="btnAccept" contentDisplay="CENTER" disable="true" mnemonicParsing="false"
+                text="%license-details.accept.text" textAlignment="CENTER"/>
+        <Button fx:id="btnDecline" contentDisplay="CENTER" layoutX="10.0" layoutY="11.0" mnemonicParsing="false"
+                text="%license-details.decline.text" textAlignment="CENTER"/>
+    </ToolBar>
 </AnchorPane>

@@ -7,8 +7,11 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
+import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
+import com.ntak.pearlzip.ui.pub.ZipLauncher;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -18,6 +21,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -25,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -235,5 +241,40 @@ public class JFXUtil {
         } else {
             Platform.runLater(runnable);
         }
+    }
+
+    public static FrmLicenseDetailsController loadLicenseDetails(String licensePath, String content,
+            boolean withAcceptDecline) throws IOException {
+        Stage licDetailsStage = new Stage();
+
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(ZipLauncher.class.getClassLoader()
+                                            .getResource("frmLicenseDetails.fxml"));
+        loader.setResources(LOG_BUNDLE);
+        AnchorPane root = loader.load();
+
+        FrmLicenseDetailsController controller = loader.getController();
+        controller.initData(licDetailsStage, content, withAcceptDecline);
+
+        Scene scene = new Scene(root);
+        // License Details : %s
+        licDetailsStage.setTitle(resolveTextKey(TITLE_LICENSE_DETAILS, licensePath));
+        licDetailsStage.setScene(scene);
+        licDetailsStage.setResizable(false);
+
+        licDetailsStage.initModality(Modality.APPLICATION_MODAL);
+        licDetailsStage.setAlwaysOnTop(true);
+        licDetailsStage.showAndWait();
+
+        return controller;
+    }
+
+    public static void checkWebEngineScrollToBottom(WebEngine engine, Consumer<Boolean> callback) {
+        int scrollY = (Integer) engine.executeScript("window.scrollY");
+        int innerHeight = (Integer) engine.executeScript("window.innerHeight");
+        int scrollHeight = (Integer) engine.executeScript("document.documentElement.scrollHeight");
+        int offsetHeight = (Integer) engine.executeScript("document.documentElement.offsetHeight");
+        boolean isScrollBottom = scrollY + innerHeight + (innerHeight * (innerHeight / offsetHeight)) >= scrollHeight;
+        callback.accept(isScrollBottom);
     }
 }
