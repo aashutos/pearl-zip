@@ -294,7 +294,7 @@ public class FrmOptionsController {
                     fileChooser.setTitle(resolveTextKey(TITLE_SELECT_INSTALL_EXTENSION));
                     fileChooser.getExtensionFilters()
                                .add(new FileChooser.ExtensionFilter("PearlZip Extensions (*.pzax)",
-                                                                    "pzax"));
+                                                                    "*.pzax"));
                     File pzaxArchive = fileChooser.showOpenDialog(new Stage());
                     if (Objects.nonNull(pzaxArchive)) {
                         try {
