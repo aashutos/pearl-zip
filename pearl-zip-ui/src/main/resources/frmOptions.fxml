@@ -43,7 +43,7 @@
                 </TableView>
             </AnchorPane>
         </Tab>
-        <Tab fx:id="tblPluginLoader" text="%options.plugin-loader.text">
+        <Tab fx:id="tabPluginLoader" text="%options.plugin-loader.text">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <Pane fx:id="paneDropArea" layoutX="14.0" layoutY="73.0" prefHeight="246.0" prefWidth="398.0"
                       style="-fx-border-color: black; -fx-background-image: url('drop-area.png');"/>
