@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
 
 public class ModuleUtilTest {
@@ -39,6 +41,11 @@ public class ModuleUtilTest {
     @BeforeEach
     public void setUp() throws IOException, NoSuchAlgorithmException, InterruptedException {
         try {
+            System.setProperty(CNS_RES_BUNDLE, "pearlzip-ui");
+            LOG_BUNDLE.keySet()
+                      .forEach(k -> System.out.println(String.format("Property: (k=%s,v=%s)",
+                                                                     k,
+                                                                     LOG_BUNDLE.getString(k))));
             Platform.startup(() -> latch.countDown());
         } catch(Exception e) {
             latch.countDown();
