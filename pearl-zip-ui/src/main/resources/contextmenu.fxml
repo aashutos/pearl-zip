@@ -5,13 +5,14 @@
   -->
 
 <?import javafx.scene.control.*?>
-<ContextMenu fx:id="ctxMenu" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.ContextMenuController">
-  <items>
-      <MenuItem fx:id="mnuPeek" mnemonicParsing="false" text="%ctxMenu.peek.text" />
-      <MenuItem fx:id="mnuExtract" mnemonicParsing="false" text="%ctxMenu.extract.text" />
-      <MenuItem fx:id="mnuCopy" mnemonicParsing="false" text="%ctxMenu.copy.text" />
-      <MenuItem fx:id="mnuMove" mnemonicParsing="false" text="%ctxMenu.move.text" />
-      <MenuItem fx:id="mnuDelete" mnemonicParsing="false" text="%ctxMenu.delete.text" />
-      <MenuItem fx:id="mnuFileInfo" mnemonicParsing="false" text="%ctxMenu.info.text" />
-  </items>
+<ContextMenu fx:id="ctxMenu" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+             fx:controller="com.ntak.pearlzip.ui.pub.ContextMenuController">
+    <items>
+        <MenuItem fx:id="mnuPeek" mnemonicParsing="false" text="%ctxMenu.peek.text"/>
+        <MenuItem fx:id="mnuExtract" mnemonicParsing="false" text="%ctxMenu.extract.text"/>
+        <MenuItem fx:id="mnuCopy" mnemonicParsing="false" text="%ctxMenu.copy.text"/>
+        <MenuItem fx:id="mnuMove" mnemonicParsing="false" text="%ctxMenu.move.text"/>
+        <MenuItem fx:id="mnuDelete" mnemonicParsing="false" text="%ctxMenu.delete.text"/>
+        <MenuItem fx:id="mnuFileInfo" mnemonicParsing="false" text="%ctxMenu.info.text"/>
+    </items>
 </ContextMenu>

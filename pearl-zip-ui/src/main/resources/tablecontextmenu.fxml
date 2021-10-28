@@ -5,11 +5,12 @@
   -->
 
 <?import javafx.scene.control.*?>
-<ContextMenu fx:id="tblCtxMenu" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.TableContextMenuController">
-  <items>
-      <MenuItem fx:id="mnuPaste" mnemonicParsing="false" text="%tblCtxMenu.paste.text" />
-      <MenuItem fx:id="mnuDrop" mnemonicParsing="false" text="%tblCtxMenu.drop.text" />
-      <MenuItem fx:id="mnuAddFile" mnemonicParsing="false" text="%tblCtxMenu.add-file.text" />
-      <MenuItem fx:id="mnuAddDir" mnemonicParsing="false" text="%tblCtxMenu.add-dir.text" />
-  </items>
+<ContextMenu fx:id="tblCtxMenu" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+             fx:controller="com.ntak.pearlzip.ui.pub.TableContextMenuController">
+    <items>
+        <MenuItem fx:id="mnuPaste" mnemonicParsing="false" text="%tblCtxMenu.paste.text"/>
+        <MenuItem fx:id="mnuDrop" mnemonicParsing="false" text="%tblCtxMenu.drop.text"/>
+        <MenuItem fx:id="mnuAddFile" mnemonicParsing="false" text="%tblCtxMenu.add-file.text"/>
+        <MenuItem fx:id="mnuAddDir" mnemonicParsing="false" text="%tblCtxMenu.add-dir.text"/>
+    </items>
 </ContextMenu>
