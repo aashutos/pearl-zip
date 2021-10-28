@@ -6,17 +6,15 @@ package com.ntak.pearlzip.ui.pub;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.license.model.LicenseInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
@@ -107,26 +104,7 @@ public class FrmLicenseOverviewController {
                                   .map(l -> info.licenseFile().endsWith("txt") ? String.format("%s<br/>", l) : l)
                                   .forEach(sb::append);
                             }
-                            Stage licDetailsStage = new Stage();
-
-                            FXMLLoader loader = new FXMLLoader();
-                            loader.setLocation(ZipLauncher.class.getClassLoader()
-                                                                .getResource("frmLicenseDetails.fxml"));
-                            loader.setResources(LOG_BUNDLE);
-                            AnchorPane root = loader.load();
-
-                            FrmLicenseDetailsController controller = loader.getController();
-                            controller.initData(sb.toString());
-
-                            Scene scene = new Scene(root);
-                            // License Details : %s
-                            licDetailsStage.setTitle(resolveTextKey(TITLE_LICENSE_DETAILS, info.licenseFile()));
-                            licDetailsStage.setScene(scene);
-                            licDetailsStage.setResizable(false);
-
-                            licDetailsStage.show();
-                            licDetailsStage.setAlwaysOnTop(true);
-                            licDetailsStage.setAlwaysOnTop(false);
+                            JFXUtil.loadLicenseDetails(info.licenseFile(), sb.toString(), false);
                         }
                     }
                 } catch (Exception exc) {

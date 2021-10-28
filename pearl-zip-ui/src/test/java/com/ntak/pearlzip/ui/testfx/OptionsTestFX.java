@@ -10,6 +10,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
@@ -17,6 +18,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -37,6 +41,8 @@ import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
+import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class OptionsTestFX extends AbstractPearlZipTestFX {
@@ -49,20 +55,26 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
      *  + Clear cache with a saved archive. All temp files are removed
      *  + Check reserved keys in Bootstrap properties are as expected
      *  + Check the expected providers have been loaded
+     *  + Load pzax package successfully
      */
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
         ZipConstants.STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
         System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
+        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
+                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
+        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
+                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
         ZipConstants.LOCAL_TEMP =
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "temp");
+        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                      .toString(), "temp");
 
         Files.list(STORE_TEMP)
              .filter(Files::isRegularFile)
-             .forEach(f-> {
+             .forEach(f -> {
                  try {
                      Files.deleteIfExists(f);
                  } catch(IOException e) {
@@ -250,8 +262,144 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         List<Pair<Boolean,ArchiveService>> props = propsGrid.getItems();
 
         // Validate expected services
-        Assertions.assertTrue(props.stream().map(Pair::getValue).anyMatch(s->s instanceof ArchiveReadService && s.getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService")), "No 7-Zip Read Service");
-        Assertions.assertTrue(props.stream().map(Pair::getValue).anyMatch(s->s instanceof ArchiveReadService && s.getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService")), "No Apache Read Service");
-        Assertions.assertTrue(props.stream().map(Pair::getValue).anyMatch(s->s instanceof ArchiveWriteService && s.getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService")), "No Write Service");
+        Assertions.assertTrue(props.stream()
+                                   .map(Pair::getValue)
+                                   .anyMatch(s -> s instanceof ArchiveReadService && s.getClass()
+                                                                                      .getCanonicalName()
+                                                                                      .equals("com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService")),
+                              "No 7-Zip Read Service");
+        Assertions.assertTrue(props.stream()
+                                   .map(Pair::getValue)
+                                   .anyMatch(s -> s instanceof ArchiveReadService && s.getClass()
+                                                                                      .getCanonicalName()
+                                                                                      .equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService")),
+                              "No Apache Read Service");
+        Assertions.assertTrue(props.stream()
+                                   .map(Pair::getValue)
+                                   .anyMatch(s -> s instanceof ArchiveWriteService && s.getClass()
+                                                                                       .getCanonicalName()
+                                                                                       .equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService")),
+                              "No Write Service");
+    }
+
+    @Test
+    @DisplayName("Test: Load PZAX package successfully")
+    public void testFX_LoadPZAXPackage_Success() throws IOException {
+        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                .toString(), "providers");
+
+        // Back up existing libraries
+        Files.list(providersDir)
+             .filter(f -> f.getFileName()
+                           .toString()
+                           .matches("pearl-zip-archive-zip4j-.*.jar") || f.getFileName()
+                                                                          .toString()
+                                                                          .matches("zip4j-.*.jar"))
+             .collect(Collectors.toList())
+             .forEach(p -> {
+                 try {
+                     Files.move(p,
+                                Paths.get(String.format("%s.backup", p.toAbsolutePath())),
+                                StandardCopyOption.REPLACE_EXISTING);
+                 } catch(IOException e) {
+                 }
+             });
+
+        Path pzaxPackage = Paths.get("src", "test", "resources", "zip4j-plugin-test.pzax")
+                                .toAbsolutePath();
+
+        this.clickOn(Point2D.ZERO.add(160, 10))
+            .clickOn(Point2D.ZERO.add(160, 30))
+            .clickOn("#tabPluginLoader")
+            .sleep(50, MILLISECONDS)
+            .doubleClickOn("#paneDropArea");
+
+        chooseFile(PLATFORM, this, pzaxPackage);
+
+        WebView webView = lookup("#webLicense").queryAs(WebView.class);
+        //ScrollBar scroll = (ScrollBar)webView.lookup(".scroll-bar:vertical");
+        this.drag("#webLicense", MouseButton.PRIMARY) // First license agreement
+            .moveBy(0, 400)
+            .sleep(2500, MILLISECONDS)
+            .drop()
+            .clickOn("#btnAccept")
+            .sleep(150, MILLISECONDS)
+            .drag("#webLicense", MouseButton.PRIMARY) // Second license agreement
+            .moveBy(0, 400)
+            .sleep(1500, MILLISECONDS)
+            .drop()
+            .clickOn("#btnAccept")
+            .sleep(300, MILLISECONDS);
+
+        DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
+        Assertions.assertEquals(dialogPane.getContentText(),
+                                String.format("The library %s has been successfully installed.",
+                                              pzaxPackage.toAbsolutePath()));
+
+        // Check loaded providers
+        final String zip4jWriteCanonicalName = "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService";
+        Assertions.assertTrue(
+                ZipState.getWriteProviders()
+                        .stream()
+                        .map(ArchiveWriteService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(zip4jWriteCanonicalName)),
+                "New library write service was not detected successfully");
+
+        final String zip4jReadCanonicalName = "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService";
+        Assertions.assertTrue(
+                ZipState.getReadProviders()
+                        .stream()
+                        .map(ArchiveReadService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(zip4jReadCanonicalName)),
+                "New library read service was not detected successfully");
+
+        Assertions.assertEquals(zip4jWriteCanonicalName,
+                                ZipState.getWriteArchiveServiceForFile("arbitrary.zip")
+                                        .get()
+                                        .getClass()
+                                        .getCanonicalName(),
+                                "Write service priority was not as expected");
+        Assertions.assertEquals(zip4jReadCanonicalName,
+                                ZipState.getReadArchiveServiceForFile("arbitrary.zip")
+                                        .get()
+                                        .getClass()
+                                        .getCanonicalName(),
+                                "Read service priority was not as expected");
+
+        // Delete installed libraries
+        Files.list(providersDir)
+             .filter(f -> f.getFileName()
+                           .toString()
+                           .matches("pearl-zip-archive-zip4j-.*.jar") || f.getFileName()
+                                                                          .toString()
+                                                                          .matches("zip4j-.*.jar"))
+             .collect(Collectors.toList())
+             .forEach(p -> {
+                 try {
+                     Files.deleteIfExists(p);
+                 } catch(IOException e) {
+                 }
+             });
+
+        // Restore original libraries
+        Files.list(providersDir)
+             .filter(f -> f.getFileName()
+                           .toString()
+                           .matches("pearl-zip-archive-zip4j-.*.jar.backup") || f.getFileName()
+                                                                                 .toString()
+                                                                                 .matches("zip4j-.*.jar.backup"))
+             .collect(Collectors.toList())
+             .forEach(p -> {
+                 try {
+                     Files.move(p,
+                                Paths.get(p.toAbsolutePath()
+                                           .toString()
+                                           .replace(".backup", "")),
+                                StandardCopyOption.REPLACE_EXISTING);
+                 } catch(IOException e) {
+                 }
+             });
     }
 }

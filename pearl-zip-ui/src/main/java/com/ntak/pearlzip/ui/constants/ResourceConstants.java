@@ -27,6 +27,7 @@ public class ResourceConstants {
                                                                               Insets.EMPTY);
 
     public static final DateTimeFormatter DTF_YYYY = DateTimeFormatter.ofPattern("yyyy");
+    public static final Pattern COLONSV = Pattern.compile(Pattern.quote(":"));
     public static final Pattern DSV = Pattern.compile(Pattern.quote("."));
     public static final Pattern CSV = Pattern.compile(Pattern.quote(","));
     public static final Pattern SSV = Pattern.compile(Pattern.quote("/"));

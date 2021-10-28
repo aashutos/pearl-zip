@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -83,9 +84,8 @@ public class FrmAboutController {
 
                     stage.setAlwaysOnTop(false);
                     licStage.initStyle(StageStyle.UNDECORATED);
-                    licStage.show();
-                    licStage.setAlwaysOnTop(true);
-                    licStage.setAlwaysOnTop(false);
+                    licStage.initModality(Modality.APPLICATION_MODAL);
+                    licStage.showAndWait();
                 } catch (Exception exc) {
                     // LOG: Issue creating stage.\nException type: %s\nMessage:%s\nStack trace:\n%s
                     LOGGER.warn(resolveTextKey(LOG_ISSUE_CREATING_STAGE, exc.getClass().getCanonicalName(),
