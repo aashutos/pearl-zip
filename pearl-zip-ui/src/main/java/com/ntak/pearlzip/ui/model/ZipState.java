@@ -63,19 +63,29 @@ public class ZipState {
                                                  .collect(Collectors.toSet())
         );
         if (service instanceof  ArchiveWriteService) {
-            addArchiveToMap(ARCHIVE_WRITE_MAP, ((ArchiveWriteService)service).supportedWriteFormats()
-                                                                             .stream()
-                                                                             .filter(Strings::isNotBlank)
-                                                                             .collect(Collectors.toList()),
+            addArchiveToMap(ARCHIVE_WRITE_MAP, ((ArchiveWriteService) service).supportedWriteFormats()
+                                                                              .stream()
+                                                                              .filter(Strings::isNotBlank)
+                                                                              .collect(Collectors.toList()),
                             (ArchiveWriteService) service);
+
+            WRITE_PROVIDERS.removeIf(s -> s.getClass()
+                                           .getCanonicalName()
+                                           .equals(service.getClass()
+                                                          .getCanonicalName()));
             WRITE_PROVIDERS.add((ArchiveWriteService) service);
         }
         if (service instanceof ArchiveReadService) {
-            addArchiveToMap(ARCHIVE_READ_MAP, ((ArchiveReadService)service).supportedReadFormats()
-                                                                           .stream()
-                                                                           .filter(Strings::isNotBlank)
-                                                                           .collect(Collectors.toList()),
+            addArchiveToMap(ARCHIVE_READ_MAP, ((ArchiveReadService) service).supportedReadFormats()
+                                                                            .stream()
+                                                                            .filter(Strings::isNotBlank)
+                                                                            .collect(Collectors.toList()),
                             (ArchiveReadService) service);
+
+            READ_PROVIDERS.removeIf(s -> s.getClass()
+                                          .getCanonicalName()
+                                          .equals(service.getClass()
+                                                         .getCanonicalName()));
             READ_PROVIDERS.add((ArchiveReadService) service);
         }
     }

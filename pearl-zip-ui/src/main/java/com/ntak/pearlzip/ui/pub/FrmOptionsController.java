@@ -32,15 +32,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -81,6 +77,8 @@ public class FrmOptionsController {
     private TableColumn<Pair<Boolean,ArchiveService>,Pair<Boolean,ArchiveService>> writeCapability;
     @FXML
     private TableColumn<Pair<Boolean,ArchiveService>,String> supportedFormat;
+    @FXML
+    private TableColumn<Pair<Boolean,ArchiveService>,Pair<String,Number>> priority;
 
     ///// Load Plugin Properties /////
     @FXML
@@ -118,6 +116,7 @@ public class FrmOptionsController {
                 } else {
                     CheckBox checkBox = new CheckBox();
                     checkBox.setSelected(!item.getKey());
+                    checkBox.setDisable(true);
                     this.setGraphic(checkBox);
                 }
             }
@@ -133,6 +132,7 @@ public class FrmOptionsController {
                 } else {
                     CheckBox checkBox = new CheckBox();
                     checkBox.setSelected(item.getKey());
+                    checkBox.setDisable(true);
                     this.setGraphic(checkBox);
                 }
             }
@@ -150,15 +150,67 @@ public class FrmOptionsController {
 
                     if (pair.getValue() instanceof ArchiveReadService) {
                         return new SimpleStringProperty(((ArchiveReadService) pair.getValue()).supportedReadFormats()
-                                                                                           .toString()
-                                                                                           .replaceAll("(\\[|\\])",
-                                                                                                       ""));
+                                                                                              .toString()
+                                                                                              .replaceAll("(\\[|\\])",
+                                                                                                          ""));
                     }
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
             }
 
             return new SimpleStringProperty("N/A");
+        });
+
+        priority.setCellFactory((c) -> new TableCell<>() {
+            @Override
+            public void updateItem(Pair<String,Number> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    TextField textField = new TextField();
+                    textField.setText(String.valueOf(item.getValue()));
+
+                    textField.setOnKeyTyped(e -> {
+                        char charEntered = e.getCode()
+                                            .getChar()
+                                            .charAt(0);
+                        int position = textField.getCaretPosition();
+                        if (!Character.isDigit(charEntered)) {
+                            textField.setText(textField.getText()
+                                                       .replaceAll("[^0-9]", ""));
+                            textField.positionCaret(Math.max(Math.min(position, textField.getLength()), 0));
+                        }
+                        String key = String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY, item.getKey());
+
+                        synchronized(WORKING_APPLICATION_SETTINGS) {
+                            WORKING_APPLICATION_SETTINGS.put(key, textField.getText());
+                        }
+                    });
+                    this.setGraphic(textField);
+                }
+            }
+        });
+
+        priority.setCellValueFactory((s) -> {
+            String priorityStr = System.getProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
+                                                                  s.getValue()
+                                                                   .getValue()
+                                                                   .getClass()
+                                                                   .getCanonicalName()));
+
+            int priority;
+            try {
+                priority = Integer.parseInt(priorityStr);
+            } catch(Exception e) {
+                priority = 0;
+            }
+
+            return new SimpleObjectProperty<Pair<String,Number>>(new Pair(s.getValue()
+                                                                           .getValue()
+                                                                           .getClass()
+                                                                           .getCanonicalName(), priority));
         });
     }
 
@@ -174,13 +226,29 @@ public class FrmOptionsController {
             }
         }
 
+        synchronized(WORKING_APPLICATION_SETTINGS) {
+            try(InputStream settingsIStream = Files.newInputStream(APPLICATION_SETTINGS_FILE)) {
+                WORKING_APPLICATION_SETTINGS.clear();
+                WORKING_APPLICATION_SETTINGS.load(settingsIStream);
+            } catch(IOException e) {
+            }
+        }
+
         ///// Initialize plugin options /////
         List<Pair<Boolean,ArchiveService>> services = new ArrayList<>();
-        services.addAll(ZipState.getWriteProviders().stream().map(s->new Pair<Boolean,ArchiveService>(true, s)).collect(Collectors.toList()));
-        services.addAll(ZipState.getReadProviders().stream().map(s->new Pair<Boolean,ArchiveService>(false,s)).collect(Collectors.toList()));
+        services.addAll(ZipState.getWriteProviders()
+                                .stream()
+                                .map(s -> new Pair<Boolean,ArchiveService>(true, s))
+                                .collect(Collectors.toList()));
+        services.addAll(ZipState.getReadProviders()
+                                .stream()
+                                .map(s -> new Pair<Boolean,ArchiveService>(false, s))
+                                .collect(Collectors.toList()));
         tblProviders.setItems(FXCollections.observableArrayList(services));
 
-        for (ArchiveService service : services.stream().map(Pair::getValue).collect(Collectors.toList())) {
+        for (ArchiveService service : services.stream()
+                                              .map(Pair::getValue)
+                                              .collect(Collectors.toList())) {
             if ((service.getOptionsPane()).isPresent()) {
                 Pair<String,Node> tab = service.getOptionsPane()
                                                .get();
@@ -230,14 +298,32 @@ public class FrmOptionsController {
             }
         });
 
-        btnApply.setOnMouseClicked(e->{
+        btnApply.setOnMouseClicked(e -> {
             synchronized(CURRENT_SETTINGS) {
                 CURRENT_SETTINGS.clear();
                 CURRENT_SETTINGS.putAll(WORKING_SETTINGS);
-                try (OutputStream settingsOutputStream = Files.newOutputStream(SETTINGS_FILE)) {
+                try(OutputStream settingsOutputStream = Files.newOutputStream(SETTINGS_FILE)) {
                     CURRENT_SETTINGS.store(settingsOutputStream, String.format("PearlZip Settings File Generated @ %s",
                                                                                LocalDateTime.now()));
-                } catch (IOException exc) {
+                } catch(IOException exc) {
+                }
+            }
+
+            synchronized(WORKING_APPLICATION_SETTINGS) {
+                try(OutputStream settingsOutputStream = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
+                    WORKING_APPLICATION_SETTINGS.store(settingsOutputStream,
+                                                       String.format("PearlZip Application Settings File Generated @ %s",
+                                                                     LocalDateTime.now()));
+
+                    // Reloading providers and cached System settings into PearlZip
+                    WORKING_APPLICATION_SETTINGS.keySet()
+                                                .forEach(k -> System.setProperty(k.toString(),
+                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(
+                                                                                         k.toString()))
+                                                );
+                    new LinkedList<>(ZipState.getWriteProviders()).forEach(ZipState::addArchiveProvider);
+                    new LinkedList<>(ZipState.getReadProviders()).forEach(ZipState::addArchiveProvider);
+                } catch(IOException exc) {
                 }
             }
         });
@@ -252,6 +338,11 @@ public class FrmOptionsController {
                 WORKING_SETTINGS.clear();
                 WORKING_SETTINGS.putAll(CURRENT_SETTINGS);
             }
+
+            synchronized(WORKING_APPLICATION_SETTINGS) {
+                WORKING_APPLICATION_SETTINGS.clear();
+            }
+
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         });
 

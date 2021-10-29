@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 public class ArchiveConstants {
     public static final Properties CURRENT_SETTINGS = new Properties();
     public static final Properties WORKING_SETTINGS = new Properties();
+    public static final Properties WORKING_APPLICATION_SETTINGS = new Properties();
     public static final List<Predicate<ArchiveInfo>> NEW_ARCHIVE_VALIDATORS = new CopyOnWriteArrayList<>();
 
     public static final ThreadGroup EVENTBUS_THREAD_GROUP = new ThreadGroup("EVENTBUS-THREAD-GROUP");
