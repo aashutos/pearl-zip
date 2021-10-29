@@ -74,7 +74,7 @@ public class ZipLauncher {
         ZipConstants.LOCAL_TEMP =
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
-        Path externalBootstrapFile = Paths.get(STORE_ROOT.toString(), "application.properties");
+        APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
 
         String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
         ZipConstants.RUNTIME_MODULE_PATH =
@@ -119,15 +119,17 @@ public class ZipLauncher {
                     Files.copy(reservedKeys, tmpRK, StandardCopyOption.REPLACE_EXISTING);
                 }
 
-                Files.lines(tmpRK)
+            Files.lines(tmpRK)
                  .filter(k -> Objects.nonNull(k) && Objects.nonNull(props.getProperty(k)))
                  // LOG: Locking in key: %s with value: %s
-                 .peek(k -> LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_LOCKING_IN_PROPERTY, k, props.getProperty(k))))
+                 .peek(k -> LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_LOCKING_IN_PROPERTY,
+                                                                             k,
+                                                                             props.getProperty(k))))
                  .forEach(k -> reservedKeyMap.put(k, props.getProperty(k)));
         }
 
-        if (Files.exists(externalBootstrapFile)) {
-            props.load(Files.newBufferedReader(externalBootstrapFile));
+        if (Files.exists(APPLICATION_SETTINGS_FILE)) {
+            props.load(Files.newBufferedReader(APPLICATION_SETTINGS_FILE));
         }
 
         props.putAll(System.getProperties());

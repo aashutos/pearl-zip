@@ -315,6 +315,7 @@ public class ZipConstants {
     public static Path STORE_TEMP;
     public static Path RECENT_FILE;
     public static Path SETTINGS_FILE;
+    public static Path APPLICATION_SETTINGS_FILE;
     public static ExecutorService PRIMARY_EXECUTOR_SERVICE;
     public static ThreadGroup THREAD_GROUP;
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
