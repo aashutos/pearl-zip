@@ -6,7 +6,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/15.0.1"
+<AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/17.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmOptionsController">
     <TabPane fx:id="tabPaneOptions" prefHeight="364.0" prefWidth="428.0" tabClosingPolicy="UNAVAILABLE">
         <Tab fx:id="tabGeneral" text="%options.general.text">

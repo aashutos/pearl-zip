@@ -8,7 +8,7 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.web.WebView?>
-<AnchorPane fx:id="pane" prefHeight="573.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1"
+<AnchorPane fx:id="pane" prefHeight="573.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController">
     <WebView fx:id="webLicense" prefHeight="573.0" prefWidth="600.0"/>
     <ToolBar fx:id="tbBottom" prefHeight="40.0" prefWidth="600.0" visible="false">

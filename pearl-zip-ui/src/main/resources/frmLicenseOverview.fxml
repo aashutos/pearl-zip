@@ -7,22 +7,22 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-<AnchorPane prefHeight="401.0" prefWidth="583.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmLicenseOverviewController">
-   <children>
-      <TableView fx:id="tblLicenseInfo" layoutX="14.0" layoutY="14.0" prefHeight="332.0" prefWidth="558.0">
+<AnchorPane prefHeight="401.0" prefWidth="583.0" xmlns="http://javafx.com/javafx/17.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmLicenseOverviewController">
+    <TableView fx:id="tblLicenseInfo" layoutX="14.0" layoutY="14.0" prefHeight="332.0" prefWidth="558.0">
         <columns>
-          <TableColumn fx:id="canonicalName" prefWidth="268.0" text="%license.tblLicenseInfo.canonicalName.text" />
-            <TableColumn fx:id="version" minWidth="0.0" prefWidth="106.0" text="%license.tblLicenseInfo.version.text" />
-          <TableColumn fx:id="licenseType" prefWidth="183.0" text="%license.tblLicenseInfo.licenseType.text" />
+            <TableColumn fx:id="canonicalName" prefWidth="268.0" text="%license.tblLicenseInfo.canonicalName.text"/>
+            <TableColumn fx:id="version" minWidth="0.0" prefWidth="106.0"
+                         text="%license.tblLicenseInfo.version.text"/>
+            <TableColumn fx:id="licenseType" prefWidth="183.0" text="%license.tblLicenseInfo.licenseType.text"/>
         </columns>
-      </TableView>
-      <ButtonBar layoutY="354.0" prefHeight="47.0" prefWidth="583.0">
+    </TableView>
+    <ButtonBar layoutY="354.0" prefHeight="47.0" prefWidth="583.0">
         <buttons>
-          <Button fx:id="btnOk" mnemonicParsing="false" text="%license.ok.text" />
+            <Button fx:id="btnOk" mnemonicParsing="false" text="%license.ok.text"/>
         </buttons>
-         <padding>
-            <Insets right="10.0" />
-         </padding>
-      </ButtonBar>
-   </children>
+        <padding>
+            <Insets right="10.0"/>
+        </padding>
+    </ButtonBar>
 </AnchorPane>

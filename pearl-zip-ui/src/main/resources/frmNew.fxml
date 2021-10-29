@@ -7,16 +7,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox prefHeight="435.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="435.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <TabPane fx:id="tabsNew" tabClosingPolicy="UNAVAILABLE">
         <Tab text="%new.tabs.general.text">
             <AnchorPane prefHeight="425.0" prefWidth="450.0">
-                <Label fx:id="lblCmpFormat" layoutX="14.0" layoutY="79.0" text="%new.cmp-format.text" />
-                <ComboBox fx:id="comboArchiveFormat" layoutX="161.0" layoutY="74.0" prefHeight="27.0" prefWidth="98.0" />
-                <Label layoutX="7.0" layoutY="6.0" prefHeight="68.0" prefWidth="299.0" text="%new.description.text" wrapText="true" />
-                <Label fx:id="lblSelectFile" layoutX="14.0" layoutY="141.0" text="%new.lbl-select-file.text" visible="false" />
-                <TextField fx:id="txtSelectFile" layoutX="161.0" layoutY="136.0" visible="false" />
-                <Button fx:id="btnSelectFile" layoutX="328.0" layoutY="136.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="95.0" text="%new.select-file.text" visible="false" />
+                <Label fx:id="lblCmpFormat" layoutX="14.0" layoutY="79.0" text="%new.cmp-format.text"/>
+                <ComboBox fx:id="comboArchiveFormat" layoutX="161.0" layoutY="74.0" prefHeight="27.0" prefWidth="98.0"/>
+                <Label layoutX="7.0" layoutY="6.0" prefHeight="68.0" prefWidth="299.0" text="%new.description.text"
+                       wrapText="true"/>
+                <Label fx:id="lblSelectFile" layoutX="14.0" layoutY="141.0" text="%new.lbl-select-file.text"
+                       visible="false"/>
+                <TextField fx:id="txtSelectFile" layoutX="161.0" layoutY="136.0" visible="false"/>
+                <Button fx:id="btnSelectFile" layoutX="328.0" layoutY="136.0" mnemonicParsing="false" prefHeight="27.0"
+                        prefWidth="95.0" text="%new.select-file.text" visible="false"/>
             </AnchorPane>
         </Tab>
     </TabPane>
