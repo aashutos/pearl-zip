@@ -6,7 +6,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/17.0.1"
+<AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/15.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmOptionsController">
     <TabPane fx:id="tabPaneOptions" prefHeight="364.0" prefWidth="428.0" tabClosingPolicy="UNAVAILABLE">
         <Tab fx:id="tabGeneral" text="%options.general.text">
@@ -15,6 +15,10 @@
                         text="%options.general.btnClearCache.text"/>
                 <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="14.0" prefHeight="52.0" prefWidth="391.0"
                        text="%options.general.description.text" wrapText="true"/>
+                <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="117.0" prefWidth="150.0"
+                          promptText="zip"/>
+                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="122.0"
+                       text="%options.general.defaultFormat.text"/>
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabBootstrap" text="%options.bootstrap-properties.text">
@@ -37,8 +41,7 @@
                                      text="%options.providers.name.readCapability.text"/>
                         <TableColumn fx:id="writeCapability" prefWidth="68.0"
                                      text="%options.providers.name.writeCapability.text"/>
-                        <TableColumn fx:id="priority" prefWidth="68.0"
-                                     text="%options.providers.name.priority.text"/>
+                        <TableColumn fx:id="priority" prefWidth="68.0" text="%options.providers.name.priority.text"/>
                         <TableColumn fx:id="supportedFormat" prefWidth="163.0"
                                      text="%options.providers.name.supportedFormat.text"/>
                     </columns>

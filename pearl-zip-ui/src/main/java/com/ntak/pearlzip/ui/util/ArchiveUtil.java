@@ -31,6 +31,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.*;
 import java.util.*;
@@ -40,6 +41,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -453,6 +455,16 @@ public class ArchiveUtil {
             // Delete top-level directory itself
             Files.deleteIfExists(d);
         } catch(IOException ioe) {
+        }
+    }
+
+    public static void initialiseApplicationSettings() {
+        synchronized(WORKING_APPLICATION_SETTINGS) {
+            try(InputStream settingsIStream = Files.newInputStream(APPLICATION_SETTINGS_FILE)) {
+                WORKING_APPLICATION_SETTINGS.clear();
+                WORKING_APPLICATION_SETTINGS.load(settingsIStream);
+            } catch(IOException e) {
+            }
         }
     }
 }

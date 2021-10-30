@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_NTAK_PEARL_ZIP_ICON_FOLDER;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
@@ -86,12 +87,12 @@ public class SevenZipArchiveService implements ArchiveReadService {
             LOGGER.info(resolveTextKey(LOG_ARCHIVE_SERVICE_NUMBER_ITEMS, archive.getNumberOfItems()));
 
             List<FileInfo> files =
-                            List.of(archive.getSimpleInterface().getArchiveItems())
-                            .stream()
-                            .map(transformer::transform)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toList());
+                    Stream.of(archive.getSimpleInterface()
+                                     .getArchiveItems())
+                          .map(transformer::transform)
+                          .filter(Optional::isPresent)
+                          .map(Optional::get)
+                          .collect(Collectors.toList());
 
             // Handle file path only archives
             if (files.stream().noneMatch(FileInfo::isFolder)) {
@@ -325,7 +326,7 @@ public class SevenZipArchiveService implements ArchiveReadService {
 
     @Override
     public List<String> supportedReadFormats() {
-        return Arrays.asList("tar","zip","gz","bz2","xz","7z", "jar", "rar", "iso", "cab", "tgz");
+        return Arrays.asList("zip", "gz", "bz2", "xz", "7z", "jar", "rar", "iso", "cab", "tgz");
     }
 
     @Override

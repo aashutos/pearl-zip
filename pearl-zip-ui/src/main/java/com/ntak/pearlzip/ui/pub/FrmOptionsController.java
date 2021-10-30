@@ -40,16 +40,19 @@ import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 import static com.ntak.pearlzip.ui.util.ModuleUtil.loadModuleFromExtensionPackage;
 
 /**
- *  Controller for the Options dialog.
- *  @author Aashutos Kakshepati
-*/
+ * Controller for the Options dialog.
+ *
+ * @author Aashutos Kakshepati
+ */
 public class FrmOptionsController {
-    private static final Logger LOGGER = LoggerContext.getContext().getLogger(FrmOptionsController.class);
+    private static final Logger LOGGER = LoggerContext.getContext()
+                                                      .getLogger(FrmOptionsController.class);
 
     ///// General /////
     @FXML
@@ -58,13 +61,16 @@ public class FrmOptionsController {
     @FXML
     private Button btnClearCache;
 
+    @FXML
+    private ComboBox<String> comboDefaultFormat;
+
     ///// Bootstrap Properties /////
     @FXML
     private TableView<Pair<String,String>> tblBootstrap;
     @FXML
-    private TableColumn<Pair<String,String>, String> key;
+    private TableColumn<Pair<String,String>,String> key;
     @FXML
-    private TableColumn<Pair<String,String>, String> value;
+    private TableColumn<Pair<String,String>,String> value;
 
     ///// Provider Properties /////
     @FXML
@@ -93,20 +99,50 @@ public class FrmOptionsController {
 
     @FXML
     public void initialize() {
+        initialiseApplicationSettings();
+
         ///// Bootstrap Properties /////
         key.setCellValueFactory(new PropertyValueFactory<>("Key"));
         value.setCellValueFactory(new PropertyValueFactory<>("Value"));
         tblBootstrap.setItems(FXCollections.observableArrayList(System.getProperties()
-                                                                          .entrySet()
-                                                                          .stream()
-                                                                          .map(e->new Pair<>((String)e.getKey(), (String)e.getValue()))
-                                                                          .collect(Collectors.toList()))
+                                                                      .entrySet()
+                                                                      .stream()
+                                                                      .map(e -> new Pair<>((String) e.getKey(),
+                                                                                           (String) e.getValue()))
+                                                                      .collect(Collectors.toList()))
         );
 
+        comboDefaultFormat.setItems(FXCollections.observableArrayList(ZipState.supportedWriteArchives()
+                                                                              .stream()
+                                                                              .collect(Collectors.toSet())));
+        if (ZipState.supportedWriteArchives()
+                    .stream()
+                    .anyMatch(f -> f.equals(WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT)))
+        ) {
+            comboDefaultFormat.getSelectionModel()
+                              .select(
+                                      WORKING_APPLICATION_SETTINGS.getProperty(
+                                              CNS_DEFAULT_FORMAT,
+                                              "zip")
+                              );
+        }
+
+        comboDefaultFormat.setOnAction(e -> {
+            synchronized(WORKING_APPLICATION_SETTINGS) {
+                WORKING_APPLICATION_SETTINGS.put(CNS_DEFAULT_FORMAT,
+                                                 comboDefaultFormat.getValue());
+            }
+
+
+        });
+
         ///// Provider Properties /////
-        name.setCellValueFactory((s)-> new SimpleStringProperty(s.getValue().getValue().getClass().getCanonicalName()));
-        readCapability.setCellValueFactory((s)-> new SimpleObjectProperty<>(s.getValue()));
-        readCapability.setCellFactory((c)-> new TableCell<>() {
+        name.setCellValueFactory((s) -> new SimpleStringProperty(s.getValue()
+                                                                  .getValue()
+                                                                  .getClass()
+                                                                  .getCanonicalName()));
+        readCapability.setCellValueFactory((s) -> new SimpleObjectProperty<>(s.getValue()));
+        readCapability.setCellFactory((c) -> new TableCell<>() {
             @Override
             public void updateItem(Pair<Boolean,ArchiveService> item, boolean empty) {
                 super.updateItem(item, empty);
@@ -222,14 +258,6 @@ public class FrmOptionsController {
                 CURRENT_SETTINGS.load(settingsIStream);
                 WORKING_SETTINGS.clear();
                 WORKING_SETTINGS.putAll(CURRENT_SETTINGS);
-            } catch(IOException e) {
-            }
-        }
-
-        synchronized(WORKING_APPLICATION_SETTINGS) {
-            try(InputStream settingsIStream = Files.newInputStream(APPLICATION_SETTINGS_FILE)) {
-                WORKING_APPLICATION_SETTINGS.clear();
-                WORKING_APPLICATION_SETTINGS.load(settingsIStream);
             } catch(IOException e) {
             }
         }
