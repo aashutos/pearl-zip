@@ -50,6 +50,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -433,6 +434,9 @@ public class PearlZipFXUtil {
         ZipConstants.RECENT_FILE = Paths.get(System.getProperty("user.home"), ".pz", "rf");
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+
+        APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
+        initialiseApplicationSettings();
 
         SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "settings.properties");
         if (!Files.exists(SETTINGS_FILE)) {
