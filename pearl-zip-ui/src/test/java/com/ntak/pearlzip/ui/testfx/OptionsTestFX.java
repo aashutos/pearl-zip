@@ -14,8 +14,10 @@ import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
+import com.ntak.testfx.FormUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
@@ -56,6 +58,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
      *  + Check reserved keys in Bootstrap properties are as expected
      *  + Check the expected providers have been loaded
      *  + Load pzax package successfully
+     *  + Check application.properties got updated by a change to the default archive format in the Options dialog
      */
 
     @Override
@@ -401,5 +404,48 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                  } catch(IOException e) {
                  }
              });
+    }
+
+    @Test
+    @DisplayName("Test: Check application.properties got updated by a change to the default archive format in the Options dialog")
+    public void testFX_ChangeDefaultArchiveFormat_Success() throws IOException {
+        //  Back up existing application.properties file
+        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                .toString(), "application.properties");
+        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                 .toString(), "application.properties.backup");
+        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
+
+        try {
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30));
+
+            ComboBox<String> combo = lookup("#comboDefaultFormat").queryAs(ComboBox.class);
+            FormUtil.selectComboBoxEntry(this, combo, "tar");
+
+            this.clickOn("#btnOk")
+                .sleep(250, MILLISECONDS);
+
+            Assertions.assertTrue(Files.readAllLines(appPropsPath)
+                                       .stream()
+                                       .anyMatch(l -> l.equals("configuration.ntak.pearl-zip.default-format=tar")),
+                                  "Properties file was not updated as expected"
+            );
+
+            this.clickOn("#btnNew")
+                .sleep(150, MILLISECONDS)
+                .clickOn("#mnuNewArchive")
+                .sleep(150, MILLISECONDS);
+
+            Assertions.assertEquals("tar",
+                                    this.lookup("#comboArchiveFormat")
+                                        .queryAs(ComboBox.class)
+                                        .getSelectionModel()
+                                        .getSelectedItem(),
+                                    "Tar archive was not selected by default on the new page");
+
+        } finally {
+            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 }

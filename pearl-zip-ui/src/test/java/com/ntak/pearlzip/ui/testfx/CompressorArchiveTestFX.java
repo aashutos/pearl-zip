@@ -10,6 +10,7 @@ import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import com.ntak.testfx.FormUtil;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import org.junit.jupiter.api.*;
@@ -545,15 +546,16 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
         simOpenArchive(this, archive, true, false);
 
         // Check window menu (incl. active window)
+        sleep(200, MILLISECONDS);
+        final ObservableList<MenuItem> mnuWindowItems = WINDOW_MENU.getItems();
         Assertions.assertEquals(1,
-                                WINDOW_MENU.getItems()
-                                           .size(),
+                                mnuWindowItems.size(),
                                 "Windows menu did not have the expected number of entries");
-        Assertions.assertTrue(WINDOW_MENU.getItems()
-                                         .get(0)
-                                         .getText()
-                                         .contains(String.format("%s%s", archive.toAbsolutePath(), " • ")),
+        Assertions.assertTrue(mnuWindowItems.get(0)
+                                            .getText()
+                                            .contains(String.format("%s%s", archive.toAbsolutePath(), " • ")),
                               "Expected archive path not found");
+        sleep(200, MILLISECONDS);
 
         // 2. Open nested archive
         final String nestedArchiveName = archive.getFileName()
@@ -580,7 +582,7 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                                            .size(),
                                 "Windows menu did not have the expected number of " +
                                         "entries");
-        sleep(200, MILLISECONDS);
+        sleep(500, MILLISECONDS);
 
         Assertions.assertTrue(WINDOW_MENU.getItems()
                                          .stream()

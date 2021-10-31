@@ -336,8 +336,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
                                                    .map(FileInfo::getFileName)
                                                    .collect(Collectors.toList());
         Assertions.assertTrue(files.contains(file.getFileName()
-                                                 .toString()
-                                                 .substring(0, 100)),
+                                                 .toString()),
                               "File was not found in archive");
 
         // Extract file and check consistency

@@ -36,6 +36,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 
 /**
  *  Loads the main UI screen for the Zip Application.
@@ -75,6 +76,7 @@ public class ZipLauncher {
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
         APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
+        initialiseApplicationSettings();
 
         String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
         ZipConstants.RUNTIME_MODULE_PATH =

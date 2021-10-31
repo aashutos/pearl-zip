@@ -40,6 +40,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.COM_BUS_EXECUTOR_SERVICE;
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -209,10 +210,27 @@ public class MacZipLauncher extends Application {
 
             archivePath = OS_FILES.remove(0);
         } else {
-            archivePath = Paths.get(STORE_TEMP.toString(),
-                                    String.format("a%s.zip", System.currentTimeMillis()))
-                               .toAbsolutePath()
-                               .toString();
+            String extension = WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT, "zip");
+            if (ZipState.getCompressorArchives()
+                        .contains(extension)) {
+                archivePath = Paths.get(STORE_TEMP.toString(),
+                                        String.format("a%s.tar.%s", System.currentTimeMillis(),
+                                                      extension))
+                                   .toAbsolutePath()
+                                   .toString();
+            } else if (ZipState.supportedWriteArchives()
+                               .contains(extension)) {
+                archivePath = Paths.get(STORE_TEMP.toString(),
+                                        String.format("a%s.%s", System.currentTimeMillis(),
+                                                      extension))
+                                   .toAbsolutePath()
+                                   .toString();
+            } else {
+                archivePath = Paths.get(STORE_TEMP.toString(),
+                                        String.format("a%s.zip", System.currentTimeMillis()))
+                                   .toAbsolutePath()
+                                   .toString();
+            }
             ZipState.getWriteArchiveServiceForFile(archivePath)
                     .get()
                     .createArchive(System.currentTimeMillis(), archivePath);
