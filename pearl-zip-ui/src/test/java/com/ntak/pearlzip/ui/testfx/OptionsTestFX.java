@@ -431,6 +431,19 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                        .anyMatch(l -> l.equals("configuration.ntak.pearl-zip.default-format=tar")),
                                   "Properties file was not updated as expected"
             );
+
+            this.clickOn("#btnNew")
+                .sleep(150, MILLISECONDS)
+                .clickOn("#mnuNewArchive")
+                .sleep(150, MILLISECONDS);
+
+            Assertions.assertEquals("tar",
+                                    this.lookup("#comboArchiveFormat")
+                                        .queryAs(ComboBox.class)
+                                        .getSelectionModel()
+                                        .getSelectedItem(),
+                                    "Tar archive was not selected by default on the new page");
+
         } finally {
             Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
         }

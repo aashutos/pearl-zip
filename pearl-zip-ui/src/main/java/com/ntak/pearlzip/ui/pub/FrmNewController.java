@@ -25,7 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_NEW_OPTIONS;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_DEFAULT_FORMAT;
 
 /**
  *  Controller for the New Archive dialog.
@@ -55,7 +57,14 @@ public class FrmNewController {
         }
 
         comboArchiveFormat.setItems(FXCollections.observableArrayList(supportedWriteFormats));
-        comboArchiveFormat.getSelectionModel().selectFirst();
+        String extension = WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT, "zip");
+        if (supportedWriteFormats.contains(extension)) {
+            comboArchiveFormat.getSelectionModel()
+                              .select(extension);
+        } else {
+            comboArchiveFormat.getSelectionModel()
+                              .selectFirst();
+        }
 
         for (ArchiveWriteService service : ZipState.getWriteProviders()) {
             if ((service.getCreateArchiveOptionsPane()).isPresent()) {
