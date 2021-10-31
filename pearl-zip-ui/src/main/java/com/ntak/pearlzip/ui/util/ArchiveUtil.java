@@ -467,4 +467,23 @@ public class ArchiveUtil {
             }
         }
     }
+
+    public static void loadPzaxPackage(String f) {
+        // TITLE: Confirmation: Load Providers Module
+        // BODY: Do you wish to load PZAX Module: %s?
+        ButtonType response =
+                raiseAlert(Alert.AlertType.CONFIRMATION,
+                           resolveTextKey(TITLE_CONFIRM_LOAD_PROVIDER_MODULE),
+                           null,
+                           resolveTextKey(BODY_CONFIRM_LOAD_PROVIDER_MODULE, f),
+                           null,
+                           null,
+                           ButtonType.YES,
+                           ButtonType.NO
+                ).get();
+
+        if (response.equals(ButtonType.YES)) {
+            ModuleUtil.loadModuleFromExtensionPackage(Paths.get(f));
+        }
+    }
 }

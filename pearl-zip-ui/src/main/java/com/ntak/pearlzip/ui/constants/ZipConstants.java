@@ -260,6 +260,9 @@ public class ZipConstants {
     public static final String TITLE_CLEAR_CACHE_BLOCKED = "title.ntak.pearl-zip.clear-cache-blocked";
     public static final String BODY_CLEAR_CACHE_BLOCKED = "body.ntak.pearl-zip.clear-cache-blocked";
 
+    public static final String TITLE_CONFIRM_LOAD_PROVIDER_MODULE = "title.ntak.pearl-zip.confirm-load-provider-module";
+    public static final String BODY_CONFIRM_LOAD_PROVIDER_MODULE = "body.ntak.pearl-zip.confirm-load-provider-module";
+
     public static final String LOG_ISSUE_ADD_DRAG_DROP = "logging.ntak.pearl-zip.issue-add-drag-drop";
     public static final String TITLE_ISSUE_ADD_DRAG_DROP = "title.ntak.pearl-zip.issue-add-drag-drop";
     public static final String HEADER_ISSUE_ADD_DRAG_DROP = "header.ntak.pearl-zip.issue-add-drag-drop";

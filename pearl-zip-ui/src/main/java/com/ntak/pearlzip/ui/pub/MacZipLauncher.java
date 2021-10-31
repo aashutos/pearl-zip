@@ -12,6 +12,7 @@ import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
@@ -65,6 +66,13 @@ public class MacZipLauncher extends Application {
                                                       .toAbsolutePath()
                                                       .toString())
                                            .forEach(f -> JFXUtil.runLater(() -> {
+                                               if (f.endsWith(".pzax")) {
+                                                   try {
+                                                       ArchiveUtil.loadPzaxPackage(f);
+                                                   } catch(Exception exc) {
+                                                   }
+                                                   return;
+                                               }
                                                Stage stage = new Stage();
 
                                                ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(f)
@@ -209,6 +217,11 @@ public class MacZipLauncher extends Application {
             }
 
             archivePath = OS_FILES.remove(0);
+
+            if (archivePath.endsWith(".pzax")) {
+                ArchiveUtil.loadPzaxPackage(archivePath);
+                return;
+            }
         } else {
             String extension = WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT, "zip");
             if (ZipState.getCompressorArchives()
