@@ -109,17 +109,18 @@ public class FrmMainController {
         hash.setCellValueFactory(new PropertyValueFactory<>("Self"));
         hash.setComparator(Comparator.comparing(v -> Long.toHexString(v.getCrcHash())
                                                          .toUpperCase()));
-
-        comments.setCellFactory(new CommentsHighlightFileInfoCellCallback());
-        comments.setCellValueFactory(new PropertyValueFactory<>("Self"));
-        comments.setComparator(Comparator.comparing(v -> Optional.ofNullable(v.getComments())
-                                                                 .orElse("")));
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
         if (fxArchiveInfo != null) {
             this.FXArchiveInfo = fxArchiveInfo;
             stage.setUserData(fxArchiveInfo);
+
+            comments.setCellFactory(new CommentsHighlightFileInfoCellCallback(fxArchiveInfo));
+            comments.setCellValueFactory(new PropertyValueFactory<>("Self"));
+            comments.setComparator(Comparator.comparing(v -> Optional.ofNullable(v.getComments())
+                                                                     .orElse("")));
+
             // TODO: Handle multiple rows
             fileContentsView.getSelectionModel()
                             .setSelectionMode(SelectionMode.SINGLE);
@@ -254,7 +255,7 @@ public class FrmMainController {
                                                                        .findFirst();
                      if (!oldValue && newValue) {
                          synchronized(WINDOW_MENU) {
-                             if (!optMenuItem.isPresent()) {
+                             if (optMenuItem.isEmpty()) {
                                  MenuItem archiveMenuItem = new MenuItem(String.format("%s%s",
                                                                                        fxArchiveInfo.getArchivePath(),
                                                                                        WINDOW_FOCUS_SYMBOL));
@@ -275,9 +276,9 @@ public class FrmMainController {
 
                      if (oldValue && !newValue) {
                          synchronized(WINDOW_MENU) {
-                             optMenuItem.ifPresent(m -> m.setText(String.format(m.getText()
-                                                                                 .replaceAll(WINDOW_FOCUS_SYMBOL
-                                                                                         , ""))));
+                             optMenuItem.ifPresent(m -> m.setText(m.getText()
+                                                                   .replaceAll(WINDOW_FOCUS_SYMBOL
+                                                                                         , "")));
                          }
                      }
                  });
@@ -327,6 +328,10 @@ public class FrmMainController {
 
     public Button getBtnUp() {
         return btnUp;
+    }
+
+    public TableColumn<FileInfo,FileInfo> getComments() {
+        return comments;
     }
 
     public FXArchiveInfo getFXArchiveInfo() {

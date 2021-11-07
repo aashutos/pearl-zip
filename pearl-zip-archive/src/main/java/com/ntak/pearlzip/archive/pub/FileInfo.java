@@ -6,6 +6,7 @@ package com.ntak.pearlzip.archive.pub;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  Java bean which stores normalised data about a particular entry in a zip archive.
@@ -24,7 +25,7 @@ public class FileInfo {
     private final String user;
     private final String group;
     private final int attributes;
-    private final String comments;
+    private String comments;
     private final boolean isFolder;
     private final boolean isEncrypted;
     private final Map<String,Object> additionalInfoMap;
@@ -49,7 +50,7 @@ public class FileInfo {
         this.comments = comments;
         this.isFolder = isFolder;
         this.isEncrypted = isEncrypted;
-        this.additionalInfoMap = additionalInfoMap;
+        this.additionalInfoMap = new ConcurrentHashMap<>(additionalInfoMap);
     }
 
     public int getIndex() {
@@ -118,6 +119,10 @@ public class FileInfo {
 
     public Map<String,Object> getAdditionalInfoMap() {
         return additionalInfoMap;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public FileInfo getSelf() { return this; }

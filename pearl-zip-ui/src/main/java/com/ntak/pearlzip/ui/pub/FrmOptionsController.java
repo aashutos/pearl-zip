@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
@@ -207,6 +209,8 @@ public class FrmOptionsController {
                 } else {
                     TextField textField = new TextField();
                     textField.setText(String.valueOf(item.getValue()));
+                    String color = this.getTableRow().isSelected() ? "white" : "black";
+                    textField.setStyle(String.format(PATTERN_TEXTFIELD_TABLE_CELL_STYLE, color));
 
                     textField.setOnKeyTyped(e -> {
                         char charEntered = e.getCode()
@@ -273,7 +277,20 @@ public class FrmOptionsController {
                                 .map(s -> new Pair<Boolean,ArchiveService>(false, s))
                                 .collect(Collectors.toList()));
         tblProviders.setItems(FXCollections.observableArrayList(services));
-
+        tblProviders.setOnMouseClicked(e->{
+            final int focusedIndex = tblProviders.getSelectionModel()
+                                                     .getFocusedIndex();
+            for (int i = 0; i < tblProviders.getItems().size(); i++) {
+                final int curIdx = i;
+                JFXUtil.getTableCellForColumnRow(tblProviders, i, "Priority").ifPresent(
+                        (tabCell) -> {
+                            String colour = curIdx == focusedIndex ? "white":"black";
+                            tabCell.getGraphic().setStyle(String.format(PATTERN_TEXTFIELD_TABLE_CELL_STYLE,
+                                                                        colour));
+                        }
+                );
+            }
+        });
         for (ArchiveService service : services.stream()
                                               .map(Pair::getValue)
                                               .collect(Collectors.toList())) {
