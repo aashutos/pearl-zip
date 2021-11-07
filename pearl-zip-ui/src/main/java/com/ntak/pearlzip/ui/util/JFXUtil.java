@@ -12,6 +12,7 @@ import com.ntak.pearlzip.ui.pub.ZipLauncher;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -276,5 +277,24 @@ public class JFXUtil {
         int offsetHeight = (Integer) engine.executeScript("document.documentElement.offsetHeight");
         boolean isScrollBottom = scrollY + innerHeight + (innerHeight * (innerHeight / offsetHeight)) >= scrollHeight;
         callback.accept(isScrollBottom);
+    }
+
+    public static <S> Optional<TableCell<S,?>> getTableCellForColumnRow(TableView<S> table, int rowIndex,
+            String columnName) {
+        Integer columnIndex = table.getColumns()
+                    .indexOf(table.getColumns()
+                                         .stream()
+                                         .filter(c -> c.getText().equals(columnName))
+                                         .findFirst()
+                                         .orElse(null));
+        if (Objects.nonNull(columnIndex)) {
+            Object obj = table.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN, rowIndex, columnIndex);
+
+            if (obj instanceof TableCell tc) {
+                return Optional.ofNullable((TableCell<S,?>) tc);
+            }
+        }
+
+        return Optional.empty();
     }
 }

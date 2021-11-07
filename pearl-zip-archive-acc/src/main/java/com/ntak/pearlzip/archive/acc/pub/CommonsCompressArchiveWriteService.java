@@ -10,6 +10,7 @@ import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
 import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.UnicodeCommentExtraField;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -27,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -236,6 +239,36 @@ public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
         aoStream.finish();
     }
 
+    private void prepareStreamEntry(ArchiveEntry entry) {
+        if (entry instanceof JarArchiveEntry jae) {
+            final byte[] bytComment = Arrays.stream(jae.getExtraFields())
+                                                   .filter(UnicodeCommentExtraField.class::isInstance)
+                                                   .findFirst()
+                                                   .get()
+                                                   .getLocalFileDataData();
+
+            if (bytComment.length > 5) {
+                String comment = StandardCharsets.UTF_8.decode(ByteBuffer.wrap((Arrays.copyOfRange(bytComment, 5,
+                                                                                                   bytComment.length)))).toString();
+                jae.setComment(comment);
+            }
+        }
+
+        if (entry instanceof ZipArchiveEntry zae) {
+            final byte[] bytComment = Arrays.stream(zae.getExtraFields())
+                                            .filter(UnicodeCommentExtraField.class::isInstance)
+                                            .findFirst()
+                                            .get()
+                                            .getLocalFileDataData();
+
+            if (bytComment.length > 5) {
+                String comment = StandardCharsets.UTF_8.decode(ByteBuffer.wrap((Arrays.copyOfRange(bytComment, 5,
+                                                                                                   bytComment.length)))).toString();
+                zae.setComment(comment);
+            }
+        }
+    }
+
     private void prepareStream(ArchiveOutputStream aoStream) {
         if (aoStream instanceof TarArchiveOutputStream tarOStream) {
             tarOStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
@@ -341,6 +374,7 @@ public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
                 prepareStream(aoStream);
                 ArchiveEntry existingEntry;
                 while ((existingEntry = aiStream.getNextEntry()) != null) {
+                    prepareStreamEntry(existingEntry);
                     aoStream.putArchiveEntry(existingEntry);
                     IOUtils.copy(aiStream, aoStream);
                     aoStream.closeArchiveEntry();

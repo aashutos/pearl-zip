@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
@@ -67,6 +68,21 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
     public void handle(MouseEvent event) {
             if (Objects.nonNull(row.getItem())) {
                 ROW_TRIGGER.set(true);
+            }
+
+            if (!row.isEmpty()) {
+                final int focusedIndex = fileContentsView.getSelectionModel()
+                                                         .getFocusedIndex();
+                for (int i = 0; i < fileContentsView.getItems().size(); i++) {
+                    int curIdx = i;
+                    JFXUtil.getTableCellForColumnRow(fileContentsView, i, "Comments").ifPresent(
+                            (tabCell) -> {
+                                String colour = curIdx == focusedIndex ? "white":"black";
+                                tabCell.getGraphic().setStyle(String.format(PATTERN_TEXTFIELD_TABLE_CELL_STYLE,
+                                                                            colour));
+                            }
+                    );
+                }
             }
 
             if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY

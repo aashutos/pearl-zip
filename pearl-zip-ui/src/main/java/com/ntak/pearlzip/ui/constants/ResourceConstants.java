@@ -35,6 +35,10 @@ public class ResourceConstants {
     public static final String PATTERN_FXID_NEW_OPTIONS = "%s.new-options";
     public static final String PATTERN_FXID_OPTIONS = "%s.options";
 
+    public static final String PATTERN_TEXTFIELD_TABLE_CELL_STYLE = "-fx-text-box-border: transparent; -fx-background-color: transparent; " +
+            "-fx-background-insets: 0; -fx-padding: 1 3 1 3; -fx-focus-color: transparent; " +
+            "-fx-text-fill: %s;";
+
     public static final int NO_FILES_HISTORY = Integer.parseInt(System.getProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY,
                                                                                    "5"));
     public static Menu WINDOW_MENU;
