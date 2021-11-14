@@ -48,7 +48,11 @@ public class CommentsHighlightFileInfoCellCallbackTest {
                 latch.countDown();
             });
         } catch (Exception e) {
-            latch.countDown();
+            Platform.runLater(() -> {
+                cell = new TableCell<>();
+                row = new TableRow<>();
+                latch.countDown();
+            });
         } finally {
             latch.await();
 
