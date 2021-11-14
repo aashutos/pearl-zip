@@ -85,10 +85,11 @@ public class MacZipLauncher extends Application {
                                                                                                      writeService);
 
                                                // Generates PreOpen dialog, if required
-                                               Optional<Node> optNode;
-                                               if ((optNode = readService.getOpenArchiveOptionsPane(fxArchiveInfo.getArchiveInfo())).isPresent()) {
+                                               Optional<ArchiveService.FXForm> optNode;
+                                               if ((optNode = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+                                                                                                fxArchiveInfo.getArchiveInfo())).isPresent()) {
                                                    Stage preOpenStage = new Stage();
-                                                   Node root = optNode.get();
+                                                   Node root = optNode.get().getContent();
                                                    JFXUtil.loadPreOpenDialog(preOpenStage, root);
 
                                                    Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
@@ -257,13 +258,14 @@ public class MacZipLauncher extends Application {
                                           readService, writeService);
 
         // Generates PreOpen dialog, if required
-        Optional<Node> optNode;
-        if ((optNode = readService.getOpenArchiveOptionsPane(fxArchiveInfo.getArchiveInfo())).isPresent()) {
+        Optional<ArchiveService.FXForm> optFXForm;
+        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+                                                         fxArchiveInfo.getArchiveInfo())).isPresent()) {
             stage.initStyle(StageStyle.TRANSPARENT);
             stage.show();
 
             Stage preOpenStage = new Stage();
-            Node root = optNode.get();
+            Node root = optFXForm.get().getContent();
             JFXUtil.loadPreOpenDialog(preOpenStage, root);
 
             Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();

@@ -3,10 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
-import com.ntak.pearlzip.archive.pub.ArchiveInfo;
-import com.ntak.pearlzip.archive.pub.ArchiveReadService;
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.*;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -296,9 +293,10 @@ public class ArchiveUtil {
     }
 
     public static void checkPreOpenDialog(ArchiveReadService readService, ArchiveInfo archiveInfo) throws InterruptedException, IOException {
-        Optional<Node> optNode;
-        if ((optNode = readService.getOpenArchiveOptionsPane(archiveInfo)).isPresent()) {
-            Node root = optNode.get();
+        Optional<ArchiveService.FXForm> optFXForm;
+        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+                                                           archiveInfo)).isPresent()) {
+            Node root = optFXForm.get().getContent();
 
             CountDownLatch latch = new CountDownLatch(1);
             JFXUtil.runLater(() -> {

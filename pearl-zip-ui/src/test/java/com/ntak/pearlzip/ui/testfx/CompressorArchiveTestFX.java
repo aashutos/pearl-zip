@@ -575,6 +575,7 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                                      .get();
         sleep(250, MILLISECONDS);
         doubleClickOn(row);
+        sleep(250, MILLISECONDS);
 
         // Check window menu (incl. active window)
         Assertions.assertEquals(2,
