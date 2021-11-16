@@ -6,9 +6,7 @@ package com.ntak.pearlzip.archive.pub;
 import javafx.scene.Node;
 import javafx.util.Pair;
 
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_COM_BUS_FACTORY;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_ARCHIVE_SERVICE_COM_BUS_INIT_ERROR;
@@ -20,6 +18,10 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
  *  @author Aashutos Kakshepati
  */
 public interface ArchiveService {
+
+    String OPEN_ARCHIVE_OPTIONS = "pearlzip.pane.open-archive-options";
+    String OPTIONS = "pearlzip.pane.options";
+    String CREATE_OPTIONS = "pearlzip.pane.create-options";
 
     CommunicationBus DEFAULT_BUS = initializeBus();
 
@@ -133,4 +135,30 @@ public interface ArchiveService {
      *   or empty if not required
      */
     default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
+
+    default Optional<FXForm> getFXFormByIdentifier(String name, Object... parameters) { return Optional.empty();}
+
+    class FXForm {
+        private final String name;
+        private final Node content;
+        private final Map<String,Object> configuration;
+
+        public FXForm(String name, Node content, Map<String,Object> configuration) {
+            this.name = name;
+            this.content = content;
+            this.configuration = configuration;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Node getContent() {
+            return content;
+        }
+
+        public Map<String,Object> getConfiguration() {
+            return Collections.unmodifiableMap(configuration);
+        }
+    }
 }

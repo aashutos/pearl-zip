@@ -266,7 +266,7 @@ public abstract class CommonsCompressArchiveWriteServiceTestCore {
 
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
         final byte[] bytes = Files.readAllBytes(archive);
-        Assertions.assertEquals(22, bytes.length, "File failed to create in the expected manner");
+        Assertions.assertEquals(382, bytes.length, "File failed to create in the expected manner");
 
         // Zip magic number
         Assertions.assertEquals((byte)0x50, bytes[0], "first byte");

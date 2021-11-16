@@ -872,15 +872,19 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
                                            "test.tar").get();
             doubleClickOn(rowGZTar);
             sleep(250, MILLISECONDS);
-            doubleClickOn(rowGZTar);
-            sleep(250, MILLISECONDS);
 
             // 2) temp.tar - Check to ensure tar is present
+            nestedGZArchiveInfo = lookupArchiveInfo("test.tar").get();
             Assertions.assertTrue(nestedGZArchiveInfo.getFiles()
                                                      .stream()
                                                      .anyMatch(f -> f.getFileName()
                                                                      .contains("empty-archive.tar")),
                                   "Tar archive is not present");
+            rowTar = simTraversalArchive(this,
+                                         nestedGZArchiveInfo.getArchivePath(),
+                                         "#fileContentsView",
+                                         (r) -> {},
+                                         "empty-archive.tar").get();
             doubleClickOn(rowTar);
 
             // 3) empty-archive.tar - Check to ensure temp file is persisted
@@ -970,6 +974,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             clickOn(archiveInfo.getController().get().getFileContentsView(), MouseButton.SECONDARY)
                .clickOn("#mnuAddDir");
             NativeFileChooserUtil.chooseFile(PLATFORM, this, emptyDirFoo);
+            sleep(250,MILLISECONDS);
             simAddFolder(this, emptyDirBar);
 
             // Add file boom

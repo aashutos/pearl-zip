@@ -240,32 +240,21 @@ public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
     }
 
     private void prepareStreamEntry(ArchiveEntry entry) {
-        if (entry instanceof JarArchiveEntry jae) {
-            final byte[] bytComment = Arrays.stream(jae.getExtraFields())
-                                                   .filter(UnicodeCommentExtraField.class::isInstance)
-                                                   .findFirst()
-                                                   .get()
-                                                   .getLocalFileDataData();
-
-            if (bytComment.length > 5) {
-                String comment = StandardCharsets.UTF_8.decode(ByteBuffer.wrap((Arrays.copyOfRange(bytComment, 5,
-                                                                                                   bytComment.length)))).toString();
-                jae.setComment(comment);
-            }
-        }
-
         if (entry instanceof ZipArchiveEntry zae) {
-            final byte[] bytComment = Arrays.stream(zae.getExtraFields())
-                                            .filter(UnicodeCommentExtraField.class::isInstance)
-                                            .findFirst()
-                                            .get()
-                                            .getLocalFileDataData();
+            try {
+                final byte[] bytComment = Arrays.stream(zae.getExtraFields())
+                                                .filter(UnicodeCommentExtraField.class::isInstance)
+                                                .findFirst()
+                                                .get()
+                                                .getLocalFileDataData();
 
-            if (bytComment.length > 5) {
-                String comment = StandardCharsets.UTF_8.decode(ByteBuffer.wrap((Arrays.copyOfRange(bytComment, 5,
-                                                                                                   bytComment.length)))).toString();
-                zae.setComment(comment);
-            }
+                if (bytComment.length > 5) {
+                    String comment = StandardCharsets.UTF_8.decode(ByteBuffer.wrap((Arrays.copyOfRange(bytComment, 5,
+                                                                                                       bytComment.length))))
+                                                           .toString();
+                    zae.setComment(comment);
+                }
+            } catch (Exception e) {}
         }
     }
 

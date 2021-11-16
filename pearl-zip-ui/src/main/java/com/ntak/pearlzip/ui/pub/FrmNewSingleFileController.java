@@ -4,28 +4,29 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
+import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
@@ -62,7 +63,7 @@ public class FrmNewSingleFileController {
     @FXML
     private TabPane tabsNew;
 
-    private final Map<String,List<Tab>> CUSTOM_TAB_MAP = new ConcurrentHashMap<>();
+    private final Map<Class,Tab> CLASS_TAB_MAP = new ConcurrentHashMap<>();
     private final ArchiveInfo archiveInfo = new ArchiveInfo();
     private File selectedFile;
 
@@ -81,25 +82,21 @@ public class FrmNewSingleFileController {
         comboArchiveFormat.getSelectionModel().selectFirst();
 
         for (ArchiveWriteService service : ZipState.getWriteProviders()) {
-            if ((service.getCreateArchiveOptionsPane()).isPresent()) {
-                Pair<String,Node> tab = service.getCreateArchiveOptionsPane()
-                                               .get();
+            if (service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS).isPresent()) {
+                ArchiveService.FXForm tab = service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS)
+                                                   .get();
 
                 Tab customTab = new Tab();
-                customTab.setText(tab.getKey());
+                customTab.setText(tab.getName());
                 customTab.setId(String.format(PATTERN_FXID_NEW_OPTIONS,
                                               service.getClass()
                                                      .getCanonicalName()));
-                customTab.setContent(tab.getValue());
-                tab.getValue().setUserData(archiveInfo);
+                customTab.setContent(tab.getContent());
+                tab.getContent().setUserData(archiveInfo);
                 tabsNew.getTabs()
                        .add(customTab);
 
-                for (String format : service.supportedWriteFormats()) {
-                    List<Tab> tabs = CUSTOM_TAB_MAP.getOrDefault(format, new LinkedList<>());
-                    tabs.add(customTab);
-                    CUSTOM_TAB_MAP.put(format, tabs);
-                }
+                CLASS_TAB_MAP.put(service.getClass(), customTab);
             }
         }
 
@@ -227,17 +224,18 @@ public class FrmNewSingleFileController {
 
     private void setTabVisibilityByFormat(String format) {
         synchronized(tabsNew) {
-            List<Tab> tabsToEnable = CUSTOM_TAB_MAP.getOrDefault(format, Collections.emptyList())
-                                                   .stream()
-                                                   .filter(Objects::nonNull)
-                                                   .collect(Collectors.toList());
             tabsNew.getTabs()
                    .remove(1,
                            tabsNew.getTabs()
                                   .size());
 
-            tabsNew.getTabs()
-                   .addAll(tabsToEnable);
+            final Tab tab = CLASS_TAB_MAP.get(ZipState.getWriteArchiveServiceForFile(String.format(".%s", format))
+                                                      .get()
+                                                      .getClass());
+            if (Objects.nonNull(tab)) {
+                tabsNew.getTabs()
+                       .add(tab);
+            }
         }
     }
 }

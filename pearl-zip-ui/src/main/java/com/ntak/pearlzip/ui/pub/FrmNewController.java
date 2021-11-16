@@ -11,19 +11,19 @@ import com.ntak.pearlzip.ui.event.handler.BtnCreateEventHandler;
 import com.ntak.pearlzip.ui.model.ZipState;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Pair;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_NEW_OPTIONS;
@@ -45,7 +45,7 @@ public class FrmNewController {
     @FXML
     private TabPane tabsNew;
 
-    private final Map<String,List<Tab>> CUSTOM_TAB_MAP = new ConcurrentHashMap<>();
+    private final Map<Class,Tab> CLASS_TAB_MAP = new ConcurrentHashMap<>();
     private final ArchiveInfo archiveInfo = new ArchiveInfo();
 
     @FXML
@@ -67,27 +67,26 @@ public class FrmNewController {
         }
 
         for (ArchiveWriteService service : ZipState.getWriteProviders()) {
-            if ((service.getCreateArchiveOptionsPane()).isPresent()) {
-                Pair<String,Node> tab = service.getCreateArchiveOptionsPane()
-                                               .get();
+            if (service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS).isPresent()) {
+                ArchiveService.FXForm tab = service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS)
+                                                   .get();
 
                 Tab customTab = new Tab();
-                customTab.setText(tab.getKey());
+                customTab.setText(tab.getName());
                 customTab.setId(String.format(PATTERN_FXID_NEW_OPTIONS,
                                               service.getClass()
                                                      .getCanonicalName()));
-                customTab.setContent(tab.getValue());
-                tab.getValue().setUserData(archiveInfo);
+                customTab.setContent(tab.getContent());
+                tab.getContent().setUserData(archiveInfo);
                 tabsNew.getTabs()
                        .add(customTab);
 
-                for (String format : service.supportedWriteFormats()) {
-                    List<Tab> tabs = CUSTOM_TAB_MAP.getOrDefault(format, new LinkedList<>());
-                    tabs.add(customTab);
-                    CUSTOM_TAB_MAP.put(format, tabs);
-                }
+                CLASS_TAB_MAP.put(service.getClass(), customTab);
             }
         }
+
+        setTabVisibilityByFormat(comboArchiveFormat.getSelectionModel()
+                                                   .getSelectedItem());
     }
 
     public void initData(Stage stage, AtomicBoolean isRendered) {
@@ -120,17 +119,18 @@ public class FrmNewController {
 
     private void setTabVisibilityByFormat(String format) {
         synchronized(tabsNew) {
-            List<Tab> tabsToEnable = CUSTOM_TAB_MAP.getOrDefault(format, Collections.emptyList())
-                                                   .stream()
-                                                   .filter(Objects::nonNull)
-                                                   .collect(Collectors.toList());
             tabsNew.getTabs()
                    .remove(1,
                            tabsNew.getTabs()
                                   .size());
 
-            tabsNew.getTabs()
-                   .addAll(tabsToEnable);
+            final Tab tab = CLASS_TAB_MAP.get(ZipState.getWriteArchiveServiceForFile(String.format(".%s", format))
+                                                    .get()
+                                                    .getClass());
+            if (Objects.nonNull(tab)) {
+                tabsNew.getTabs()
+                       .add(tab);
+            }
         }
     }
 }

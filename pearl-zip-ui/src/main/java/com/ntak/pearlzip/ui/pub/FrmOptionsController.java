@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Dragboard;
@@ -294,16 +293,17 @@ public class FrmOptionsController {
         for (ArchiveService service : services.stream()
                                               .map(Pair::getValue)
                                               .collect(Collectors.toList())) {
-            if ((service.getOptionsPane()).isPresent()) {
-                Pair<String,Node> tab = service.getOptionsPane()
-                                               .get();
+
+            if (service.getFXFormByIdentifier(ArchiveService.OPTIONS).isPresent()) {
+                ArchiveService.FXForm tab = service.getFXFormByIdentifier(ArchiveService.OPTIONS)
+                                                   .get();
 
                 Tab customTab = new Tab();
-                customTab.setText(tab.getKey());
+                customTab.setText(tab.getName());
                 customTab.setId(String.format(PATTERN_FXID_OPTIONS,
                                               service.getClass()
                                                      .getCanonicalName()));
-                customTab.setContent(tab.getValue());
+                customTab.setContent(tab.getContent());
                 tabPaneOptions.getTabs()
                               .add(customTab);
             }
