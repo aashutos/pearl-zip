@@ -82,8 +82,8 @@ public class FrmNewSingleFileController {
         comboArchiveFormat.getSelectionModel().selectFirst();
 
         for (ArchiveWriteService service : ZipState.getWriteProviders()) {
-            if (service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS).isPresent()) {
-                ArchiveService.FXForm tab = service.getFXFormByIdentifier(ArchiveService.CREATE_OPTIONS)
+            if (service.getFXFormByIdentifier(ArchiveWriteService.CREATE_OPTIONS).isPresent()) {
+                ArchiveService.FXForm tab = service.getFXFormByIdentifier(ArchiveWriteService.CREATE_OPTIONS)
                                                    .get();
 
                 Tab customTab = new Tab();

@@ -19,9 +19,7 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
  */
 public interface ArchiveService {
 
-    String OPEN_ARCHIVE_OPTIONS = "pearlzip.pane.open-archive-options";
     String OPTIONS = "pearlzip.pane.options";
-    String CREATE_OPTIONS = "pearlzip.pane.create-options";
 
     CommunicationBus DEFAULT_BUS = initializeBus();
 

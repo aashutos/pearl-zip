@@ -86,7 +86,8 @@ public class MacZipLauncher extends Application {
 
                                                // Generates PreOpen dialog, if required
                                                Optional<ArchiveService.FXForm> optNode;
-                                               if ((optNode = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+                                               if ((optNode =
+                                                       readService.getFXFormByIdentifier(ArchiveReadService.OPEN_ARCHIVE_OPTIONS,
                                                                                                 fxArchiveInfo.getArchiveInfo())).isPresent()) {
                                                    Stage preOpenStage = new Stage();
                                                    Node root = optNode.get().getContent();
@@ -259,7 +260,7 @@ public class MacZipLauncher extends Application {
 
         // Generates PreOpen dialog, if required
         Optional<ArchiveService.FXForm> optFXForm;
-        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveReadService.OPEN_ARCHIVE_OPTIONS,
                                                          fxArchiveInfo.getArchiveInfo())).isPresent()) {
             stage.initStyle(StageStyle.TRANSPARENT);
             stage.show();

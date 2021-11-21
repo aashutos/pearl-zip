@@ -75,6 +75,7 @@ public class PearlZipFXUtil {
         final String[] nameSplit = DSV.split(archive.getFileName()
                                                    .toString());
         final String archiveFormat = nameSplit[nameSplit.length-1];
+        robot.sleep(100, MILLISECONDS);
         ComboBox<String> cmbArchiveFormat = FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat");
         FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, archiveFormat);
 

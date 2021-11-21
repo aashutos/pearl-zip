@@ -14,6 +14,8 @@ import java.util.Optional;
  *  @author Aashutos Kakshepati
  */
 public interface ArchiveReadService extends ArchiveService {
+    String OPEN_ARCHIVE_OPTIONS = "pearlzip.pane.open-archive-options";
+
     /**
      *  Extracts metadata from the archive specified and wraps it in an ArchiveInfo object. The default
      *  implementation does not parse the file and just returns the default archive setup with minimum configuration.
