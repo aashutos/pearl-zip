@@ -294,7 +294,7 @@ public class ArchiveUtil {
 
     public static void checkPreOpenDialog(ArchiveReadService readService, ArchiveInfo archiveInfo) throws InterruptedException, IOException {
         Optional<ArchiveService.FXForm> optFXForm;
-        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveService.OPEN_ARCHIVE_OPTIONS,
+        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveReadService.OPEN_ARCHIVE_OPTIONS,
                                                            archiveInfo)).isPresent()) {
             Node root = optFXForm.get().getContent();
 

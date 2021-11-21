@@ -15,6 +15,8 @@ import java.util.Optional;
  */
 public interface ArchiveWriteService extends ArchiveService {
 
+    String CREATE_OPTIONS = "pearlzip.pane.create-options";
+
     /**
      *  Creates an archive at the path specified with optionally adding files to the archive.
      *
