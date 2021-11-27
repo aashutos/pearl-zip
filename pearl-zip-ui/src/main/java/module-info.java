@@ -31,6 +31,8 @@ module com.ntak.pearlzip.ui {
 
     opens com.ntak.pearlzip.ui.pub;
     opens com.ntak.pearlzip.ui.model;
+    exports com.ntak.pearlzip.ui.mac;
+    opens com.ntak.pearlzip.ui.mac;
 
     // Logging dependencies
     requires org.apache.logging.log4j;

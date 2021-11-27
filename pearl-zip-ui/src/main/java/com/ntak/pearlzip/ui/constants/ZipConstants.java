@@ -3,15 +3,19 @@
  */
 package com.ntak.pearlzip.ui.constants;
 
-import com.ntak.pearlzip.ui.pub.MacZipLauncher;
+import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
-import de.jangassen.MenuToolkit;
 
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,6 +44,7 @@ public class ZipConstants {
     public static final String CNS_CONCURRENCY_LOCK_POLL_TIMEOUT = "configuration.ntak.pearl-zip.concurrency.lock-poll-timeout";
     public static final String CNS_SYSMENU_WINDOW_TEXT = "sysmenu.window.text";
     public static final String CNS_DEFAULT_FORMAT = "configuration.ntak.pearl-zip.default-format";
+    public static final String CNS_LAUNCHER_CANONICAL_NAME = "configuration.ntak.pearl-zip.launcher-canonical-name";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -316,7 +321,7 @@ public class ZipConstants {
 
     public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
 
-    public static MacZipLauncher APP;
+    public static PearlZipApplication APP;
     public static Path LOCAL_TEMP;
     public static Path STORE_ROOT;
     public static Path STORE_TEMP;
@@ -327,10 +332,29 @@ public class ZipConstants {
     public static ThreadGroup THREAD_GROUP;
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
     public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
-    public static MenuToolkit MENU_TOOLKIT;
     public static Path RUNTIME_MODULE_PATH;
 
+    public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
+
+    private static Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
+
+    public static <T> Optional<T> getAdditionalConfig(String key) {
+        if (Objects.nonNull(key)) {
+            try {
+                T value = (T) ADDITIONAL_CONFIG.get(key);
+                return Optional.ofNullable(value);
+            } catch (Exception e) {
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static <T> void setAdditionalConfig(String key, T value) {
+        if (Objects.nonNull(key) && Objects.nonNull(value)) {
+            ADDITIONAL_CONFIG.put(key, value);
+        }
+    }
 }

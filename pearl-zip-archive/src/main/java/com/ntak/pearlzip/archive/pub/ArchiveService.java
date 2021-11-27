@@ -22,6 +22,7 @@ public interface ArchiveService {
     String OPTIONS = "pearlzip.pane.options";
 
     CommunicationBus DEFAULT_BUS = initializeBus();
+    String CUSTOM_MENUS = "pearlzip.menu.custom-menus";
 
     /**
      *   This method decouples the implementation of the internal communication bus from PearlZip by utilising the

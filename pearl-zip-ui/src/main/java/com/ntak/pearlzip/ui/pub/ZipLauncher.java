@@ -8,17 +8,19 @@ import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.license.pub.LicenseService;
 import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.MetricProfile;
 import com.ntak.pearlzip.ui.util.MetricProfileFactory;
 import com.ntak.pearlzip.ui.util.MetricThreadFactory;
 import com.ntak.pearlzip.ui.util.ModuleUtil;
-import de.jangassen.MenuToolkit;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -58,17 +60,24 @@ public class ZipLauncher {
         }
     }
 
-    public static void main(String[] args) {
-       MacZipLauncher.main(args);
+    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException, InterruptedException, IOException {
+        // Dynamically load launcher...
+        Properties props = new Properties();
+        props.load(MacPearlZipApplication.class.getClassLoader()
+                                               .getResourceAsStream("application.properties"));
+        Class<?> klass = Class.forName(props.getProperty(CNS_LAUNCHER_CANONICAL_NAME));
+        Method mainMethod = klass.getMethod("main", String[].class);
+        mainMethod.invoke(null, (Object) args);
 
+       APP_LATCH.await();
        Runtime.getRuntime().exit(0);
     }
 
     public static void initialize() throws IOException {
         // Load bootstrap properties
         Properties props = new Properties();
-        props.load(MacZipLauncher.class.getClassLoader()
-                                       .getResourceAsStream("application.properties"));
+        props.load(MacPearlZipApplication.class.getClassLoader()
+                                               .getResourceAsStream("application.properties"));
         ZipConstants.STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT, String.format("%s/.pz",
                                                                                              System.getProperty(
                                                                                                      "user.home"))));
@@ -104,16 +113,16 @@ public class ZipLauncher {
              FileChannel channel = fileOutputStream.getChannel();
              FileLock lock = channel.lock()) {
                 // Standard resource case
-                Path reservedKeys = Paths.get(MacZipLauncher.class.getClassLoader()
-                                                                  .getResource("reserved-keys")
-                                                                  .getPath());
+                Path reservedKeys = Paths.get(MacPearlZipApplication.class.getClassLoader()
+                                                                          .getResource("reserved-keys")
+                                                                          .getPath());
                 LoggingConstants.ROOT_LOGGER.info(reservedKeys);
 
                 // standard/jar resource case
                 if (Objects.nonNull(reservedKeys)) {
 
-                    try (InputStream is = MacZipLauncher.class.getClassLoader()
-                                                              .getResourceAsStream("reserved-keys")) {
+                    try (InputStream is = MacPearlZipApplication.class.getClassLoader()
+                                                                      .getResourceAsStream("reserved-keys")) {
                         Files.copy(is, tmpRK, StandardCopyOption.REPLACE_EXISTING);
                     }
                 } else if (!Files.exists(reservedKeys)) {
@@ -167,7 +176,6 @@ public class ZipLauncher {
                                  Locale.getDefault());
         LOG_BUNDLE = ResourceBundle.getBundle(System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
                                               Locale.getDefault());
-        ZipConstants.MENU_TOOLKIT = MenuToolkit.toolkit(Locale.getDefault());
 
         // Load License Declarations
         LicenseService licenseService = new PearlZipLicenseService();
