@@ -8,7 +8,6 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -16,12 +15,12 @@ import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
-import de.jangassen.model.AppearanceMode;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -34,18 +33,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.COM_BUS_EXECUTOR_SERVICE;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.mac.MacZipConstants.*;
 import static com.ntak.pearlzip.ui.pub.ZipLauncher.OS_FILES;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
@@ -55,7 +54,7 @@ import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
  *
  * @author Aashutos Kakshepati
  */
-public class MacZipLauncher extends Application {
+public abstract class PearlZipApplication extends Application {
 
     static {
         Desktop.getDesktop()
@@ -150,52 +149,12 @@ public class MacZipLauncher extends Application {
             Files.createFile(RECENT_FILE);
         }
 
-        ////////////////////////////////////////////
-        ///// Create System Menu //////////////////
-        //////////////////////////////////////////
-
-        // Create a new System Menu
-        String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
-        MenuBar sysMenu = new MenuBar();
-
         // Setting about form...
-        FXMLLoader aboutLoader = new FXMLLoader();
-        aboutLoader.setLocation(MacZipLauncher.class.getClassLoader()
-                                                    .getResource("frmAbout.fxml"));
-        aboutLoader.setResources(LOG_BUNDLE);
-        VBox abtRoot = aboutLoader.load();
-        FrmAboutController abtController = aboutLoader.getController();
-        Scene abtScene = new Scene(abtRoot);
-        Stage aboutStage = new Stage();
-        abtController.initData(aboutStage);
-        aboutStage.setScene(abtScene);
-        aboutStage.initStyle(StageStyle.UNDECORATED);
+        Stage aboutStage = genFrmAbout();
 
-        sysMenu.setUseSystemMenuBar(true);
-        sysMenu.getMenus()
-               .add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
-
-        // Add some more Menus...
-        FXMLLoader menuLoader = new FXMLLoader();
-        menuLoader.setLocation(MacZipLauncher.class.getClassLoader()
-                                                   .getResource("sysmenu.fxml"));
-        menuLoader.setResources(LOG_BUNDLE);
-        MenuBar additionalMenu = menuLoader.load();
-        SysMenuController menuController = menuLoader.getController();
-        menuController.initData();
-        sysMenu.getMenus()
-               .addAll(additionalMenu.getMenus());
-        ResourceConstants.WINDOW_MENU =
-                sysMenu.getMenus()
-                       .stream()
-                       .filter(m -> m.getText()
-                                     .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
-                       .findFirst()
-                       .get();
-
-        // Use the menu sysMenu for all stages including new ones
-        MENU_TOOLKIT.setAppearanceMode(AppearanceMode.DARK);
-        MENU_TOOLKIT.setMenuBar(sysMenu);
+        // Load custom menus from plugins
+        List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
+        createSystemMenu(aboutStage, customMenus);
 
         // Initialise archive information
         readyLatch.countDown();
@@ -289,6 +248,61 @@ public class MacZipLauncher extends Application {
             launchMainStage(stage, fxArchiveInfo);
         }
     }
+
+    public static Stage genFrmAbout() throws IOException {
+        FXMLLoader aboutLoader = new FXMLLoader();
+        aboutLoader.setLocation(PearlZipApplication.class.getClassLoader()
+                                                         .getResource("frmAbout.fxml"));
+        aboutLoader.setResources(LOG_BUNDLE);
+        VBox abtRoot = aboutLoader.load();
+        FrmAboutController abtController = aboutLoader.getController();
+        Scene abtScene = new Scene(abtRoot);
+        Stage aboutStage = new Stage();
+        abtController.initData(aboutStage);
+        aboutStage.setScene(abtScene);
+        aboutStage.initStyle(StageStyle.UNDECORATED);
+        return aboutStage;
+    }
+
+    public static List<javafx.scene.control.Menu> loadMenusFromPlugins() {
+        List<javafx.scene.control.Menu> customMenus = new LinkedList<>();
+        Set<ArchiveService> archiveServices = new HashSet<>();
+        archiveServices.addAll(ZipState.supportedWriteArchives()
+                .stream()
+                .map(f-> ZipState.getWriteArchiveServiceForFile(String.format(".%s",f)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList()));
+        archiveServices.addAll(ZipState.supportedReadArchives()
+                                       .stream()
+                                       .map(f-> ZipState.getReadArchiveServiceForFile(String.format(".%s",f)))
+                                       .filter(Optional::isPresent)
+                                       .map(Optional::get)
+                                       .collect(Collectors.toList()));
+
+        for (ArchiveService service : archiveServices) {
+            Optional<ArchiveService.FXForm> optMenu = service.getFXFormByIdentifier(ArchiveService.CUSTOM_MENUS);
+            if (optMenu.isPresent() && optMenu.get().getContent() instanceof MenuBar menuBar) {
+                javafx.scene.control.Menu menu = new javafx.scene.control.Menu();
+                if (menuBar.getMenus().size() > 1) {
+                    menu.getItems()
+                        .addAll(menuBar.getMenus());
+                    menu.setText(optMenu.get()
+                                        .getName());
+                } else if (menuBar.getMenus().size() == 1) {
+                    menu.getItems()
+                        .addAll(menuBar.getMenus().get(0).getItems());
+                    menu.setText(menuBar.getMenus().get(0).getText());
+                }
+                customMenus.add(menu);
+            }
+        }
+
+        customMenus.sort(Comparator.comparing(MenuItem::getText));
+        return customMenus;
+    }
+
+    public abstract void createSystemMenu(Stage aboutStage, List<javafx.scene.control.Menu> customMenus) throws IOException;
 
     @Override
     public void stop() {

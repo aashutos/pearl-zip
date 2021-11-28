@@ -41,6 +41,8 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.genFrmAbout;
+import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.loadMenusFromPlugins;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
@@ -368,6 +370,11 @@ public class FrmOptionsController {
                                                 );
                     new LinkedList<>(ZipState.getWriteProviders()).forEach(ZipState::addArchiveProvider);
                     new LinkedList<>(ZipState.getReadProviders()).forEach(ZipState::addArchiveProvider);
+
+                    // Load custom menus from plugins
+                    Stage aboutStage = genFrmAbout();
+                    List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
+                    APP.createSystemMenu(aboutStage, customMenus);
                 } catch(IOException exc) {
                 }
             }

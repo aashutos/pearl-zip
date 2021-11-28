@@ -162,6 +162,12 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <compilerArgs>
+                        <compilerArg>--add-exports</compilerArg>
+                        <compilerArg>nsmenufx/de.jangassen.platform.mac=com.ntak.pearlzip.ui</compilerArg>
+                        <compilerArg>--add-exports</compilerArg>
+                        <compilerArg>nsmenufx/de.jangassen.platform=com.ntak.pearlzip.ui</compilerArg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

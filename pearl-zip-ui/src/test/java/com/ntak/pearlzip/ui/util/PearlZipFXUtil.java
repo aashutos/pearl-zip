@@ -8,11 +8,12 @@ import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmAboutController;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
-import com.ntak.pearlzip.ui.pub.MacZipLauncher;
+import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
 import org.testfx.util.WaitForAsyncUtils;
 
@@ -430,6 +432,8 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
+        APP = Mockito.mock(PearlZipApplication.class);
+
         // Set up global constants
         ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
         ZipConstants.RECENT_FILE = Paths.get(System.getProperty("user.home"), ".pz", "rf");
@@ -461,7 +465,7 @@ public class PearlZipFXUtil {
 
         // Load main form
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(MacZipLauncher.class.getResource("/frmMain.fxml"));
+        loader.setLocation(MacPearlZipApplication.class.getResource("/frmMain.fxml"));
         loader.setResources(LOG_BUNDLE);
         Parent root = loader.load();
         if (!stage.getStyle().equals(StageStyle.DECORATED))
@@ -490,7 +494,7 @@ public class PearlZipFXUtil {
 
         // Setting about form...
         FXMLLoader aboutLoader = new FXMLLoader();
-        aboutLoader.setLocation(MacZipLauncher.class.getClassLoader().getResource("frmAbout.fxml"));
+        aboutLoader.setLocation(MacPearlZipApplication.class.getClassLoader().getResource("frmAbout.fxml"));
         aboutLoader.setResources(LOG_BUNDLE);
         VBox abtRoot = aboutLoader.load();
         FrmAboutController abtController = aboutLoader.getController();
@@ -506,8 +510,8 @@ public class PearlZipFXUtil {
 
         // Add some more Menus...
         FXMLLoader menuLoader = new FXMLLoader();
-        menuLoader.setLocation(MacZipLauncher.class.getClassLoader()
-                                                   .getResource("sysmenu.fxml"));
+        menuLoader.setLocation(MacPearlZipApplication.class.getClassLoader()
+                                                           .getResource("sysmenu.fxml"));
         menuLoader.setResources(LOG_BUNDLE);
         MenuBar additionalMenu = menuLoader.load();
         SysMenuController menuController = menuLoader.getController();

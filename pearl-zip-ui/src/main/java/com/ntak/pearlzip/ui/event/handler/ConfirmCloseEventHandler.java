@@ -310,7 +310,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                 long sessionId = System.currentTimeMillis();
                 executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, true),
                                          LOGGER::error,
-                                         (s) -> {});
+                                         (s) -> {APP_LATCH.countDown();});
             }
         }
     }
