@@ -14,7 +14,7 @@
     <url>https://pearlzip.92ak.co.uk</url>
 
     <properties>
-        <log4j.version>2.14.0</log4j.version>
+        <log4j.version>2.15.0</log4j.version>
         <junit.version>5.5.2</junit.version>
         <junit-platform-runner.version>1.5.2</junit-platform-runner.version>
         <dryrun.release>true</dryrun.release>
