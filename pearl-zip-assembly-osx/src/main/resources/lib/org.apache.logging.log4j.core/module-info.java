@@ -26,6 +26,7 @@ module org.apache.logging.log4j.core {
     exports org.apache.logging.log4j.core.appender.routing;
     exports org.apache.logging.log4j.core.async;
     exports org.apache.logging.log4j.core.config;
+    exports org.apache.logging.log4j.core.config.arbiters;
     exports org.apache.logging.log4j.core.config.builder.api;
     exports org.apache.logging.log4j.core.config.builder.impl;
     exports org.apache.logging.log4j.core.config.composite;
