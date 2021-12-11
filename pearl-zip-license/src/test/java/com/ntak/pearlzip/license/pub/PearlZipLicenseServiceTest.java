@@ -61,7 +61,7 @@ public class PearlZipLicenseServiceTest {
 
         Map<String,LicenseInfo> licenses = licenseService.retrieveDeclaredLicenses();
         Assertions.assertNotNull(licenses, "Licenses was unexpectedly null");
-        Assertions.assertEquals(23, licenses.size(), "The expected licenses were not retrieved");
+        Assertions.assertEquals(40, licenses.size(), "The expected licenses were not retrieved");
 
         for (String key : expectedKeys) {
             Assertions.assertTrue(licenses.containsKey(key), String.format("key '%s' was not found", key));
@@ -101,6 +101,6 @@ public class PearlZipLicenseServiceTest {
 
         Map<String,LicenseInfo> licenses = licenseService.retrieveDeclaredLicenses();
         Assertions.assertNotNull(licenses, "Licenses was unexpectedly null");
-        Assertions.assertEquals(10, licenses.size(), "The expected licenses were not retrieved");
+        Assertions.assertEquals(27, licenses.size(), "The expected licenses were not retrieved");
     }
 }
