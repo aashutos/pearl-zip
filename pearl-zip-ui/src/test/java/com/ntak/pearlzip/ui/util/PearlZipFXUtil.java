@@ -52,6 +52,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.mac.MacZipConstants.MENU_TOOLKIT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -486,7 +487,11 @@ public class PearlZipFXUtil {
     }
 
     public static void initialiseMenu() throws IOException {
-        MenuToolkit MENU_TOOLKIT = MenuToolkit.toolkit(Locale.getDefault());
+        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
+            ZipConstants.setAdditionalConfig(MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
+        }
+
+        MenuToolkit menuToolkit = (MenuToolkit)ZipConstants.getAdditionalConfig(MENU_TOOLKIT).get();
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
@@ -506,7 +511,7 @@ public class PearlZipFXUtil {
 
         sysMenu.setUseSystemMenuBar(true);
         sysMenu.getMenus()
-               .add(MENU_TOOLKIT.createDefaultApplicationMenu(appName, aboutStage));
+               .add(menuToolkit.createDefaultApplicationMenu(appName, aboutStage));
 
         // Add some more Menus...
         FXMLLoader menuLoader = new FXMLLoader();
@@ -521,7 +526,7 @@ public class PearlZipFXUtil {
         sysMenu.setId("MenuBar");
 
         // Use the menu sysMenu for all stages including new ones
-        MENU_TOOLKIT.setGlobalMenuBar(sysMenu);
+        menuToolkit.setGlobalMenuBar(sysMenu);
 
         // Set Windows menu variable...
         WINDOW_MENU = sysMenu.getMenus()

@@ -3,7 +3,6 @@
  */
 package com.ntak.pearlzip.ui.event.handler;
 
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
@@ -20,27 +19,23 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.addDirectory;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 
 /**
- *  Event Handler for Add Directory functionality.
- *  @author Aashutos Kakshepati
-*/
+ * Event Handler for Add Directory functionality.
+ *
+ * @author Aashutos Kakshepati
+ */
 public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
 
-    private static final Logger LOGGER = LoggerContext.getContext().getLogger(BtnAddDirEventHandler.class);
+    private static final Logger LOGGER = LoggerContext.getContext()
+                                                      .getLogger(BtnAddDirEventHandler.class);
 
     private final TableView<FileInfo> fileContentsView;
     private final FXArchiveInfo fxArchiveInfo;
@@ -52,9 +47,8 @@ public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
 
     @Override
     public void handleEvent(ActionEvent event) {
-        ArchiveWriteService archiveWriteService;
         try {
-            if (Objects.nonNull(archiveWriteService = fxArchiveInfo.getWriteService())) {
+            if (Objects.nonNull(fxArchiveInfo.getWriteService())) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 // TITLE: Select source directory location for augmentation...
                 directoryChooser.setTitle(resolveTextKey(TITLE_SOURCE_DIR_LOCATION));
@@ -64,62 +58,26 @@ public class BtnAddDirEventHandler implements CheckEventHandler<ActionEvent> {
                     return;
                 }
 
-                final Path dirPath = dir.toPath();
-
-                int depth = fxArchiveInfo.getDepth().get();
-                int index = fxArchiveInfo.getFiles().size();
+                int depth = fxArchiveInfo.getDepth()
+                                         .get();
                 String prefix = fxArchiveInfo.getPrefix();
 
                 long sessionId = System.currentTimeMillis();
-                JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
-                                                 ()-> {
-                        Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
-                        Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
-
-                        List<FileInfo> files = ArchiveUtil.handleDirectory(prefix, dirPath.getParent(), dirPath, depth+1, index);
-                        files.add(new FileInfo((index+1), depth,
-                                                depth>0?String.format("%s/%s",prefix,
-                                                                      dirPath.getFileName().toString()):dirPath.getFileName().toString(),
-                                                -1, 0,
-                                                0, null,
-                                                null, null,
-                                                "", "", 0, "",
-                                                true, false,
-                                                Collections.singletonMap(KEY_FILE_PATH, dirPath.toString())));
-
-                        if (files.removeIf(f -> f.getAdditionalInfoMap().getOrDefault(KEY_FILE_PATH,"").equals(fxArchiveInfo.getArchivePath()))) {
-                            // LOG: Skipping the addition of this archive within itself...
-                            LOGGER.warn(resolveTextKey(LOG_SKIP_ADD_SELF));
-                        }
-
-                        boolean success = archiveWriteService.addFile(sessionId, fxArchiveInfo.getArchiveInfo(),
-                                                    files.toArray(new FileInfo[0]));
-                        if (!success) {
-                            restoreBackupArchive(tempArchive,
-                                                 Paths.get(fxArchiveInfo.getArchivePath()));
-                            JFXUtil.runLater(fxArchiveInfo::refresh);
-
-                            // LOG: Issue adding directory %s
-                            // TITLE: ERROR: Failed to add directory to archive
-                            // HEADER: Directory %s could not be added to archive %s
-                            // BODY: Archive has been reverted to the last stable state.
-                            LOGGER.error(resolveTextKey(LOG_ISSUE_ADDING_DIR, dir.getAbsolutePath()));
-                            raiseAlert(Alert.AlertType.ERROR,
-                                       resolveTextKey(TITLE_ISSUE_ADDING_DIR),
-                                       resolveTextKey(HEADER_ISSUE_ADDING_DIR),
-                                       resolveTextKey(BODY_ISSUE_ADDING_DIR),
-                                       null
-                            );
-                        }
-
-                        removeBackupArchive(tempArchive);
-                    },
-                    (s)->JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
+                JFXUtil.executeBackgroundProcess(sessionId,
+                                                 (Stage) fileContentsView.getScene()
+                                                                         .getWindow(),
+                                                 () -> addDirectory(sessionId, fxArchiveInfo, dir),
+                                                 (s) -> JFXUtil.refreshFileView(fileContentsView,
+                                                                                fxArchiveInfo,
+                                                                                depth,
+                                                                                prefix)
                 );
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             // LOG: Issue creating stage.\nException type: %s\nMessage:%s\nStack trace:\n%s
-            LOGGER.warn(resolveTextKey(LOG_ISSUE_CREATING_STAGE, e.getClass().getCanonicalName(),
+            LOGGER.warn(resolveTextKey(LOG_ISSUE_CREATING_STAGE,
+                                       e.getClass()
+                                        .getCanonicalName(),
                                        e.getMessage(),
                                        LoggingUtil.getStackTraceFromException(e)));
             // TITLE: ERROR: Issue creating stage

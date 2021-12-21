@@ -11,6 +11,7 @@ module com.ntak.pearlzip.ui {
     exports com.ntak.pearlzip.ui.cell;
     exports com.ntak.pearlzip.ui.pub;
     exports com.ntak.pearlzip.ui.util;
+    opens com.ntak.pearlzip.ui.util;
 
     // UI dependencies
     requires java.desktop;
@@ -30,9 +31,11 @@ module com.ntak.pearlzip.ui {
     requires sevenzipjbinding;
 
     opens com.ntak.pearlzip.ui.pub;
+    exports com.ntak.pearlzip.ui.constants;
     opens com.ntak.pearlzip.ui.model;
     exports com.ntak.pearlzip.ui.mac;
     opens com.ntak.pearlzip.ui.mac;
+    exports com.ntak.pearlzip.ui.model;
 
     // Logging dependencies
     requires org.apache.logging.log4j;

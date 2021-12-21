@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -482,6 +485,128 @@ public class ArchiveUtil {
 
         if (response.equals(ButtonType.YES)) {
             ModuleUtil.loadModuleFromExtensionPackage(Paths.get(f));
+        }
+    }
+
+    public static void addDirectory(long sessionId, FXArchiveInfo fxArchiveInfo, File dirToAdd) throws IOException {
+        int depth = fxArchiveInfo.getDepth()
+                                 .get();
+        int index = fxArchiveInfo.getFiles()
+                                 .size();
+        String prefix = fxArchiveInfo.getPrefix();
+        Path dirPath = dirToAdd.toPath();
+        ArchiveWriteService archiveWriteService = fxArchiveInfo.getWriteService();
+
+        Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
+        Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
+
+        List<FileInfo> files = ArchiveUtil.handleDirectory(prefix, dirPath.getParent(), dirPath, depth + 1, index);
+        files.add(new FileInfo((index + 1), depth,
+                               depth > 0 ? String.format("%s/%s", prefix,
+                                                         dirPath.getFileName()
+                                                                .toString()) : dirPath.getFileName()
+                                                                                      .toString(),
+                               -1, 0,
+                               0, null,
+                               null, null,
+                               "", "", 0, "",
+                               true, false,
+                               Collections.singletonMap(KEY_FILE_PATH, dirPath.toString())));
+
+        if (files.removeIf(f -> f.getAdditionalInfoMap()
+                                 .getOrDefault(KEY_FILE_PATH, "")
+                                 .equals(fxArchiveInfo.getArchivePath()))) {
+            // LOG: Skipping the addition of this archive within itself...
+            LOGGER.warn(resolveTextKey(LOG_SKIP_ADD_SELF));
+        }
+
+        boolean success = archiveWriteService.addFile(sessionId, fxArchiveInfo.getArchiveInfo(),
+                                                      files.toArray(new FileInfo[0]));
+        if (!success) {
+            restoreBackupArchive(tempArchive,
+                                 Paths.get(fxArchiveInfo.getArchivePath()));
+            JFXUtil.runLater(fxArchiveInfo::refresh);
+
+            // LOG: Issue adding directory %s
+            // TITLE: ERROR: Failed to add directory to archive
+            // HEADER: Directory %s could not be added to archive %s
+            // BODY: Archive has been reverted to the last stable state.
+            LOGGER.error(resolveTextKey(LOG_ISSUE_ADDING_DIR, dirToAdd.getAbsolutePath()));
+            raiseAlert(Alert.AlertType.ERROR,
+                       resolveTextKey(TITLE_ISSUE_ADDING_DIR),
+                       resolveTextKey(HEADER_ISSUE_ADDING_DIR),
+                       resolveTextKey(BODY_ISSUE_ADDING_DIR),
+                       null
+            );
+        }
+
+        removeBackupArchive(tempArchive);
+    }
+
+    public static void addFile(long sessionId, FXArchiveInfo fxArchiveInfo, File rawFile, String fileName) throws IOException {
+        int depth = fxArchiveInfo.getDepth().get();
+        int index = fxArchiveInfo.getFiles().size();
+        String prefix = fxArchiveInfo.getPrefix();
+
+        Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
+        Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
+
+        ArchiveWriteService service = ZipState.getWriteArchiveServiceForFile(
+               fxArchiveInfo.getArchivePath()).get();
+        boolean success;
+        if (rawFile.isFile()) {
+            FileInfo fileToAdd = new FileInfo(fxArchiveInfo.getFiles()
+                                                           .size(),
+                                              fxArchiveInfo.getDepth()
+                                                           .get(),
+                                              fileName,
+                                              -1,
+                                              0,
+                                              rawFile.getTotalSpace(),
+                                              LocalDateTime.ofInstant(Instant.ofEpochMilli(
+                                                                              rawFile.lastModified()),
+                                                                      ZoneId.systemDefault()),
+                                              null,
+                                              null,
+                                              null,
+                                              null,
+                                              0,
+                                              "",
+                                              !rawFile.isFile(),
+                                              false,
+                                              Collections.singletonMap(
+                                                      KEY_FILE_PATH,
+                                                      rawFile.getAbsoluteFile()
+                                                             .getPath()));
+            success = service.addFile(sessionId,
+                                      fxArchiveInfo.getArchiveInfo(),
+                                      fileToAdd);
+        } else { // Mac App is a directory
+            List<FileInfo> files = handleDirectory(prefix,
+                                                   rawFile.toPath().getParent(), rawFile.toPath(), depth +1,
+                                                   index);
+            success = service.addFile(sessionId,
+                                      fxArchiveInfo.getArchiveInfo(),
+                                      files.toArray(new FileInfo[0]));
+        }
+
+        if (!success) {
+            restoreBackupArchive(tempArchive,
+                                 Paths.get(fxArchiveInfo.getArchivePath()));
+            JFXUtil.runLater(fxArchiveInfo::refresh);
+
+            // LOG: Issue adding file %s
+            // TITLE: ERROR: Failed to add file to archive
+            // HEADER: File %s could not be added to archive %s
+            // BODY: Archive has been reverted to the last stable state.
+            LOGGER.error(resolveTextKey(LOG_ISSUE_ADDING_FILE,
+                                                               rawFile.getAbsolutePath()));
+            raiseAlert(Alert.AlertType.ERROR,
+                       resolveTextKey(TITLE_ISSUE_ADDING_FILE),
+                       resolveTextKey(HEADER_ISSUE_ADDING_FILE),
+                       resolveTextKey(BODY_ISSUE_ADDING_FILE),
+                       null
+            );
         }
     }
 }
