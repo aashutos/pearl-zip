@@ -103,7 +103,7 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                                                      selectedFile
                                                              .getFileName().toString());
 
-                if (ZipState.supportedReadArchives().stream().anyMatch(e -> clickedRow.getFileName().endsWith(String.format(".%s", e)))) {
+                if (!clickedRow.isFolder() && ZipState.supportedReadArchives().stream().anyMatch(e -> clickedRow.getFileName().endsWith(String.format(".%s", e)))) {
                     JFXUtil.executeBackgroundProcess(sessionId, thisStage,
                                                      ()-> {
                                                          JFXUtil.runLater(() -> row.setDisable(true));
