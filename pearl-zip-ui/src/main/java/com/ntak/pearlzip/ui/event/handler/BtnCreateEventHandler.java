@@ -51,8 +51,7 @@ public class BtnCreateEventHandler implements EventHandler<MouseEvent> {
 
                 FileChooser saveDialog = new FileChooser();
                 // TITLE: Save archive to location...
-                saveDialog.setTitle(TITLE_TARGET_ARCHIVE_LOCATION);
-                saveDialog.setTitle(resolveTextKey(TITLE_SAVE_ARCHIVE_PATTERN));
+                saveDialog.setTitle(resolveTextKey(TITLE_TARGET_ARCHIVE_LOCATION));
                 saveDialog.setInitialFileName("UntitledArchive");
                 File newArchive = saveDialog.showSaveDialog(dlgStage);
                 if (newArchive != null) {
