@@ -154,7 +154,22 @@ printf "PearlZip Version $VERSION Change Log\nCopyright © $(date +%Y) 92AK\n===
 
 echo "Building installation package..."
 cp -R target/${LOCALE}/PearlZip.app ${P_LICENSE_DIRECTORY}/BSD-3-CLAUSE-LICENSE ${P_LICENSE_DIRECTORY}/CC-ATTR-4-LICENSE ${P_LICENSE_DIRECTORY}/CC-NC-ND-4-LICENSE components
-pkgbuild --root components --component-plist ./src/main/resources/PearlZip.plist --install-location /Applications/PearlZip --identifier com.ntak.pearlzip --version ${MAC_APP_VERSION} --ownership recommended ./target/${LOCALE}/PearlZip-Installer-${LOCALE}-${VERSION}.pkg
+pkgbuild --root components --component-plist ./src/main/resources/PearlZip.plist --install-location /Applications/PearlZip --identifier com.ntak.pearlzip --version ${MAC_APP_VERSION} --ownership recommended ./target/${LOCALE}/PearlZip-Installer.pkg
+rm -rf components/PearlZip.app
+
+echo "PearlZip ${VERSION} - Open Source Licenses" > components/LICENSE.txt
+echo "------------------------------------------" >> components/LICENSE.txt
+echo " " >> components/LICENSE.txt
+cat ../BSD-3-CLAUSE-LICENSE >> components/LICENSE.txt
+echo " " >> components/LICENSE.txt
+cat ../CC-ATTR-4-LICENSE >> components/LICENSE.txt
+echo " " >> components/LICENSE.txt
+cat ../CC-NC-ND-4-LICENSE >> components/LICENSE.txt
+
+productbuild  --distribution "./src/main/resources/Distribution.xml"  \
+              --package-path "./target/${LOCALE}/PearlZip-Installer.pkg" \
+              --resources "components" \
+              "./target/${LOCALE}/PearlZip-Installer-${LOCALE}-${VERSION}.pkg"
 
 if [ "$USE_BUILD_DIR" == 'true' ]
 then

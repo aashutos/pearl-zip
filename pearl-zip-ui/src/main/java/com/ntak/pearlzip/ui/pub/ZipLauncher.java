@@ -5,6 +5,7 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
+import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.license.pub.LicenseService;
 import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
@@ -33,8 +34,9 @@ import java.util.concurrent.Executors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -181,6 +183,46 @@ public class ZipLauncher {
         LicenseService licenseService = new PearlZipLicenseService();
         licenseService.retrieveDeclaredLicenses()
                       .forEach(ZipState::addLicenseDeclaration);
+
+        ////////////////////////////////////////////
+        ///// KeyStore Setup //////////////////////
+        //////////////////////////////////////////
+
+        // Root store folder
+        Path storePath = Paths.get(STORE_ROOT.toString(), ".store");
+        if (Files.notExists(storePath)) {
+            Files.createDirectories(storePath);
+        }
+
+        // Key Stores
+        // Load key store and trust store
+        try(InputStream kis = new BufferedInputStream(ZipLauncher.class.getClassLoader().getResourceAsStream("keystore.jks"));
+            InputStream tis = ZipLauncher.class.getClassLoader().getResourceAsStream("truststore.jks")) {
+
+            // Copy KeyStore files
+            String keystorePathString = Paths.get(storePath.toString(), "keystore.jks")
+                                             .toString();
+            final Path keystorePath = Paths.get(keystorePathString);
+            if (!Files.exists(keystorePath)) {
+                Files.copy(kis, keystorePath);
+            }
+            System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE, keystorePathString);
+            System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD));
+
+            // Copy truststore files
+            String truststorePathString = Paths.get(storePath.toString(), "truststore.jks")
+                                               .toString();
+            final Path truststorePath = Paths.get(truststorePathString);
+            if (!Files.exists(truststorePath)) {
+                Files.copy(tis, truststorePath);
+            }
+            System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE, truststorePathString);
+            System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD));
+        } catch(Exception e) {
+            // LOG: Issue setting up key stores. Exception message: %s\nStack trace:\n%s
+            ROOT_LOGGER.warn(resolveTextKey(LOG_ISSUE_SETTING_UP_KEYSTORE, e.getMessage(),
+                                            LoggingUtil.getStackTraceFromException(e)));
+        }
 
         ////////////////////////////////////////////
         ///// Runtime Module Load /////////////////

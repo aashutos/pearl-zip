@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright © 2021 92AK
+  -->
+
+<installer-gui-script minSpecVersion="1">
+    <title>PearlZip</title>
+    <pkg-ref id="com.ntak.pearlzip"/>
+    <license file="LICENSE.txt"/>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.ntak.pearlzip"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.ntak.pearlzip" visible="false">
+        <pkg-ref id="com.ntak.pearlzip"/>
+    </choice>
+    <pkg-ref id="com.ntak.pearlzip" version="1.0.0" onConclusion="none">PearlZip-Installer-en_GB-0.0.0.3.pkg</pkg-ref>
+</installer-gui-script>

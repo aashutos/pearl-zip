@@ -57,7 +57,7 @@ import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSetting
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PearlZipFXUtil {
     public static void simUp(FxRobot robot) {
@@ -539,10 +539,10 @@ public class PearlZipFXUtil {
 
     private static FXArchiveInfo initFxArchiveInfo(Path archive) throws IOException {
         Files.deleteIfExists(archive);
-        Files.createFile(archive);
         ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(archive.getFileName().toString()).get();
         ArchiveWriteService writeService =
                 ZipState.getWriteArchiveServiceForFile(archive.getFileName().toString()).orElse(null);
+        writeService.createArchive(System.currentTimeMillis(), archive.toString());
 
         return new FXArchiveInfo(archive.toAbsolutePath().toString(), readService,
                                  writeService);

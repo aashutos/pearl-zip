@@ -6,6 +6,8 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
+import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
@@ -14,6 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -32,18 +35,21 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.ESV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.PSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.LOCK_POLL_TIMEOUT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchProgress;
@@ -296,5 +302,110 @@ public class JFXUtil {
         }
 
         return Optional.empty();
+    }
+
+    public static void showNotifications() {
+        try {
+            Stage notificationStage = new Stage();
+
+            // Load notification form
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MacPearlZipApplication.class.getResource("/frmNotifications.fxml"));
+            loader.setResources(LOG_BUNDLE);
+            Parent root = loader.load();
+            notificationStage.setScene(new Scene(root));
+
+            notificationStage.setAlwaysOnTop(true);
+            notificationStage.toFront();
+            notificationStage.show();
+        } catch (Exception e) {
+        }
+    }
+
+    public static boolean checkNewVersionAvailable() {
+        List<NotificationEntry> entries = getNotifications("PearlZip Version");
+        Optional<NotificationEntry> optVersion = entries.stream()
+                                                        .sorted(Comparator.comparingInt(NotificationEntry::id))
+                                                        .findFirst();
+        if (optVersion.isPresent()) {
+            NotificationEntry version = optVersion.get();
+            String message = version.message();
+            String[] identifiers = PSV.split(message);
+            if (identifiers.length == 2) {
+                String versionLine = ESV.split(identifiers[0])[1];
+                String hashLine = ESV.split(identifiers[1])[1];
+                // If a newer version string or a different hash of the same version is detected, a new version has
+                // been released. I expect a version bump, however whenever a commit change occurs.
+                if (VersionComparator.getInstance().compare(versionLine,System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION)) >= 0
+                        && !hashLine.equals(System.getProperty(CNS_NTAK_PEARL_ZIP_COMMIT_HASH))) {
+                    // TITLE: New Version of PearlZip is available
+                    // BODY: A newer version of PearlZip (version %s) is available for download. Please visit %s to
+                    //       download the latest version.
+                    JFXUtil.runLater(()-> raiseAlert(Alert.AlertType.INFORMATION,
+                                                     resolveTextKey(TITLE_NEW_VERSION_AVAILABLE),
+                                                     null,
+                                                     resolveTextKey(BODY_NEW_VERSION_AVAILABLE, versionLine, System.getProperty(CNS_NTAK_PEARL_ZIP_WEBLINK)),
+                                                     null));
+
+                    return true;
+                }
+            }
+        }
+
+        // TITLE: PearlZip is up to date
+        // BODY: You are using the latest version of PearlZip.
+        JFXUtil.runLater(()-> raiseAlert(Alert.AlertType.INFORMATION,
+                                         resolveTextKey(TITLE_LATEST_VERSION),
+                                         null,
+                                         resolveTextKey(BODY_LATEST_VERSION),
+                                         null));
+        return false;
+    }
+
+    public static List<NotificationEntry> getNotifications(String... filters) {
+        List<NotificationEntry> entries = new CopyOnWriteArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(
+                System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD))) {
+            if (conn != null) {
+                PreparedStatement ps = conn.prepareStatement(
+                  String.format(
+                   """
+                   SELECT ID, TOPIC, MESSAGE, CREATIONTIMESTAMP
+                   FROM PUB.PearlZipNotifications
+                   WHERE TOPIC IN (%s)
+                   """,
+                  Arrays.stream(filters)
+                        .map(v -> "?")
+                        .collect(Collectors.joining(", ")))
+                );
+
+                for (int i = 0; i < filters.length; i++) {
+                    ps.setString(i+1, filters[i]);
+                }
+
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    entries.add(new NotificationEntry(rs.getInt("ID"),
+                                                      rs.getString("TOPIC"),
+                                                      rs.getString("MESSAGE"),
+                                                      rs.getTimestamp("CREATIONTIMESTAMP").toLocalDateTime()
+                      )
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            // LOG: SQL Exception occurred upon trying to retrieve notifications. SQL State: %s\nStack trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_NOTIFICATIONS_SQL_ISSUE,
+                         e.getSQLState(),
+                         LoggingUtil.getStackTraceFromException(e)));
+        } catch (Exception e) {
+            // LOG: Exception raised upon trying to retrieve notifications.\nStack trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_NOTIFICATIONS_ISSUE,
+                         LoggingUtil.getStackTraceFromException(e))
+            );
+        }
+
+        return entries;
     }
 }

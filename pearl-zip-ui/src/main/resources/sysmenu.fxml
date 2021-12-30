@@ -26,4 +26,8 @@
     </Menu>
     <Menu fx:id="mnuWindowWrapper" text="%sysmenu.window.text">
     </Menu>
+    <Menu fx:id="mnuHelp" text="%sysmenu.help.text">
+        <MenuItem fx:id="mnuNotifications" text="%sysmenu.help.notifications.text"/>
+        <MenuItem fx:id="mnuNewVersion" text="%sysmenu.help.new-version.text"/>
+    </Menu>
 </MenuBar>

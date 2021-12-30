@@ -39,8 +39,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.COM_BUS_EXECUTOR_SERVICE;
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -156,8 +155,18 @@ public abstract class PearlZipApplication extends Application {
         List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
         createSystemMenu(aboutStage, customMenus);
 
-        // Initialise archive information
         readyLatch.countDown();
+
+        // Show Notifications dialog
+        try {
+            if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION, "true"))) {
+                JFXUtil.runLater(JFXUtil::showNotifications);
+            }
+        } catch (Exception e) {
+
+        }
+
+        // Initialise archive information
         FXArchiveInfo fxArchiveInfo;
         String archivePath;
         if (APP.getParameters()

@@ -185,5 +185,17 @@
                 </license>
             </licenses>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.jdbc.database</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>21.4.0.0.1</version>
+            <licenses>
+                <license>
+                    <name>Oracle Free Usage Terms &amp; Conditions</name>
+                    <url>https://www.oracle.com/downloads/licenses/oracle-free-license.html</url>
+                    <file>Oracle-FUTC.html</file>
+                </license>
+            </licenses>
+        </dependency>
     </dependencies>
 </licenseSummary>
