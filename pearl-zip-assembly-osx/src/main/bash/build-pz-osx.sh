@@ -149,8 +149,8 @@ done
 mkdir -p components
 echo "Generating changelog"
 # Retrieve Change Log for release
-curl -X GET "${P_YOUTRACK_HOST}/api/issues?fields=summary&query=project:%20PearlZip%20%23Bug%20%23Feature%20%23Task%20Fix%20versions:%20${YT_VERSION}%20tag:%20release-tickets" -H 'Accept: application/json' -H "Authorization: Bearer ${P_YOUTRACK_AUTH}" -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' | tr , "\n" | grep summary | cut -d'"' -f4 | sort | xargs -I{} echo "+ {}" > components/changelog
-printf "PearlZip Version $VERSION Change Log\nCopyright © $(date +%Y) 92AK\n====================================\n\nThe following features are in scope for this release of PearlZip:\n\n$(cat components/changelog)" > components/changelog
+curl -X GET "${P_YOUTRACK_HOST}/api/issues?fields=summary&query=project:%20PearlZip%20%23Bug%20%23Feature%20%23Task%20Fix%20versions:%20${YT_VERSION}%20tag:%20release-tickets" -H 'Accept: application/json' -H "Authorization: Bearer ${P_YOUTRACK_AUTH}" -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' | tr , "\n" | grep summary | cut -d'"' -f4 | sort | xargs -I{} echo "+ {}" > components/CHANGELOG
+printf "PearlZip Version $VERSION Change Log\nCopyright © $(date +%Y) 92AK\n====================================\n\nThe following features are in scope for this release of PearlZip:\n\n$(cat components/changelog)" > components/CHANGELOG
 
 echo "Building installation package..."
 cp -R target/${LOCALE}/PearlZip.app ${P_LICENSE_DIRECTORY}/BSD-3-CLAUSE-LICENSE ${P_LICENSE_DIRECTORY}/CC-ATTR-4-LICENSE ${P_LICENSE_DIRECTORY}/CC-NC-ND-4-LICENSE components
@@ -158,7 +158,7 @@ pkgbuild --root components --component-plist ./src/main/resources/PearlZip.plist
 rm -rf components/PearlZip.app
 
 echo "PearlZip ${VERSION} - Open Source Licenses" > components/LICENSE.txt
-echo "------------------------------------------" >> components/LICENSE.txt
+echo "-------------------------------------------------------" >> components/LICENSE.txt
 echo " " >> components/LICENSE.txt
 cat ../BSD-3-CLAUSE-LICENSE >> components/LICENSE.txt
 echo " " >> components/LICENSE.txt
@@ -167,7 +167,7 @@ echo " " >> components/LICENSE.txt
 cat ../CC-NC-ND-4-LICENSE >> components/LICENSE.txt
 
 productbuild  --distribution "./src/main/resources/Distribution.xml"  \
-              --package-path "./target/${LOCALE}/PearlZip-Installer.pkg" \
+              --package-path "./target/${LOCALE}/" \
               --resources "components" \
               "./target/${LOCALE}/PearlZip-Installer-${LOCALE}-${VERSION}.pkg"
 

@@ -4,7 +4,6 @@
   -->
 
 <installer-gui-script minSpecVersion="1">
-    <title>PearlZip</title>
     <pkg-ref id="com.ntak.pearlzip"/>
     <license file="LICENSE.txt"/>
     <options customize="never" require-scripts="false"/>
@@ -17,5 +16,5 @@
     <choice id="com.ntak.pearlzip" visible="false">
         <pkg-ref id="com.ntak.pearlzip"/>
     </choice>
-    <pkg-ref id="com.ntak.pearlzip" version="1.0.0" onConclusion="none">PearlZip-Installer-en_GB-0.0.0.3.pkg</pkg-ref>
+    <pkg-ref id="com.ntak.pearlzip" version="1.0.0" onConclusion="none">PearlZip-Installer.pkg</pkg-ref>
 </installer-gui-script>
