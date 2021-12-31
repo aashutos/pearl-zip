@@ -18,6 +18,17 @@ public class ConfigurationConstants {
     public static final String CNS_TMP_DIR_PREFIX = "configuration.ntak.tmp-dir-prefix";
     public static final String CNS_COM_BUS_FACTORY = "configuration.ntak.com-bus-factory";
 
+    public static final String CNS_NTAK_PEARL_ZIP_JDBC_URL = "configuration.ntak.pearl-zip.jdbc.url";
+    public static final String CNS_NTAK_PEARL_ZIP_JDBC_USER = "configuration.ntak.pearl-zip.jdbc.user";
+    public static final String CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD = "configuration.ntak.pearl-zip.jdbc.password";
+    public static final String CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD = "configuration.ntak.pearl-zip.keystore.password";
+    public static final String CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD = "configuration.ntak.pearl-zip.truststore.password";
+
+    public static final String CNS_JAVAX_NET_SSL_KEYSTORE = "javax.net.ssl.keyStore";
+    public static final String CNS_JAVAX_NET_SSL_TRUSTSTORE = "javax.net.ssl.trustStore";
+    public static final String CNS_JAVAX_NET_SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
+    public static final String CNS_JAVAX_NET_SSL_TRUSTSTORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+
     public static final String KEY_SESSION_ID = "session-id";
     public static final String KEY_FILE_PATH = "file-path";
     public static final String KEY_FILE_REPLACE = "file-replace";

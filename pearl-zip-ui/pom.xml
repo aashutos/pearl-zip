@@ -95,6 +95,13 @@
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.jdbc.database</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>21.4.0.0.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../pearl-zip-assembly-osx/src/main/resources/lib/com.oracle.jdbc.database.ojdbc11/ojdbc11.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
@@ -102,6 +109,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>*.jks</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>
@@ -169,6 +179,32 @@
                         <compilerArg>nsmenufx/de.jangassen.platform=com.ntak.pearlzip.ui</compilerArg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-keystores</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>cp</executable>
+                    <arguments>
+                        <argument>${project.basedir}/src/main/resources/keystore.jks</argument>
+                        <argument>${project.basedir}/src/main/resources/truststore.jks</argument>
+                        <argument>${project.build.directory}/classes</argument>
+                    </arguments>
+                    <async>false</async>
+                </configuration>
+                <goals>
+                    <goal>exec</goal>
+                </goals>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

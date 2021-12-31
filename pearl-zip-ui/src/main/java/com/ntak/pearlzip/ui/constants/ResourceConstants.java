@@ -31,6 +31,8 @@ public class ResourceConstants {
     public static final Pattern DSV = Pattern.compile(Pattern.quote("."));
     public static final Pattern CSV = Pattern.compile(Pattern.quote(","));
     public static final Pattern SSV = Pattern.compile(Pattern.quote("/"));
+    public static final Pattern PSV = Pattern.compile(Pattern.quote("|"));
+    public static final Pattern ESV = Pattern.compile(Pattern.quote("="));
 
     public static final String PATTERN_FXID_NEW_OPTIONS = "%s.new-options";
     public static final String PATTERN_FXID_OPTIONS = "%s.options";

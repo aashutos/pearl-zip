@@ -10,6 +10,7 @@ import com.ntak.pearlzip.ui.event.handler.BtnOpenEventHandler;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -33,8 +34,7 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
-import static com.ntak.pearlzip.ui.util.JFXUtil.getActiveStage;
-import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
@@ -59,6 +59,11 @@ public class SysMenuController {
     private MenuItem mnuClose;
     @FXML
     private MenuItem mnuOptions;
+
+    @FXML
+    private MenuItem mnuNotifications;
+    @FXML
+    private MenuItem mnuNewVersion;
 
     public void initData() {
         mnuNew.setOnAction((e)->new BtnNewEventHandler().handle(null));
@@ -151,5 +156,8 @@ public class SysMenuController {
                            null);
             }
         });
+
+        mnuNotifications.setOnAction((e)-> JFXUtil.runLater(JFXUtil::showNotifications));
+        mnuNewVersion.setOnAction((e)->checkNewVersionAvailable());
     }
 }

@@ -70,15 +70,21 @@ public class MacPearlZipApplication extends PearlZipApplication {
             ZipConstants.setAdditionalConfig(CORE_MENU_SIZE, sysMenu.getMenus().size());
         } else {
             sysMenu = ZipConstants.<MenuBar>getAdditionalConfig(SYS_MENU)
-                                  .get();;
+                                  .get();
         }
         ZipConstants.setAdditionalConfig(SYS_MENU, sysMenu);
         int coreMenuSize = ZipConstants.<Integer>getAdditionalConfig(CORE_MENU_SIZE)
                                        .get();
-        sysMenu.getMenus().remove(coreMenuSize,sysMenu.getMenus().size());
+        if (sysMenu.getMenus().size() > coreMenuSize) {
+            sysMenu.getMenus()
+                   .remove(3,
+                           sysMenu.getMenus()
+                                  .size() - 2);
+        }
 
         for (javafx.scene.control.Menu menu : customMenus) {
-            sysMenu.getMenus().add(menu);
+            // Add before Window and Help menus
+            sysMenu.getMenus().add(sysMenu.getMenus().size()-2, menu);
         }
         ResourceConstants.WINDOW_MENU =
                 sysMenu.getMenus()

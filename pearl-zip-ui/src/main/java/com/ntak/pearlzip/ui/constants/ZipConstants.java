@@ -31,6 +31,8 @@ public class ZipConstants {
     public static final String CNS_NTAK_PEARL_ZIP_APP_NAME = "configuration.ntak.pearl-zip.app-name";
     public static final String CNS_NTAK_PEARL_ZIP_COPYRIGHT = "configuration.ntak.pearl-zip.copyright";
     public static final String CNS_NTAK_PEARL_ZIP_WEBLINK = "configuration.ntak.pearl-zip.weblink";
+    public static final String CNS_NTAK_PEARL_ZIP_COMMIT_HASH = "configuration.ntak.pearl-zip.commit-hash";
+    public static final String CNS_NTAK_PEARL_ZIP_RAW_VERSION = "configuration.ntak.pearl-zip.raw-version";
     public static final String CNS_NTAK_PEARL_ZIP_LICENSE_LOCATION = "configuration.ntak.pearl-zip.license-location";
     public static final String CNS_NTAK_PEARL_ZIP_LICENSE_OVERRIDE_LOCATION = "configuration.ntak.pearl-zip.license-override-location";
     public static final String CNS_NTAK_PEARL_ZIP_MODULE_PATH = "configuration.ntak.pearl-zip.module-path";
@@ -45,6 +47,7 @@ public class ZipConstants {
     public static final String CNS_SYSMENU_WINDOW_TEXT = "sysmenu.window.text";
     public static final String CNS_DEFAULT_FORMAT = "configuration.ntak.pearl-zip.default-format";
     public static final String CNS_LAUNCHER_CANONICAL_NAME = "configuration.ntak.pearl-zip.launcher-canonical-name";
+    public static final String CNS_SHOW_NOTIFICATION = "configuration.ntak.pearl-zip.show-notification";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -103,6 +106,10 @@ public class ZipConstants {
     public static final String LOG_GENERAL_EVENT_HANDLER_EXCEPTION = "logging.ntak.pearl-zip.general-event-handler-exception";
 
     public static final String LOG_ARCHIVE_TEST_FAILED = "logging.ntak.pearl-zip.archive-test-failed";
+
+    public static final String LOG_ISSUE_SETTING_UP_KEYSTORE = "logging.ntak.pearl-zip.issue-setting-up-keystore";
+    public static final String LOG_NOTIFICATIONS_SQL_ISSUE = "logging.ntak.pearl-zip.notifications-sql-issue";
+    public static final String LOG_NOTIFICATIONS_ISSUE = "logging.ntak.pearl-zip.notifications-issue";
 
     // Paste exception
     public static final String LOG_PASTE_EXCEPTION = "logging.ntak.pearl-zip.paste-exception";
@@ -305,6 +312,12 @@ public class ZipConstants {
     public static final String TITLE_SOURCE_DIR_LOCATION = "title.ntak.pearl-zip.source-dir-location";
     public static final String TITLE_TARGET_DIR_LOCATION = "title.ntak.pearl-zip.target-dir-location";
     public static final String TITLE_SELECT_INSTALL_EXTENSION = "title.ntak.pearl-zip.select-install-extension";
+
+    public static final String TITLE_NEW_VERSION_AVAILABLE = "title.ntak.pearl-zip.new-version-available";
+    public static final String BODY_NEW_VERSION_AVAILABLE = "body.ntak.pearl-zip.new-version-available";
+
+    public static final String TITLE_LATEST_VERSION = "title.ntak.pearl-zip.latest-version";
+    public static final String BODY_LATEST_VERSION = "body.ntak.pearl-zip.latest-version";
 
     public static final String LBL_ARCHIVE_EXT_TYPE_PATTERN = "label.ntak.pearl-zip.archive-ext-type-pattern";
     public static final String LBL_BUTTON_MOVE = "label.ntak.pearl-zip.button.move";

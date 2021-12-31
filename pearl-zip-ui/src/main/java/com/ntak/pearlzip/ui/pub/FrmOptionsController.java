@@ -67,6 +67,9 @@ public class FrmOptionsController {
     @FXML
     private ComboBox<String> comboDefaultFormat;
 
+    @FXML
+    private CheckBox checkShowNotification;
+
     ///// Bootstrap Properties /////
     @FXML
     private TableView<Pair<String,String>> tblBootstrap;
@@ -115,6 +118,7 @@ public class FrmOptionsController {
                                                                       .collect(Collectors.toList()))
         );
 
+        // COMBO BOX - DEFAULT FORMAT
         comboDefaultFormat.setItems(FXCollections.observableArrayList(ZipState.supportedWriteArchives()
                                                                               .stream()
                                                                               .collect(Collectors.toSet())));
@@ -137,6 +141,20 @@ public class FrmOptionsController {
             }
 
 
+        });
+
+        // CHECK BOX - SHOW NOTIFICATION
+        try {
+            checkShowNotification.setSelected(Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
+                                                                                                "true")));
+        } catch (Exception e) {
+            checkShowNotification.setSelected(true);
+        }
+        checkShowNotification.setOnAction(e -> {
+            synchronized(WORKING_SETTINGS) {
+                WORKING_SETTINGS.put(CNS_SHOW_NOTIFICATION,
+                                                 checkShowNotification.isSelected()?"true":"false");
+            }
         });
 
         ///// Provider Properties /////
