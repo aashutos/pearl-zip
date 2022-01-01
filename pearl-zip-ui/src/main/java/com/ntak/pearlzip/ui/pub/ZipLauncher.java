@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -22,13 +22,13 @@ import java.awt.*;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
@@ -40,7 +40,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
+import static com.ntak.pearlzip.ui.util.JFXUtil.initialiseBootstrapProperties;
 
 /**
  *  Loads the main UI screen for the Zip Application.
@@ -77,21 +77,7 @@ public class ZipLauncher {
 
     public static void initialize() throws IOException {
         // Load bootstrap properties
-        Properties props = new Properties();
-        props.load(MacPearlZipApplication.class.getClassLoader()
-                                               .getResourceAsStream("application.properties"));
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT, String.format("%s/.pz",
-                                                                                             System.getProperty(
-                                                                                                     "user.home"))));
-        ZipConstants.LOCAL_TEMP =
-                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()));
-        APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
-        initialiseApplicationSettings();
-
-        String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
-        ZipConstants.RUNTIME_MODULE_PATH =
-                Paths.get(System.getProperty(CNS_NTAK_PEARL_ZIP_MODULE_PATH, defaultModulePath)).toAbsolutePath();
+        Properties props = initialiseBootstrapProperties();
 
         ////////////////////////////////////////////
         ///// Settings File Load ///////////////////
@@ -106,49 +92,6 @@ public class ZipLauncher {
             CURRENT_SETTINGS.load(settingsIStream);
             WORKING_SETTINGS.load(settingsIStream);
         }
-
-        // Overwrite with external properties file
-        // Reserved properties are kept as per internal key definition
-        Map<String,String> reservedKeyMap = new HashMap<>();
-        Path tmpRK = Paths.get(STORE_ROOT.toString(), "rk");
-        try (FileOutputStream fileOutputStream = new FileOutputStream(tmpRK.toString());
-             FileChannel channel = fileOutputStream.getChannel();
-             FileLock lock = channel.lock()) {
-                // Standard resource case
-                Path reservedKeys = Paths.get(MacPearlZipApplication.class.getClassLoader()
-                                                                          .getResource("reserved-keys")
-                                                                          .getPath());
-                LoggingConstants.ROOT_LOGGER.info(reservedKeys);
-
-                // standard/jar resource case
-                if (Objects.nonNull(reservedKeys)) {
-
-                    try (InputStream is = MacPearlZipApplication.class.getClassLoader()
-                                                                      .getResourceAsStream("reserved-keys")) {
-                        Files.copy(is, tmpRK, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                } else if (!Files.exists(reservedKeys)) {
-                    reservedKeys = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui", "reserved-keys");
-                    Files.copy(reservedKeys, tmpRK, StandardCopyOption.REPLACE_EXISTING);
-                }
-
-            Files.lines(tmpRK)
-                 .filter(k -> Objects.nonNull(k) && Objects.nonNull(props.getProperty(k)))
-                 // LOG: Locking in key: %s with value: %s
-                 .peek(k -> LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_LOCKING_IN_PROPERTY,
-                                                                             k,
-                                                                             props.getProperty(k))))
-                 .forEach(k -> reservedKeyMap.put(k, props.getProperty(k)));
-        }
-
-        if (Files.exists(APPLICATION_SETTINGS_FILE)) {
-            props.load(Files.newBufferedReader(APPLICATION_SETTINGS_FILE));
-        }
-
-        props.putAll(System.getProperties());
-        props.putAll(reservedKeyMap);
-        System.setProperties(props);
-        LoggingConstants.ROOT_LOGGER.info(props);
 
         ////////////////////////////////////////////
         ///// Log4j Setup /////////////////////////
