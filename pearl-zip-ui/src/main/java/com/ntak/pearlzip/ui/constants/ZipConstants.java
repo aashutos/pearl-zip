@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.constants;
 
@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -346,6 +347,7 @@ public class ZipConstants {
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
     public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
     public static Path RUNTIME_MODULE_PATH;
+    public static Set<String> RK_KEYS;
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
