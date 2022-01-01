@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -44,8 +44,7 @@ import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.loadMenusFromPlugins;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
-import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
-import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 import static com.ntak.pearlzip.ui.util.ModuleUtil.loadModuleFromExtensionPackage;
 
 /**
@@ -379,13 +378,8 @@ public class FrmOptionsController {
                     WORKING_APPLICATION_SETTINGS.store(settingsOutputStream,
                                                        String.format("PearlZip Application Settings File Generated @ %s",
                                                                      LocalDateTime.now()));
-
                     // Reloading providers and cached System settings into PearlZip
-                    WORKING_APPLICATION_SETTINGS.keySet()
-                                                .forEach(k -> System.setProperty(k.toString(),
-                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(
-                                                                                         k.toString()))
-                                                );
+                    initialiseBootstrapProperties();
                     new LinkedList<>(ZipState.getWriteProviders()).forEach(ZipState::addArchiveProvider);
                     new LinkedList<>(ZipState.getReadProviders()).forEach(ZipState::addArchiveProvider);
 
