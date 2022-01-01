@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -485,6 +485,10 @@ public class ArchiveUtil {
 
         if (response.equals(ButtonType.YES)) {
             ModuleUtil.loadModuleFromExtensionPackage(Paths.get(f));
+        } else {
+            if (Stage.getWindows().size() == 0) {
+                JFXUtil.runLater(() -> System.exit(0));
+            }
         }
     }
 

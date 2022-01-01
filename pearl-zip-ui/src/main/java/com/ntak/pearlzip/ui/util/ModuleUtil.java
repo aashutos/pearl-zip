@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -275,6 +275,9 @@ public class ModuleUtil {
                                               null));
         } finally {
             deleteDirectory(tempDir, (b) -> false);
+            if (Stage.getWindows().size() == 0) {
+                JFXUtil.runLater(() -> System.exit(0));
+            }
         }
     }
 

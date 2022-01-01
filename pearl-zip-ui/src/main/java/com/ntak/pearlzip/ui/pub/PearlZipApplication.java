@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -159,7 +159,8 @@ public abstract class PearlZipApplication extends Application {
 
         // Show Notifications dialog
         try {
-            if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION, "true"))) {
+            if (OS_FILES.size() == 0 && Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
+                                                                                        "true"))) {
                 JFXUtil.runLater(JFXUtil::showNotifications);
             }
         } catch (Exception e) {
