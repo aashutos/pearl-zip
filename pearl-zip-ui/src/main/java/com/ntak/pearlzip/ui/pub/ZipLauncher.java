@@ -11,10 +11,7 @@ import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.MetricProfile;
-import com.ntak.pearlzip.ui.util.MetricProfileFactory;
-import com.ntak.pearlzip.ui.util.MetricThreadFactory;
-import com.ntak.pearlzip.ui.util.ModuleUtil;
+import com.ntak.pearlzip.ui.util.*;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
@@ -31,6 +28,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
@@ -71,7 +69,13 @@ public class ZipLauncher {
         Method mainMethod = klass.getMethod("main", String[].class);
         mainMethod.invoke(null, (Object) args);
 
-       APP_LATCH.await();
+        // Wait for latch unless countdown was not triggered due to race. A break check is initiated in this case.
+       while (!APP_LATCH.await(300, TimeUnit.MILLISECONDS)) {
+           if (JFXUtil.getMainStageInstances().size() == 0)  {
+               break;
+           }
+       }
+
        Runtime.getRuntime().exit(0);
     }
 
