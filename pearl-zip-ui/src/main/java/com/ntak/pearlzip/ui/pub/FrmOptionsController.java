@@ -119,9 +119,15 @@ public class FrmOptionsController {
         );
 
         // COMBO BOX - DEFAULT FORMAT
+        Set<String> aliasFormats = ZipState.getRawSupportedCompressorWriteFormats()
+                .stream()
+                .filter(f -> !ZipState.getSupportedCompressorWriteFormats().contains(f))
+                        .collect(Collectors.toSet());
         comboDefaultFormat.setItems(FXCollections.observableArrayList(ZipState.supportedWriteArchives()
                                                                               .stream()
-                                                                              .collect(Collectors.toSet())));
+                                                                              .filter(f->!aliasFormats.contains(f))
+                                                                              .collect(Collectors.toSet()))
+        );
         if (ZipState.supportedWriteArchives()
                     .stream()
                     .anyMatch(f -> f.equals(WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT)))
