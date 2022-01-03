@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -434,7 +434,7 @@ public class PearlZipFXUtil {
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
         APP = Mockito.mock(PearlZipApplication.class);
-
+        POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
         ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
         ZipConstants.RECENT_FILE = Paths.get(System.getProperty("user.home"), ".pz", "rf");
@@ -442,6 +442,14 @@ public class PearlZipFXUtil {
         String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
 
         APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
+        RK_KEYS = new HashSet<>();
+        RK_KEYS.add("configuration.ntak.pearl-zip.app-name");
+        RK_KEYS.add("configuration.ntak.pearl-zip.version");
+        RK_KEYS.add("configuration.ntak.pearl-zip.copyright");
+        RK_KEYS.add("configuration.ntak.pearl-zip.weblink");
+        RK_KEYS.add("configuration.ntak.pearl-zip.license-location");
+        RK_KEYS.add("configuration.ntak.pearl-zip.license-override-location");
+
         initialiseApplicationSettings();
 
         SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "settings.properties");

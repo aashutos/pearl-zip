@@ -348,6 +348,7 @@ public class ZipConstants {
     public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
     public static Path RUNTIME_MODULE_PATH;
     public static Set<String> RK_KEYS;
+    public static Runnable POST_PZAX_COMPLETION_CALLBACK = () -> System.exit(0);
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
