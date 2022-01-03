@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -272,17 +273,22 @@ public class TestArchiveTestFX extends AbstractPearlZipTestFX {
     ////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    @DisplayName("Test: test invalid xz archive returns success alert")
-    public void testFX_testInvalidXZArchive_Alert() {
+    @DisplayName("Test: test invalid xz archive returns failure alert")
+    public void testFX_testInvalidXZArchive_Alert() throws IOException {
         final String archiveFormat = "tar.xz";
+        final Path tempDir = Files.createTempDirectory("pz");
         final String archiveName = String.format("broken.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
+        final Path srcArchive = Paths.get("src",  "test", "resources", "test.tar.xz").toAbsolutePath();
+        final Path targetArchive = Paths.get(tempDir.toAbsolutePath().toString(), archiveName).toAbsolutePath();
+        Files.copy(srcArchive,targetArchive);
 
         // Open archive...
-        simOpenArchive(this, archive, true, false);
+        simOpenArchive(this, targetArchive, true, false);
 
         // Test archive
+        Files.deleteIfExists(targetArchive);
+        Files.write(targetArchive, new byte[]{0,0,0,0}, StandardOpenOption.CREATE_NEW);
+        sleep(1000, MILLISECONDS);
         simTestArchive(this);
 
         // Interrogate alert dialog

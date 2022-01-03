@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
@@ -419,7 +420,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         try {
             this.clickOn(Point2D.ZERO.add(160, 10))
                 .clickOn(Point2D.ZERO.add(160, 30));
-
+            WORKING_APPLICATION_SETTINGS.setProperty("configuration.ntak.pearl-zip.default-format","zip");
             ComboBox<String> combo = lookup("#comboDefaultFormat").queryAs(ComboBox.class);
             FormUtil.selectComboBoxEntry(this, combo, "tar");
 
