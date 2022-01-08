@@ -1,10 +1,11 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.license.pub;
 
+import com.ntak.pearlzip.archive.model.LicenseInfo;
+import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.license.constants.LicenseConstants;
-import com.ntak.pearlzip.license.model.LicenseInfo;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.w3c.dom.Document;

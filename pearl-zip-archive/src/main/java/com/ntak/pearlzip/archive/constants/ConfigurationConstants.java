@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.constants;
 
@@ -10,6 +10,7 @@ package com.ntak.pearlzip.archive.constants;
 public class ConfigurationConstants {
     public static final String CNS_NTAK_PEARL_ZIP_ICON_FILE = "configuration.ntak.pearl-zip.icon.file";
     public static final String CNS_NTAK_PEARL_ZIP_ICON_FOLDER = "configuration.ntak.pearl-zip.icon.folder";
+    public static final String CNS_NTAK_PEARL_ZIP_LICENSE_SERVICE_CANONICAL_NAME = "configuration.ntak.pearl-zip.license-service-canonical-name";
     public static final String CNS_LOCALE_LANG = "configuration.ntak.pearl-zip.locale.lang";
     public static final String CNS_LOCALE_COUNTRY = "configuration.ntak.pearl-zip.locale.country";
     public static final String CNS_LOCALE_VARIANT = "configuration.ntak.pearl-zip.locale.variant";

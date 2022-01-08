@@ -1,8 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.LicenseService;
 
 /**
  *  General UI/front-end JavaFX code for the Pearl Zip application.
@@ -25,11 +26,6 @@ module com.ntak.pearlzip.ui {
     // PearlZip dependencies
     requires com.ntak.pearlzip.archive;
     requires com.ntak.pearlzip.lang.enGB;
-    requires com.ntak.pearlzip.archive.szjb;
-    requires com.ntak.pearlzip.archive.acc;
-    requires com.ntak.pearlzip.license;
-
-    requires sevenzipjbinding;
 
     opens com.ntak.pearlzip.ui.pub;
     exports com.ntak.pearlzip.ui.constants;
@@ -47,4 +43,5 @@ module com.ntak.pearlzip.ui {
     // SPI Definition
     uses ArchiveWriteService;
     uses ArchiveReadService;
+    uses LicenseService;
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -30,6 +30,24 @@
     </licenses>
 
     <dependencies>
+        <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>pearl-zip-archive-acc</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>pearl-zip-archive-szjb</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>pearl-zip-license</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.ntak</groupId>
             <artifactId>ntak-testfx-util</artifactId>
@@ -78,24 +96,6 @@
             <version>16.02-2.01</version>
         </dependency>
         <dependency>
-            <groupId>com.ntak</groupId>
-            <artifactId>pearl-zip-archive-szjb</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ntak</groupId>
-            <artifactId>pearl-zip-license</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ntak</groupId>
-            <artifactId>pearl-zip-archive-acc</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.oracle.jdbc.database</groupId>
             <artifactId>ojdbc11</artifactId>
             <version>21.4.0.0.1</version>
@@ -115,6 +115,21 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*TestSuite.class</include>
+                    </includes>
+                    <argLine>
+                        --add-exports com.ntak.pearlzip.archive.acc/com.ntak.pearlzip.archive.acc.pub=com.ntak.pearlzip.ui
+                        --add-exports com.ntak.pearlzip.archive.szjb/com.ntak.pearlzip.archive.szjb.pub=com.ntak.pearlzip.ui
+                        --illegal-access=permit
+                    </argLine>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -173,6 +188,8 @@
                     <source>17</source>
                     <target>17</target>
                     <compilerArgs>
+                        <compilerArg>--add-opens</compilerArg>
+                        <compilerArg>com.ntak.pearlzip.license/com.ntak.pearlzip.license.pub.PearlZipLicenseService=com.ntak.pearlzip.ui</compilerArg>
                         <compilerArg>--add-exports</compilerArg>
                         <compilerArg>nsmenufx/de.jangassen.platform.mac=com.ntak.pearlzip.ui</compilerArg>
                         <compilerArg>--add-exports</compilerArg>

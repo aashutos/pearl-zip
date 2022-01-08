@@ -1,7 +1,7 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
-package com.ntak.pearlzip.license.model;
+package com.ntak.pearlzip.archive.model;
 
 import java.util.Objects;
 

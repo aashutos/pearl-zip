@@ -1,12 +1,12 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.model;
 
+import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.license.model.LicenseInfo;
 import javafx.scene.control.ContextMenu;
 import org.apache.logging.log4j.util.Strings;
 

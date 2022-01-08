@@ -15,6 +15,7 @@ module com.ntak.pearlzip.archive {
     exports com.ntak.pearlzip.archive.util;
     exports com.ntak.pearlzip.archive.constants;
     exports com.ntak.pearlzip.archive.pub;
+    exports com.ntak.pearlzip.archive.model;
 
     ////////////////////
     ///// Requires /////

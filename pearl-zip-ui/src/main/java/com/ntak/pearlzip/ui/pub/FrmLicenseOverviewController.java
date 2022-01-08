@@ -1,10 +1,10 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.license.model.LicenseInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.beans.property.SimpleStringProperty;
