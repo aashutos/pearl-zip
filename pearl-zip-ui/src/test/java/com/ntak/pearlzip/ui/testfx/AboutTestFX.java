@@ -3,8 +3,8 @@
  */
 package com.ntak.pearlzip.ui.testfx;
 
-import com.ntak.pearlzip.license.model.LicenseInfo;
-import com.ntak.pearlzip.license.pub.LicenseService;
+import com.ntak.pearlzip.archive.model.LicenseInfo;
+import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;

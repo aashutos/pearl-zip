@@ -5,9 +5,8 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
+import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.license.pub.LicenseService;
-import com.ntak.pearlzip.license.pub.PearlZipLicenseService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -79,7 +78,7 @@ public class ZipLauncher {
        Runtime.getRuntime().exit(0);
     }
 
-    public static void initialize() throws IOException {
+    public static void initialize() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         // Load bootstrap properties
         Properties props = initialiseBootstrapProperties();
 
@@ -127,9 +126,17 @@ public class ZipLauncher {
                                               Locale.getDefault());
 
         // Load License Declarations
-        LicenseService licenseService = new PearlZipLicenseService();
-        licenseService.retrieveDeclaredLicenses()
-                      .forEach(ZipState::addLicenseDeclaration);
+        try {
+            LicenseService licenseService = (LicenseService) Class.forName(System.getProperty(
+                                                                          CNS_NTAK_PEARL_ZIP_LICENSE_SERVICE_CANONICAL_NAME,
+                                                                          "com.ntak.pearlzip.license.pub.PearlZipLicenseService"))
+                                                                  .getDeclaredConstructor()
+                                                                  .newInstance();
+            licenseService.retrieveDeclaredLicenses()
+                          .forEach(ZipState::addLicenseDeclaration);
+        } catch (Exception e) {
+
+        }
 
         ////////////////////////////////////////////
         ///// KeyStore Setup //////////////////////

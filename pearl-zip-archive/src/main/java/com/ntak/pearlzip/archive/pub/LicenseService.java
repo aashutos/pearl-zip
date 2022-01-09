@@ -1,9 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
-package com.ntak.pearlzip.license.pub;
+package com.ntak.pearlzip.archive.pub;
 
-import com.ntak.pearlzip.license.model.LicenseInfo;
+import com.ntak.pearlzip.archive.model.LicenseInfo;
 
 import java.util.Map;
 

@@ -326,6 +326,7 @@ public class JFXUtil {
             Parent root = loader.load();
             notificationStage.setScene(new Scene(root));
 
+            notificationStage.setResizable(false);
             notificationStage.setAlwaysOnTop(true);
             notificationStage.toFront();
             notificationStage.show();
