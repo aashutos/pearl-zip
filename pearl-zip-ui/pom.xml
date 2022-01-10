@@ -20,6 +20,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <pearl-zip.version>${project.parent.version}</pearl-zip.version>
+        <system.lib.root.dir>${project.basedir}/../pearl-zip-assembly-osx/src/main/resources/lib</system.lib.root.dir>
     </properties>
 
     <licenses>
@@ -100,7 +101,7 @@
             <artifactId>ojdbc11</artifactId>
             <version>21.4.0.0.1</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../pearl-zip-assembly-osx/src/main/resources/lib/com.oracle.jdbc.database.ojdbc11/ojdbc11.jar</systemPath>
+            <systemPath>${system.lib.root.dir}/com.oracle.jdbc.database.ojdbc11/ojdbc11.jar</systemPath>
         </dependency>
     </dependencies>
 
