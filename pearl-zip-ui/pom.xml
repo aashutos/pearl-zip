@@ -20,7 +20,6 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <pearl-zip.version>${project.parent.version}</pearl-zip.version>
-        <system.lib.root.dir>${project.basedir}/../pearl-zip-assembly-osx/src/main/resources/lib</system.lib.root.dir>
     </properties>
 
     <licenses>
@@ -29,6 +28,14 @@
             <url>http://opensource.org/licenses/BSD-3-Clause</url>
         </license>
     </licenses>
+
+    <repositories>
+        <repository>
+            <id>mvn-repo-1</id>
+            <name>Maven Repository 1</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -97,11 +104,9 @@
             <version>16.02-2.01</version>
         </dependency>
         <dependency>
-            <groupId>com.oracle.jdbc.database</groupId>
+            <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
             <version>21.4.0.0.1</version>
-            <scope>system</scope>
-            <systemPath>${system.lib.root.dir}/com.oracle.jdbc.database.ojdbc11/ojdbc11.jar</systemPath>
         </dependency>
     </dependencies>
 
