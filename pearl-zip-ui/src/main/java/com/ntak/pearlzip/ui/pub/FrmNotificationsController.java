@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -38,7 +38,7 @@ public class FrmNotificationsController {
             JFXUtil.runLater(()->{
                 tblNotifications.getItems().addAll(entries.get());
                 tblNotifications.setItems(new SortedList<>(tblNotifications.getItems(),
-                                                           Comparator.comparingInt(NotificationEntry::id))
+                                                           Comparator.comparingInt(NotificationEntry::id).reversed())
                 );
                 tblNotifications.refresh();
             });
