@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
@@ -8,7 +8,7 @@
 
     <groupId>com.ntak</groupId>
     <artifactId>pearl-zip</artifactId>
-    <version>0.0.0.3</version>
+    <version>0.0.4.0</version>
     <name>PearlZip Application</name>
     <packaging>pom</packaging>
     <url>https://pearlzip.92ak.co.uk</url>
@@ -235,6 +235,12 @@
                             <additionalJOption>--release</additionalJOption>
                             <additionalJOption>17</additionalJOption>
                             <additionalJOption>-Xdoclint:none</additionalJOption>
+                            <additionalJOption>--add-opens</additionalJOption>
+                            <additionalJOption>com.ntak.pearlzip.license/com.ntak.pearlzip.license.pub.PearlZipLicenseService=com.ntak.pearlzip.ui</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>nsmenufx/de.jangassen.platform.mac=com.ntak.pearlzip.ui</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>nsmenufx/de.jangassen.platform=com.ntak.pearlzip.ui</additionalJOption>
                         </additionalJOptions>
                     </configuration>
                 </plugin>
