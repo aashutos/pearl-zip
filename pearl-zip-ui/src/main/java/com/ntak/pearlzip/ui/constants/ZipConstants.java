@@ -300,6 +300,9 @@ public class ZipConstants {
     public static final String LOG_REQUIRED_LICENSE_FILE_NOT_EXIST = "logging.ntak.pearl-zip.required-license-not-exist";
     public static final String LOG_HASH_INTEGRITY_FAILURE = "logging.ntak.pearl-zip.hash-integrity-failure";
 
+    public static final String LOG_VERSION_MIN_VERSION_BREACH = "logging.ntak.pearl-zip.min-version-breach";
+    public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
+
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
     public static final String TITLE_NEW_ARCHIVE_PATTERN = "title.ntak.pearl-zip.new-archive-pattern";

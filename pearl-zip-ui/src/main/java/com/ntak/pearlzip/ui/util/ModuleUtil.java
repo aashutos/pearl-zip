@@ -291,6 +291,28 @@ public class ModuleUtil {
 
                 if (config.length > 0) {
                     switch(config[0]) {
+                        case "min-version":
+                            int result = VersionComparator.getInstance()
+                                                          .compare(config[1],
+                                                                   System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0")
+                                                          );
+                            if (result > 0) {
+                                // LOG: PZAX archive requires a newer version of PearlZip (Minimum version supported: %s)
+                                throw new Exception(resolveTextKey(LOG_VERSION_MIN_VERSION_BREACH, config[1]));
+                            }
+                            break;
+
+                        case "max-version":
+                            result = VersionComparator.getInstance()
+                                                          .compare(config[1],
+                                                                   System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0")
+                                                          );
+                            if (result < 0) {
+                                // LOG: PZAX archive requires an older version of PearlZip (Maximum version supported: %s)
+                                throw new Exception(resolveTextKey(LOG_VERSION_MAX_VERSION_BREACH, config[1]));
+                            }
+                            break;
+
                         case "license":
                             Path licenseFile = Paths.get(targetDir.toAbsolutePath()
                                                                   .toString(),
