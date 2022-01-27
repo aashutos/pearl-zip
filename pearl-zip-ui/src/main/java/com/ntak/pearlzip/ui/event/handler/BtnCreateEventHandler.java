@@ -1,11 +1,10 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.EventHandler;
@@ -23,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.genNewArchivePath;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 
 /**
@@ -73,7 +73,7 @@ public class BtnCreateEventHandler implements EventHandler<MouseEvent> {
                         );
 
                         newArchive = genNewArchivePath(newArchive.getAbsolutePath(), timestamp,
-                                                       archiveInfo.getArchiveFormat());
+                                                                   archiveInfo.getArchiveFormat());
 
                     }
 
@@ -106,23 +106,4 @@ public class BtnCreateEventHandler implements EventHandler<MouseEvent> {
             }
         }
     }
-
-    private File genNewArchivePath(String path, String timestamp, String archiveFormat) {
-        path = path.replaceFirst(String.format("(\\.%s|\\.tar\\.%s)", archiveFormat, archiveFormat),"");
-
-        if (ZipState.getCompressorArchives().contains(archiveInfo.getArchiveFormat())
-        ) {
-            // tar.<ext> file format
-            return new File(String.format("%s%s.tar.%s",
-                                                path,
-                                                timestamp,
-                                                archiveFormat));
-        } else {
-            return new File(String.format("%s%s.%s",
-                                                path,
-                                                timestamp,
-                                                archiveFormat));
-        }
-    }
-
 }

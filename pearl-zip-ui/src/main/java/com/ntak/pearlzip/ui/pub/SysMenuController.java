@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -32,8 +32,7 @@ import java.nio.file.Paths;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -98,6 +97,7 @@ public class SysMenuController {
 
             if (newArchive != null) {
                 try {
+                    newArchive = genNewArchivePath(newArchive.getAbsolutePath(), "", fxArchiveInfo.getArchiveInfo().getArchiveFormat());
                     Files.copy(Paths.get(fxArchiveInfo.getArchivePath()), newArchive.toPath(), REPLACE_EXISTING);
                     final String absolutePath = newArchive.getAbsolutePath();
                     FXArchiveInfo newArchiveInfo = new FXArchiveInfo(absolutePath,

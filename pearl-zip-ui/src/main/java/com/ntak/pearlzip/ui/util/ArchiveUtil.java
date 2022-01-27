@@ -613,4 +613,22 @@ public class ArchiveUtil {
             );
         }
     }
+
+    public static File genNewArchivePath(String path, String timestamp, String archiveFormat) {
+        path = path.replaceFirst(String.format("(\\.%s|\\.tar\\.%s)", archiveFormat, archiveFormat),"");
+
+        if (ZipState.getCompressorArchives().contains(archiveFormat)
+        ) {
+            // tar.<ext> file format
+            return new File(String.format("%s%s.tar.%s",
+                                                path,
+                                                timestamp,
+                                                archiveFormat));
+        } else {
+            return new File(String.format("%s%s.%s",
+                                                path,
+                                                timestamp,
+                                                archiveFormat));
+        }
+    }
 }
