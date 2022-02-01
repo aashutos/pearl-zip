@@ -3,6 +3,8 @@
  */
 package com.ntak.pearlzip.ui.constants;
 
+import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
@@ -11,11 +13,9 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -299,6 +299,7 @@ public class ZipConstants {
 
     public static final String LOG_REQUIRED_LICENSE_FILE_NOT_EXIST = "logging.ntak.pearl-zip.required-license-not-exist";
     public static final String LOG_HASH_INTEGRITY_FAILURE = "logging.ntak.pearl-zip.hash-integrity-failure";
+    public static final String LOG_LIB_FILE_MANIFEST_ENTRY_CORRUPT = "logging.ntak.pearl-zip.lib-file-manifest-entry-corrupt";
 
     public static final String LOG_VERSION_MIN_VERSION_BREACH = "logging.ntak.pearl-zip.min-version-breach";
     public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
@@ -345,6 +346,7 @@ public class ZipConstants {
     public static Path RECENT_FILE;
     public static Path SETTINGS_FILE;
     public static Path APPLICATION_SETTINGS_FILE;
+    public static Path LOCAL_MANIFEST_DIR;
     public static ExecutorService PRIMARY_EXECUTOR_SERVICE;
     public static ThreadGroup THREAD_GROUP;
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
@@ -358,6 +360,11 @@ public class ZipConstants {
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
 
+    public static final String MANIFEST_FILE_NAME = "MF";
+    public static final String KEY_MANIFEST_DELETED= "remove-pattern";
+
+    public static List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
+    public static Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
     private static Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
 
     public static <T> Optional<T> getAdditionalConfig(String key) {

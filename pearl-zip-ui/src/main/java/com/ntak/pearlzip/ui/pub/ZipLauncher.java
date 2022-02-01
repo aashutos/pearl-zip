@@ -5,11 +5,13 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
+import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.rules.*;
 import com.ntak.pearlzip.ui.util.*;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -21,10 +23,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -177,6 +176,39 @@ public class ZipLauncher {
             ROOT_LOGGER.warn(resolveTextKey(LOG_ISSUE_SETTING_UP_KEYSTORE, e.getMessage(),
                                             LoggingUtil.getStackTraceFromException(e)));
         }
+
+        ////////////////////////////////////////////
+        ///// Plugin Manifest Load ////////////////
+        //////////////////////////////////////////
+
+        // Loading rules...
+        MANIFEST_RULES.add(new MinVersionManifestRule());
+        MANIFEST_RULES.add(new MaxVersionManifestRule());
+        MANIFEST_RULES.add(new LicenseManifestRule());
+        MANIFEST_RULES.add(new CheckLibManifestRule());
+        MANIFEST_RULES.add(new RemovePatternManifestRule());
+
+        // Loading plugin manifests...
+        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        if (!Files.exists(LOCAL_MANIFEST_DIR)) {
+            Files.createDirectories(LOCAL_MANIFEST_DIR);
+        }
+
+        Files.list(LOCAL_MANIFEST_DIR)
+                .filter(m -> m.getFileName()
+                              .toString()
+                              .toUpperCase()
+                              .endsWith(".MF"))
+             .forEach(m -> {
+            try {
+                Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
+                if (optInfo.isPresent()) {
+                    PluginInfo info = optInfo.get();
+                    PLUGINS_METADATA.put(info.getName(), info);
+                }
+            } catch(Exception e) {
+            }
+        });
 
         ////////////////////////////////////////////
         ///// Runtime Module Load /////////////////
