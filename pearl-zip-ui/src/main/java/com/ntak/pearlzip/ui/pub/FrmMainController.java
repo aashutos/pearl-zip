@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -112,6 +112,14 @@ public class FrmMainController {
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
+        try {
+            stage.setMinWidth(Double.parseDouble(resolveTextKey(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH, "816")));
+            stage.setMinHeight(Double.parseDouble(resolveTextKey(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "480")));
+        } catch (Exception e) {
+            stage.setMinWidth(816.0);
+            stage.setMinHeight(480.0);
+        }
+
         if (fxArchiveInfo != null) {
             this.FXArchiveInfo = fxArchiveInfo;
             stage.setUserData(fxArchiveInfo);

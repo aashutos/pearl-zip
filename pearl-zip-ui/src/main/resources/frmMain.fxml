@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox fx:id="wrapper" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.ntak.pearlzip.ui.pub.FrmMainController">
     <minHeight>480</minHeight>
     <minWidth>816</minWidth>
     <alignment>TOP_CENTER</alignment>
-    <ToolBar prefHeight="64.0" prefWidth="816.0">
-        <minWidth>816</minWidth>
+    <ToolBar prefHeight="64.0" prefWidth="816.0" minWidth="816" maxWidth="Infinity" minHeight="64" maxHeight="Infinity">
+        <prefWidth>816</prefWidth>
         <maxHeight>64</maxHeight>
-        <translateX>-5</translateX>
         <padding>
-            <Insets left="10.0"/>
+            <Insets left="5.0"/>
         </padding>
         <MenuButton fx:id="btnNew" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
                     minWidth="64.0" contentDisplay="TOP" text="%main.new.text"
@@ -138,46 +136,52 @@
             </graphic>
         </Button>
     </ToolBar>
-    <HBox>
-        <minHeight>416</minHeight>
-        <minWidth>816</minWidth>
-
-        <TableView fx:id="fileContentsView">
-            <minHeight>416</minHeight>
-            <maxHeight>416</maxHeight>
-            <minWidth>816</minWidth>
-            <maxWidth>816</maxWidth>
-            <placeholder>
-                <Label/>
-            </placeholder>
-            <columns>
-                <TableColumn fx:id="name" text="%main.file-content-view.name.text">
-                    <minWidth>200</minWidth>
-                </TableColumn>
-                <TableColumn fx:id="size" text="%main.file-content-view.size.text">
-                    <text>Size</text>
-                </TableColumn>
-                <TableColumn fx:id="packedSize" text="%main.file-content-view.packedSize.text">
-                    <text>Packed Size</text>
-                    <minWidth>100</minWidth>
-                </TableColumn>
-                <TableColumn fx:id="modified" text="%main.file-content-view.modified.text">
-                    <text>Modified</text>
-                    <minWidth>150</minWidth>
-                </TableColumn>
-                <TableColumn fx:id="created" text="%main.file-content-view.created.text">
-                    <text>Created</text>
-                    <minWidth>150</minWidth>
-                </TableColumn>
-                <TableColumn fx:id="hash" text="%main.file-content-view.hash.text">
-                    <text>Hash</text>
-                    <minWidth>160</minWidth>
-                </TableColumn>
-                <TableColumn fx:id="comments" text="%main.file-content-view.comments.text">
-                    <text>Comments</text>
-                    <minWidth>150</minWidth>
-                </TableColumn>
-            </columns>
-        </TableView>
-    </HBox>
+    <TableView fx:id="fileContentsView"
+               minWidth="816"
+               maxWidth="Infinity"
+               minHeight="416"
+               maxHeight="Infinity"
+               VBox.vgrow="ALWAYS"
+    >
+        <prefHeight>416</prefHeight>
+        <prefWidth>816</prefWidth>
+        <placeholder>
+            <Label/>
+        </placeholder>
+        <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+        <columns>
+            <TableColumn fx:id="name" text="%main.file-content-view.name.text">
+                <minWidth>200</minWidth>
+            </TableColumn>
+            <TableColumn fx:id="size" text="%main.file-content-view.size.text">
+                <text>Size</text>
+                <minWidth>100</minWidth>
+                <maxWidth>200</maxWidth>
+            </TableColumn>
+            <TableColumn fx:id="packedSize" text="%main.file-content-view.packedSize.text">
+                <text>Packed Size</text>
+                <minWidth>100</minWidth>
+                <maxWidth>200</maxWidth>
+            </TableColumn>
+            <TableColumn fx:id="modified" text="%main.file-content-view.modified.text">
+                <text>Modified</text>
+                <minWidth>150</minWidth>
+                <maxWidth>150</maxWidth>
+            </TableColumn>
+            <TableColumn fx:id="created" text="%main.file-content-view.created.text">
+                <text>Created</text>
+                <minWidth>150</minWidth>
+                <maxWidth>150</maxWidth>
+            </TableColumn>
+            <TableColumn fx:id="hash" text="%main.file-content-view.hash.text">
+                <text>Hash</text>
+                <minWidth>160</minWidth>
+                <maxWidth>320</maxWidth>
+            </TableColumn>
+            <TableColumn fx:id="comments" text="%main.file-content-view.comments.text">
+                <text>Comments</text>
+                <minWidth>150</minWidth>
+            </TableColumn>
+        </columns>
+    </TableView>
 </VBox>
