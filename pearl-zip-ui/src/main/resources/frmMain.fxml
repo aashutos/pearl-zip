@@ -4,9 +4,11 @@
   ~ Copyright © 2022 92AK
   -->
 
+<?import com.jfoenix.controls.JFXSnackbar?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <VBox fx:id="wrapper" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.ntak.pearlzip.ui.pub.FrmMainController">
@@ -184,4 +186,7 @@
             </TableColumn>
         </columns>
     </TableView>
+    <Pane fx:id="toastPane" minWidth="816" maxWidth="Infinity" minHeight="0" maxHeight="32" translateY="-25" style="-fx-text-box-border: 0; -fx-background-color: -fx-text-box-border, -fx-control-inner-background">
+        <JFXSnackbar fx:id="toast" prefWidth="Infinity" />
+    </Pane>
 </VBox>

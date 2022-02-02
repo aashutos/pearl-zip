@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.cell.*;
 import com.ntak.pearlzip.ui.event.handler.*;
@@ -56,6 +57,8 @@ public class FrmMainController {
     private TableColumn<FileInfo, FileInfo> hash;
     @FXML
     private TableColumn<FileInfo, FileInfo> comments;
+    @FXML
+    private JFXSnackbar toast;
 
     @FXML
     private MenuButton btnNew;
@@ -109,16 +112,24 @@ public class FrmMainController {
         hash.setCellValueFactory(new PropertyValueFactory<>("Self"));
         hash.setComparator(Comparator.comparing(v -> Long.toHexString(v.getCrcHash())
                                                          .toUpperCase()));
+
+        toast.lookup(".jfx-snackbar-content")
+             .setStyle("""
+                       -fx-border-style: none none none none;
+                       -fx-background-color: #44c3ec;
+                       """);
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
         try {
-            stage.setMinWidth(Double.parseDouble(resolveTextKey(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH, "816")));
-            stage.setMinHeight(Double.parseDouble(resolveTextKey(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "480")));
+            stage.setMinWidth(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH, "816")));
+            stage.setMinHeight(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "480")));
         } catch (Exception e) {
             stage.setMinWidth(816.0);
             stage.setMinHeight(480.0);
         }
+
+        stage.widthProperty().addListener((l) -> toast.setPrefWidth(stage.getWidth()));
 
         if (fxArchiveInfo != null) {
             this.FXArchiveInfo = fxArchiveInfo;
@@ -138,7 +149,7 @@ public class FrmMainController {
                                                                                      .collect(Collectors.toList())));
             fileContentsView.setRowFactory(tv -> {
                 TableRow<FileInfo> row = new TableRow<>();
-                row.setOnMouseClicked(new FileInfoRowEventHandler(fileContentsView, btnUp, row, fxArchiveInfo));
+                row.setOnMouseClicked(new FileInfoRowEventHandler(fileContentsView, btnUp, row, fxArchiveInfo, toast));
 
                 return row;
             });
@@ -240,7 +251,7 @@ public class FrmMainController {
 
             btnDelete.setOnMouseClicked(new BtnDeleteEventHandler(fileContentsView, fxArchiveInfo));
             btnInfo.setOnMouseClicked(new BtnFileInfoEventHandler(fileContentsView, fxArchiveInfo));
-            btnUp.setOnMouseClicked(new BtnUpEventHandler(fileContentsView, fxArchiveInfo, btnUp));
+            btnUp.setOnMouseClicked(new BtnUpEventHandler(fileContentsView, fxArchiveInfo, btnUp, toast));
 
             if (ZipState.getCompressorArchives()
                         .contains(fxArchiveInfo.getArchivePath()

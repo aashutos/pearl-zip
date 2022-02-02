@@ -39,6 +39,7 @@ public class ZipConstants {
     public static final String CNS_NTAK_PEARL_ZIP_MODULE_PATH = "configuration.ntak.pearl-zip.module-path";
     public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH = "configuration.ntak.pearl-zip.default-min-width";
     public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT = "configuration.ntak.pearl-zip.default-min-height";
+    public static final String CNS_NTAK_PEARL_ZIP_TOAST_DURATION = "configuration.ntak.pearl-zip.toast-duration";
     public static final String CNS_PROVIDER_PRIORITY_ROOT_KEY = "configuration.ntak.pearl-zip.provider.priority.%s";
     public static final String CNS_STORE_ROOT = "configuration.ntak.pearl-zip.store.temp";
     public static final String CNS_SETTINGS_FILE = "configuration.ntak.pearl-zip.settings-file";
@@ -67,6 +68,8 @@ public class ZipConstants {
     public static final String LOG_LICENSE_FILE_INFO = "logging.ntak.pearl-zip.license.license-file-info";
 
     public static final String LOG_OS_TRIGGER_DETECTED = "logging.ntak.pearl-zip.os-trigger-detected";
+
+    public static final String LOG_TOAST_CURRENT_DIRECTORY = "logging.ntak.pearl-zip.toast.current-directory";
 
     public static final String TITLE_ISSUE_INTEGRATING_CHANGES = "title.ntak.pearl-zip.issue-integrating-changes";
     public static final String HEADER_ISSUE_INTEGRATING_CHANGES = "header.ntak.pearl-zip.issue-integrating-changes";

@@ -22,6 +22,7 @@ module com.ntak.pearlzip.ui {
     requires javafx.fxml;
     requires javafx.web;
     requires nsmenufx;
+    requires com.jfoenix;
 
     // PearlZip dependencies
     requires com.ntak.pearlzip.archive;

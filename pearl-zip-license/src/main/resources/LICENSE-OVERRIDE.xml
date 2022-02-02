@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <licenseSummary>
@@ -194,6 +194,18 @@
                     <name>Oracle Free Usage Terms &amp; Conditions</name>
                     <url>https://www.oracle.com/downloads/licenses/oracle-free-license.html</url>
                     <file>Oracle-FUTC.html</file>
+                </license>
+            </licenses>
+        </dependency>
+        <dependency>
+            <groupId>com.jfoenix</groupId>
+            <artifactId>jfoenix</artifactId>
+            <version>9.0.10</version>
+            <licenses>
+                <license>
+                    <name>Apache License, Version 2.0</name>
+                    <url>http://www.jfoenix.com/documentation.html#license</url>
+                    <file>apache license v2.0 - license-2.0.txt</file>
                 </license>
             </licenses>
         </dependency>

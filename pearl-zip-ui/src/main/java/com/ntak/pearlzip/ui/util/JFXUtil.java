@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
@@ -32,6 +33,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -482,5 +484,18 @@ public class JFXUtil {
         System.setProperties(props);
         LoggingConstants.ROOT_LOGGER.info(props);
         return props;
+    }
+
+    public static void toastMessage(JFXSnackbar toast, String message) {
+        try {
+            toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
+                                                        Duration.millis(Double.parseDouble(System.getProperty(
+                                                                CNS_NTAK_PEARL_ZIP_TOAST_DURATION, "500")))));
+        } catch (Exception e) {
+            if (Objects.nonNull(toast)) {
+                toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
+                                                            Duration.millis(500.0)));
+            }
+        }
     }
 }
