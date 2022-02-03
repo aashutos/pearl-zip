@@ -40,6 +40,7 @@ public class ZipConstants {
     public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH = "configuration.ntak.pearl-zip.default-min-width";
     public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT = "configuration.ntak.pearl-zip.default-min-height";
     public static final String CNS_NTAK_PEARL_ZIP_TOAST_DURATION = "configuration.ntak.pearl-zip.toast-duration";
+    public static final String CNS_NTAK_PEARL_ZIP_SAFE_MODE = "configuration.ntak.pearl-zip.safe-mode";
     public static final String CNS_PROVIDER_PRIORITY_ROOT_KEY = "configuration.ntak.pearl-zip.provider.priority.%s";
     public static final String CNS_STORE_ROOT = "configuration.ntak.pearl-zip.store.temp";
     public static final String CNS_SETTINGS_FILE = "configuration.ntak.pearl-zip.settings-file";
@@ -293,6 +294,9 @@ public class ZipConstants {
     public static final String TITLE_ARCHIVE_CANNOT_CLOSE = "title.ntak.pearl-zip.archive-cannot-close";
     public static final String BODY_ARCHIVE_CANNOT_CLOSE = "body.ntak.pearl-zip.archive-cannot-close";
 
+    public static final String TITLE_SAFE_MODE_ENABLED = "title.ntak.pearl-zip.safe-mode-enabled";
+    public static final String BODY_SAFE_MODE_ENABLED = "body.ntak.pearl-zip.safe-mode-enabled";
+
     // Confirm pzax extension installation
     public static final String TITLE_CONFIRM_INSTALL_EXTENSION = "title.ntak.pearl-zip.confirm-install-extension";
     public static final String HEADER_CONFIRM_INSTALL_EXTENSION = "header.ntak.pearl-zip.confirm-install-extension";
@@ -309,6 +313,7 @@ public class ZipConstants {
     public static final String LOG_VERSION_MIN_VERSION_BREACH = "logging.ntak.pearl-zip.min-version-breach";
     public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
 
+    public static final String TITLE_SAFE_MODE_PATTERN = "title.ntak.pearl-zip.safe-mode-pattern";
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
     public static final String TITLE_NEW_ARCHIVE_PATTERN = "title.ntak.pearl-zip.new-archive-pattern";

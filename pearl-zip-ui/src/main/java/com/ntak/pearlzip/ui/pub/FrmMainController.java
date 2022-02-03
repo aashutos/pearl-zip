@@ -123,10 +123,10 @@ public class FrmMainController {
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
         try {
             stage.setMinWidth(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH, "816")));
-            stage.setMinHeight(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "480")));
+            stage.setMinHeight(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "500")));
         } catch (Exception e) {
             stage.setMinWidth(816.0);
-            stage.setMinHeight(480.0);
+            stage.setMinHeight(500.0);
         }
 
         stage.widthProperty().addListener((l) -> toast.setPrefWidth(stage.getWidth()));

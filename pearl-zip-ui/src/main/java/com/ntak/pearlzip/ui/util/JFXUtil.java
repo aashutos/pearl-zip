@@ -498,4 +498,17 @@ public class JFXUtil {
             }
         }
     }
+
+    public static void setSafeModeTitles(boolean isSafeMode, Stage stage) {
+            String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
+            if (isSafeMode) {
+                if (!stage.getTitle().contains(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName))) {
+                    stage.setTitle(stage.getTitle()
+                                        .replace(appName, resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName)));
+                }
+            } else {
+                stage.setTitle(stage.getTitle()
+                            .replace(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName), appName));
+            }
+        }
 }

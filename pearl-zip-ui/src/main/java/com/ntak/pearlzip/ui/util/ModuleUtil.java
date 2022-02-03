@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
@@ -27,10 +28,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
@@ -92,6 +95,12 @@ public class ModuleUtil {
      *   @param modulePath The directory to scan for java modules
      */
     public static void loadModulesDynamic(Path modulePath) {
+        // Safe mode execution...
+        if (System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
+            loadModulesStatic();
+            return;
+        }
+
         try {
             URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
             ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
@@ -152,6 +161,14 @@ public class ModuleUtil {
                               .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
                                                                 .get()));
         } catch(Exception e) {
+            System.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
+            try(OutputStream bw = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
+                WORKING_APPLICATION_SETTINGS.store(bw, String.format("PearlZip Application Settings File Generated @ %s",
+                                                                     LocalDateTime.now()));
+            } catch(IOException ex) {
+            }
+
             loadModulesStatic();
         }
     }
@@ -371,7 +388,7 @@ public class ModuleUtil {
              });
     }
 
-    public static final Optional<PluginInfo> parseManifest(Path manifestFile) {
+    public static Optional<PluginInfo> parseManifest(Path manifestFile) {
         final Pattern csv = Pattern.compile(Pattern.quote(":"));
         try(Scanner scanner = new Scanner(manifestFile)) {
             String name = "";

@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.NO_FILES_HISTORY;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -131,7 +132,7 @@ public class ArchiveUtil {
         try {
             if (Objects.nonNull(backupArchive) && Objects.nonNull(targetLocation) && Files.exists(backupArchive)) {
                 Files.copy(backupArchive, targetLocation, StandardCopyOption.REPLACE_EXISTING);
-                if (!backupArchive.toString().equals(targetLocation)) {
+                if (!backupArchive.equals(targetLocation)) {
                     Files.deleteIfExists(backupArchive);
                 }
                 return true;
@@ -145,7 +146,9 @@ public class ArchiveUtil {
 
     public static void removeBackupArchive(Path tempArchive) throws IOException {
         Files.deleteIfExists(tempArchive);
-        if (tempArchive.getParent().getFileName().toString().matches(REGEX_TIMESTAMP_DIR) && Files.list(tempArchive.getParent()).count() == 0) {
+        if (tempArchive.getParent().getFileName().toString().matches(REGEX_TIMESTAMP_DIR) && Files.list(tempArchive.getParent())
+                                                                                                  .findAny()
+                                                                                                  .isEmpty()) {
             Files.deleteIfExists(tempArchive.getParent());
         }
     }
@@ -353,6 +356,21 @@ public class ArchiveUtil {
             stage.show();
             stage.toFront();
         } catch (Exception e) {
+        } finally {
+            // Safe mode enabled warning
+            // TITLE: Safe Mode Enabled
+            // BODY: There was an issue in start up so safe mode has been enabled. Some plugins may need to be removed.
+            if (JFXUtil.getMainStageInstances().size() == 1 &&
+                    WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
+                JFXUtil.runLater( () -> {
+                    ROOT_LOGGER.error(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "false"));
+                    raiseAlert(Alert.AlertType.WARNING,
+                               resolveTextKey(TITLE_SAFE_MODE_ENABLED), null,
+                               resolveTextKey(BODY_SAFE_MODE_ENABLED), stage);
+                });
+
+                JFXUtil.setSafeModeTitles(true, stage);
+            }
         }
 
         return stage;

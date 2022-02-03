@@ -70,6 +70,9 @@ public class FrmOptionsController {
     @FXML
     private CheckBox checkShowNotification;
 
+    @FXML
+    private CheckBox checkSafeMode;
+
     ///// Bootstrap Properties /////
     @FXML
     private TableView<Pair<String,String>> tblBootstrap;
@@ -163,6 +166,24 @@ public class FrmOptionsController {
             }
         });
 
+        // CHECK BOX - SAFE MODE
+        try {
+            checkSafeMode.setSelected(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,
+                                                                                                "true")));
+        } catch (Exception e) {
+            checkSafeMode.setSelected(true);
+        }
+        checkSafeMode.setOnAction(e -> {
+            synchronized(WORKING_SETTINGS) {
+                WORKING_APPLICATION_SETTINGS.put(CNS_NTAK_PEARL_ZIP_SAFE_MODE,
+                                                 checkSafeMode.isSelected()?"true":"false");
+            }
+        });
+
+        checkSafeMode.selectedProperty().addListener((l)-> {
+            JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));
+        });
+        
         ///// Provider Properties /////
         name.setCellValueFactory((s) -> new SimpleStringProperty(s.getValue()
                                                                   .getValue()
@@ -401,6 +422,8 @@ public class FrmOptionsController {
                     List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
                     APP.createSystemMenu(aboutStage, customMenus);
                 } catch(IOException exc) {
+                }  finally {
+                    JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));
                 }
             }
         });
@@ -421,6 +444,8 @@ public class FrmOptionsController {
             }
 
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "false")),
+                                                                                       s));
         });
 
         paneDropArea.setOnDragOver(e -> e.acceptTransferModes(TransferMode.COPY));
