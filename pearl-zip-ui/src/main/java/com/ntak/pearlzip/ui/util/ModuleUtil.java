@@ -285,12 +285,7 @@ public class ModuleUtil {
                                    .toString()
                                    .matches(rootMF)
                      )
-                     .forEach(m -> {
-                         try {
-                             Files.deleteIfExists(m);
-                         } catch(IOException e) {
-                         }
-                     });
+                     .forEach(ModuleUtil::safeDeletePath);
             }
 
             // Copy manifest file locally and add to application cache
@@ -303,7 +298,9 @@ public class ModuleUtil {
             Files.copy(srcMF,
                        localMF
                     , StandardCopyOption.REPLACE_EXISTING);
-            PLUGINS_METADATA.put(info.getName(), info);
+            synchronized(PLUGINS_METADATA) {
+                PLUGINS_METADATA.put(info.getName(), info);
+            }
 
             // Reload provider modules into PearlZip
             loadModulesDynamic(moduleDirectory);
@@ -365,27 +362,76 @@ public class ModuleUtil {
                               )
                               .toString();
 
-        Set<Path> dependencies = PLUGINS_METADATA.entrySet()
-                                                 .stream()
-                                                 .filter(e -> !e.getKey().equals(pluginName))
-                                                 .map(Map.Entry::getValue)
-                                                 .flatMap(l -> l.getDependencies()
-                                                               .stream())
-                                                 .map(s -> Paths.get(moduleDirectory.toAbsolutePath()
-                                                                                    .toString(), s))
-                                                 .filter(p -> p.toAbsolutePath().toString().matches(rootLib))
-                                                 .collect(Collectors.toSet());
+        synchronized(PLUGINS_METADATA) {
+            Set<Path> dependencies = PLUGINS_METADATA.entrySet()
+                                                     .stream()
+                                                     .filter(e -> !e.getKey()
+                                                                    .equals(pluginName))
+                                                     .map(Map.Entry::getValue)
+                                                     .flatMap(l -> l.getDependencies()
+                                                                    .stream())
+                                                     .map(s -> Paths.get(moduleDirectory.toAbsolutePath()
+                                                                                        .toString(), s))
+                                                     .filter(p -> p.toAbsolutePath()
+                                                                   .toString()
+                                                                   .matches(rootLib))
+                                                     .collect(Collectors.toSet());
 
-        Files.list(moduleDirectory)
-             .filter(f -> f.toAbsolutePath()
-                           .toString()
-                           .matches(rootLib) && !dependencies.contains(f))
-             .forEach(f -> {
+            Files.list(moduleDirectory)
+                 .filter(f -> f.toAbsolutePath()
+                               .toString()
+                               .matches(rootLib) && !dependencies.contains(f))
+                 .forEach(ModuleUtil::safeDeletePath);
+        }
+    }
+
+    public static void purgeLibraries(String moduleDirectory, Set<String> names) throws IOException {
+        // Remove libraries...
+        synchronized(PLUGINS_METADATA) {
+            PLUGINS_METADATA.values()
+                            .stream()
+                            .filter(m -> names.contains(m.getName()))
+                            .forEach(m -> {
+                                try {
+                                    for (String dependency : m.getDependencies()) {
+                                        purgeLibrary(Paths.get(moduleDirectory),
+                                                     Paths.get(moduleDirectory, dependency),
+                                                     m.getName());
+                                    }
+                                } catch(IOException ex) {
+                                }
+                            });
+        }
+
+        // Remove manifests
+        Files.list(LOCAL_MANIFEST_DIR)
+             .forEach(m -> {
                  try {
-                     Files.deleteIfExists(f);
-                 } catch(Exception e) {
+                     final Optional<PluginInfo> optPluginInfo = parseManifest(m);
+                     if (names.contains(optPluginInfo.get().getName())) {
+                         Files.deleteIfExists(m);
+
+                         synchronized(PLUGINS_METADATA) {
+                             PLUGINS_METADATA.remove(optPluginInfo.get()
+                                                                  .getName());
+                         }
+                     }
+                 } catch(IOException ex) {
                  }
              });
+    }
+
+    public static void purgeAllLibraries() throws IOException {
+        Files.list(Path.of(STORE_ROOT.toAbsolutePath()
+                                     .toString(), "providers"))
+             .forEach(ModuleUtil::safeDeletePath);
+
+        Files.list(LOCAL_MANIFEST_DIR)
+             .forEach(ModuleUtil::safeDeletePath);
+
+        synchronized(PLUGINS_METADATA) {
+            PLUGINS_METADATA.clear();
+        }
     }
 
     public static Optional<PluginInfo> parseManifest(Path manifestFile) {
@@ -454,5 +500,12 @@ public class ModuleUtil {
         } catch(Exception e) {
         }
         return Optional.empty();
+    }
+
+    public static void safeDeletePath(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch(IOException e) {
+        }
     }
 }

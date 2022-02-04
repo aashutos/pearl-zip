@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane prefHeight="277.0" prefWidth="394.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmPurgePluginController">
+    <TableView fx:id="tblManifests" layoutX="14.0" layoutY="14.0" prefHeight="215.0" prefWidth="368.0">
+      <columns>
+          <TableColumn fx:id="colName" prefWidth="366.0" text="%purge-plugin.tblManifests.name.text"/>
+      </columns>
+    </TableView>
+    <Button fx:id="btnPurgeSelected" layoutX="14.0" layoutY="239.0" mnemonicParsing="false" prefHeight="27.0"
+            prefWidth="114.0" text="%purge-plugin.btnPurgeSelected.text"/>
+    <Button fx:id="btnCancel" layoutX="303.0" layoutY="239.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="79.0"
+            text="%purge-plugin.btnCancel.textpurge-plugin.btnCancel.text"/>
+</AnchorPane>

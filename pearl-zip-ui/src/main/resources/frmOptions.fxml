@@ -32,8 +32,8 @@
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabProviders" text="%options.providers.text">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <TableView fx:id="tblProviders" layoutX="10.0" layoutY="15.0" prefHeight="300.0" prefWidth="410.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="428.0">
+                <TableView fx:id="tblProviders" layoutX="10.0" layoutY="15.0" prefHeight="239.0" prefWidth="410.0">
                     <columns>
                         <TableColumn fx:id="name" prefWidth="109.0" text="%options.providers.name.text" />
                         <TableColumn fx:id="readCapability" prefWidth="68.0" text="%options.providers.name.readCapability.text" />
@@ -42,6 +42,8 @@
                         <TableColumn fx:id="supportedFormat" prefWidth="163.0" text="%options.providers.name.supportedFormat.text" />
                     </columns>
                 </TableView>
+            <Button fx:id="btnPurgePlugin" layoutX="10.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="107.0" text="%options.providers.purge-plugin.text" />
+            <Button fx:id="btnPurgeAll" layoutX="125.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="141.0" text="%options.providers.purge-all.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabPluginLoader" text="%options.plugin-loader.text">

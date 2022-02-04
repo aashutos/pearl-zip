@@ -327,12 +327,22 @@ public class ZipConstants {
     public static final String TITLE_SOURCE_DIR_LOCATION = "title.ntak.pearl-zip.source-dir-location";
     public static final String TITLE_TARGET_DIR_LOCATION = "title.ntak.pearl-zip.target-dir-location";
     public static final String TITLE_SELECT_INSTALL_EXTENSION = "title.ntak.pearl-zip.select-install-extension";
+    public static final String TITLE_SELECT_PLUGINS_PURGE = "title.ntak.pearl-zip.select-plugins-purge";
 
     public static final String TITLE_NEW_VERSION_AVAILABLE = "title.ntak.pearl-zip.new-version-available";
     public static final String BODY_NEW_VERSION_AVAILABLE = "body.ntak.pearl-zip.new-version-available";
 
     public static final String TITLE_LATEST_VERSION = "title.ntak.pearl-zip.latest-version";
     public static final String BODY_LATEST_VERSION = "body.ntak.pearl-zip.latest-version";
+
+    public static final String TITLE_CONFIRM_PURGE_ALL = "title.ntak.pearl-zip.confirm-purge-all";
+    public static final String BODY_CONFIRM_PURGE_ALL = "body.ntak.pearl-zip.confirm-purge-all";
+
+    public static final String TITLE_PURGE_COMPLETE = "title.ntak.pearl-zip.purge-complete";
+    public static final String BODY_PURGE_COMPLETE = "body.ntak.pearl-zip.purge-complete";
+
+    public static final String TITLE_CONFIRM_PURGE_SELECTED = "title.ntak.pearl-zip.confirm-purge-selected";
+    public static final String BODY_CONFIRM_PURGE_SELECTED = "body.ntak.pearl-zip.confirm-purge-selected";
 
     public static final String LBL_ARCHIVE_EXT_TYPE_PATTERN = "label.ntak.pearl-zip.archive-ext-type-pattern";
     public static final String LBL_BUTTON_MOVE = "label.ntak.pearl-zip.button.move";
@@ -373,9 +383,9 @@ public class ZipConstants {
     public static final String MANIFEST_FILE_NAME = "MF";
     public static final String KEY_MANIFEST_DELETED= "remove-pattern";
 
-    public static List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
-    public static Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
-    private static Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
+    public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
+    public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
+    private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
 
     public static <T> Optional<T> getAdditionalConfig(String key) {
         if (Objects.nonNull(key)) {

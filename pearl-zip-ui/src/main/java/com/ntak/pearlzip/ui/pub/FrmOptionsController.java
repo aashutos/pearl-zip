@@ -7,19 +7,25 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.ModuleUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Pair;
@@ -37,6 +43,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
@@ -94,6 +101,10 @@ public class FrmOptionsController {
     private TableColumn<Pair<Boolean,ArchiveService>,String> supportedFormat;
     @FXML
     private TableColumn<Pair<Boolean,ArchiveService>,Pair<String,Number>> priority;
+    @FXML
+    private Button btnPurgePlugin;
+    @FXML
+    private Button btnPurgeAll;
 
     ///// Load Plugin Properties /////
     @FXML
@@ -337,6 +348,66 @@ public class FrmOptionsController {
                 );
             }
         });
+
+        // Purge plugin functionality
+        btnPurgePlugin.setOnAction((e) -> {
+            try {
+                Stage stgPurgePlugin = new Stage();
+
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(ArchiveUtil.class.getClassLoader()
+                                                    .getResource("frmPurgePlugin.fxml"));
+                loader.setResources(LOG_BUNDLE);
+                AnchorPane pane = loader.load();
+                final Scene scene = new Scene(pane);
+                stgPurgePlugin.setScene(scene);
+                stgPurgePlugin.setTitle(resolveTextKey(TITLE_SELECT_PLUGINS_PURGE));
+
+                stgPurgePlugin.initOwner(stage);
+                stgPurgePlugin.initModality(Modality.WINDOW_MODAL);
+                
+                stgPurgePlugin.setResizable(false);
+                stgPurgePlugin.setAlwaysOnTop(true);
+                stgPurgePlugin.showAndWait();
+            } catch (Exception exc) {
+
+            }
+
+        });
+
+        btnPurgeAll.setOnAction((e) -> {
+            Optional<ButtonType> response = Optional.empty();
+            try {
+                // TITLE: Confirmation: Purge all plugins
+                // BODY: Do you wish to purge all plugins?
+                response = raiseAlert(Alert.AlertType.CONFIRMATION,
+                           resolveTextKey(TITLE_CONFIRM_PURGE_ALL),
+                           null,
+                           resolveTextKey(BODY_CONFIRM_PURGE_ALL),
+                           null,
+                           stage,
+                           ButtonType.YES,
+                           ButtonType.NO);
+                if (response.isPresent() && response.get().equals(ButtonType.YES)) {
+                    ModuleUtil.purgeAllLibraries();
+                }
+            } catch(IOException ex) {
+            } finally {
+                if (response.isPresent() && response.get().equals(ButtonType.YES)) {
+                    // TITLE: Purge Complete
+                    // BODY: Purge has completed. The effects of purge will come into effect after restart.
+                    raiseAlert(Alert.AlertType.INFORMATION,
+                               resolveTextKey(TITLE_PURGE_COMPLETE),
+                               null,
+                               resolveTextKey(BODY_PURGE_COMPLETE),
+                               null,
+                               stage
+                    );
+                }
+            }
+        });
+
+        // Plugin option loading...
         for (ArchiveService service : services.stream()
                                               .map(Pair::getValue)
                                               .collect(Collectors.toList())) {

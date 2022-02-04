@@ -204,7 +204,9 @@ public class ZipLauncher {
                 Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
                 if (optInfo.isPresent()) {
                     PluginInfo info = optInfo.get();
-                    PLUGINS_METADATA.put(info.getName(), info);
+                    synchronized(PLUGINS_METADATA) {
+                        PLUGINS_METADATA.put(info.getName(), info);
+                    }
                 }
             } catch(Exception e) {
             }
