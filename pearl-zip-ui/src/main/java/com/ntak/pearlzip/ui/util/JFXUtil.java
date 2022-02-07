@@ -14,6 +14,7 @@ import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
@@ -41,6 +42,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -60,8 +62,7 @@ import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.ESV;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.PSV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.LOCK_POLL_TIMEOUT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
@@ -511,4 +512,20 @@ public class JFXUtil {
                             .replace(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName), appName));
             }
         }
+
+    public static void initialiseTheme(Path themesPath, String themeName) {
+        String themePath = String.format(PATTERN_CSS_THEME_PATH,
+                                         themesPath.toAbsolutePath(),
+                                         themeName,
+                                         themeName);
+        if (!Files.exists(Paths.get(URI.create(themePath).getPath()))) {
+            themeName = "modena";
+            themePath = String.format(PATTERN_CSS_THEME_PATH,
+                                      themesPath.toAbsolutePath(),
+                                      themeName,
+                                      themeName);
+        }
+        Application.setUserAgentStylesheet(themePath);
+        System.setProperty(CNS_THEME_NAME, themeName);
+    }
 }

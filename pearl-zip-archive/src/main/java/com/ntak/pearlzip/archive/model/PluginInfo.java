@@ -17,11 +17,12 @@ public class PluginInfo {
     private final String maxVersion;
     private final Set<String> licenses = new HashSet<>();
     private final Set<String> dependencies = new LinkedHashSet<>();
+    private final Set<String> themes = new LinkedHashSet<>();
     private final List<String> hashFormats = new LinkedList<>();
     private final Map<String,String> properties = new ConcurrentHashMap<>();
 
     public PluginInfo(String name, String minVersion, String maxVersion, List<String> licenses,
-            List<String> dependencies, List<String> hashFormats,
+            List<String> dependencies, List<String> hashFormats, List<String> themes,
             Map<String,String> properties) {
         this.name = name;
         this.minVersion = minVersion;
@@ -29,6 +30,7 @@ public class PluginInfo {
         this.licenses.addAll(licenses);
         this.dependencies.addAll(dependencies);
         this.hashFormats.addAll(hashFormats);
+        this.themes.addAll(themes);
         this.properties.putAll(properties);
     }
 
@@ -54,6 +56,10 @@ public class PluginInfo {
 
     public List<String> getHashFormats() {
         return Collections.unmodifiableList(hashFormats);
+    }
+
+    public Set<String> getThemes() {
+        return themes;
     }
 
     public Map<String,String> getProperties() {

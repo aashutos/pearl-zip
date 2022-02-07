@@ -53,6 +53,7 @@ public class ZipConstants {
     public static final String CNS_DEFAULT_FORMAT = "configuration.ntak.pearl-zip.default-format";
     public static final String CNS_LAUNCHER_CANONICAL_NAME = "configuration.ntak.pearl-zip.launcher-canonical-name";
     public static final String CNS_SHOW_NOTIFICATION = "configuration.ntak.pearl-zip.show-notification";
+    public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -312,6 +313,7 @@ public class ZipConstants {
 
     public static final String LOG_VERSION_MIN_VERSION_BREACH = "logging.ntak.pearl-zip.min-version-breach";
     public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
+    public static final String LOG_THEME_NOT_EXIST = "logging.ntak.pearl-zip.theme-not-exist";
 
     public static final String TITLE_SAFE_MODE_PATTERN = "title.ntak.pearl-zip.safe-mode-pattern";
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
@@ -382,6 +384,7 @@ public class ZipConstants {
 
     public static final String MANIFEST_FILE_NAME = "MF";
     public static final String KEY_MANIFEST_DELETED= "remove-pattern";
+    public static final Set<String> CORE_THEMES = Set.of("modena", "modena-dark");
 
     public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
     public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();

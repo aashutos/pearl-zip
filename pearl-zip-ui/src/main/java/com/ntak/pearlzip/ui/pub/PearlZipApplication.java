@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -140,6 +141,37 @@ public abstract class PearlZipApplication extends Application {
         Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath()
                                                 .toString(), "providers");
         Files.createDirectories(providerPath);
+
+        // Themes
+        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                              .toString(), "themes");
+
+        // Copy over and overwrite core themes...
+        for (String theme : CORE_THEMES) {
+            Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                  .toString(), "themes", theme);
+            Files.createDirectories(defThemePath);
+            Files.list(Paths.get(getClass().getClassLoader()
+                                           .getResource(theme)
+                                           .getPath()))
+                 .forEach(f -> {
+                              try {
+                                  Files.copy(f,
+                                             Paths.get(defThemePath.toAbsolutePath()
+                                                                 .toString(),
+                                                       f.getFileName()
+                                                        .toString()
+                                             ),
+                                             StandardCopyOption.REPLACE_EXISTING);
+                              } catch(IOException e) {
+                              }
+                          }
+                 );
+        }
+
+        // Initialise theme...
+        String themeName = System.getProperty(CNS_THEME_NAME, "modena");
+        JFXUtil.initialiseTheme(themesPath, themeName);
 
         // Recent files
         RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()

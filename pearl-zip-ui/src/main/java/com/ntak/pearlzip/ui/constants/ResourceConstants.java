@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.constants;
 
@@ -36,6 +36,7 @@ public class ResourceConstants {
 
     public static final String PATTERN_FXID_NEW_OPTIONS = "%s.new-options";
     public static final String PATTERN_FXID_OPTIONS = "%s.options";
+    public static final String PATTERN_CSS_THEME_PATH = "file://%s/%s/%s.css";
 
     public static final String PATTERN_TEXTFIELD_TABLE_CELL_STYLE = "-fx-text-box-border: transparent; -fx-background-color: transparent; " +
             "-fx-background-insets: 0; -fx-padding: 1 3 1 3; -fx-focus-color: transparent; " +

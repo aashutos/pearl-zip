@@ -112,12 +112,6 @@ public class FrmMainController {
         hash.setCellValueFactory(new PropertyValueFactory<>("Self"));
         hash.setComparator(Comparator.comparing(v -> Long.toHexString(v.getCrcHash())
                                                          .toUpperCase()));
-
-        toast.lookup(".jfx-snackbar-content")
-             .setStyle("""
-                       -fx-border-style: none none none none;
-                       -fx-background-color: #44c3ec;
-                       """);
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {

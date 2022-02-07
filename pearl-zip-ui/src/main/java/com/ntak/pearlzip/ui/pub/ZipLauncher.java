@@ -187,6 +187,7 @@ public class ZipLauncher {
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
+        MANIFEST_RULES.add(new ThemeManifestRule());
 
         // Loading plugin manifests...
         LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");

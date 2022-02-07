@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -51,8 +53,7 @@ import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.loadMenusFromPlugins;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
-import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
-import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.JFXUtil.*;
 import static com.ntak.pearlzip.ui.util.ModuleUtil.loadModuleFromExtensionPackage;
 
 /**
@@ -116,6 +117,16 @@ public class FrmOptionsController {
     private Button btnApply;
     @FXML
     private Button btnCancel;
+
+    ///// Theme Properties /////
+    @FXML
+    private Tab tabTheme;
+    @FXML
+    private TableView<String> tblTheme;
+    @FXML
+    private TableColumn<String,String> colTheme;
+    @FXML
+    private Button btnSetTheme;
 
     @FXML
     public void initialize() {
@@ -461,6 +472,32 @@ public class FrmOptionsController {
             }
         });
 
+        // Theme related functionality
+        final Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                              .toString(), "themes");
+        tabTheme.setOnSelectionChanged( (ev) -> {
+             try {
+                 tblTheme.setItems(FXCollections.observableArrayList(Files.list(themesPath)
+                                                                          .filter(t -> Files.isDirectory(t))
+                                                                          .map(p -> p.getFileName()
+                                                                                     .toString())
+                                                                          .collect(Collectors.toList()))
+                 );
+                 tblTheme.refresh();
+             } catch(Exception e) {
+
+             }
+        });
+
+        colTheme.setCellValueFactory((t) -> new SimpleStringProperty(t.getValue()));
+
+        btnSetTheme.setOnAction((e)-> {
+            String name = tblTheme.getSelectionModel().getSelectedItem();
+            initialiseTheme(themesPath, name);
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_THEME_NAME, name);
+        });
+
+        // Button bar functionality
         btnApply.setOnMouseClicked(e -> {
             synchronized(CURRENT_SETTINGS) {
                 CURRENT_SETTINGS.clear();

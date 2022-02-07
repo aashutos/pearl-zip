@@ -24,10 +24,8 @@ import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -43,6 +41,7 @@ import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
 import static com.ntak.pearlzip.ui.util.JFXUtil.loadLicenseDetails;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
  *  Utility methods within this class are utilised by PearlZip to load Archive Service implementations.
@@ -288,8 +287,39 @@ public class ModuleUtil {
                      .forEach(ModuleUtil::safeDeletePath);
             }
 
-            // Copy manifest file locally and add to application cache
-            Files.createDirectories(LOCAL_MANIFEST_DIR);
+            // Copy themes to local directory
+            for (String theme : info.getThemes()) {
+                Path localThemeDir = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "themes");
+                Files.copy(targetDir.resolve(theme),
+                           localThemeDir.resolve(theme),
+                           StandardCopyOption.REPLACE_EXISTING);
+
+                // N.B. SimpleFileVisitor implementation taken from javadoc
+                Files.walkFileTree(Paths.get(targetDir.toAbsolutePath().toString(), theme), new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                            throws IOException
+                    {
+                        Path targetdir = localThemeDir.resolve(targetDir.relativize(dir));
+                        try {
+                            Files.copy(dir, targetdir);
+                        } catch (FileAlreadyExistsException e) {
+                            if (!Files.isDirectory(targetdir))
+                                throw e;
+                        }
+                        return CONTINUE;
+                    }
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                            throws IOException
+                    {
+                        Files.copy(file, localThemeDir.resolve(targetDir.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+                        return CONTINUE;
+                    }
+                });
+            }
+
+             Files.createDirectories(LOCAL_MANIFEST_DIR);
             final Path localMF = Paths.get(LOCAL_MANIFEST_DIR.toString(),
                                       String.format("%s.%s",
                                                     pzaxArchive.getFileName()
@@ -398,6 +428,17 @@ public class ModuleUtil {
                                                      Paths.get(moduleDirectory, dependency),
                                                      m.getName());
                                     }
+
+                                    // Remove themes by unique key...
+                                    for (String theme : m.getThemes()) {
+                                        Path themePath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                                             .toString(),
+                                                                   "themes",
+                                                                   theme
+                                        );
+
+                                        deleteDirectory(themePath, (p) -> false);
+                                    }
                                 } catch(IOException ex) {
                                 }
                             });
@@ -429,6 +470,15 @@ public class ModuleUtil {
         Files.list(LOCAL_MANIFEST_DIR)
              .forEach(ModuleUtil::safeDeletePath);
 
+        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                             .toString(),
+                                   "themes"
+        );
+
+        Files.list(themesPath)
+             .filter(d -> Files.isDirectory(d) && !CORE_THEMES.contains(d.getFileName().toString()))
+             .forEach(d -> deleteDirectory(d, (p) -> false));
+
         synchronized(PLUGINS_METADATA) {
             PLUGINS_METADATA.clear();
         }
@@ -443,6 +493,7 @@ public class ModuleUtil {
             List<String> hashFormats = new LinkedList<>();
             List<String> licenses = new LinkedList<>();
             List<String> dependencies = new LinkedList<>();
+            List<String> themes = new LinkedList<>();
             Map<String,String> properties = new HashMap<>();
 
             while (scanner.hasNextLine()) {
@@ -470,6 +521,12 @@ public class ModuleUtil {
                                            String.join(",", licenses));
                             break;
 
+                        case "theme":
+                            themes.add(config[1]);
+                            properties.put("theme",
+                                           String.join(",", themes));
+                            break;
+
                         case "lib-file":
                             String hashFormat = config[1];
                             String lib = config[2];
@@ -495,7 +552,7 @@ public class ModuleUtil {
 
             properties.put("lib-file",
                            String.join(",", dependencies));
-            return Optional.of(new PluginInfo(name, minVersion, maxVersion, licenses, dependencies, hashFormats,
+            return Optional.of(new PluginInfo(name, minVersion, maxVersion, licenses, dependencies, hashFormats, themes,
                                               properties));
         } catch(Exception e) {
         }

@@ -60,6 +60,7 @@ public class ModuleUtilTest {
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
+        MANIFEST_RULES.add(new ThemeManifestRule());
 
         System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
 
