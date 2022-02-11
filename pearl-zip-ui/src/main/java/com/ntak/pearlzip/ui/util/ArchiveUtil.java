@@ -43,8 +43,7 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.NO_FILES_HISTORY;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -647,6 +646,69 @@ public class ArchiveUtil {
                                                 path,
                                                 timestamp,
                                                 archiveFormat));
+        }
+    }
+
+    public static void extractDirectory(long sessionId, Path targetDir, FXArchiveInfo fxArchiveInfo,
+            FileInfo selectedFile) {
+        try {
+
+            // List files and folders under the current directory
+            Map<Boolean,List<FileInfo>> files = fxArchiveInfo.getFiles()
+                                                             .stream()
+                                                             .filter(f -> f.getFileName()
+                                                                           .startsWith(selectedFile.getFileName()))
+                                                             .collect(Collectors.partitioningBy(FileInfo::isFolder));
+
+            long total =
+                    files.values()
+                         .stream()
+                         .flatMap(Collection::stream)
+                         .parallel()
+                         .mapToLong(FileInfo::getRawSize)
+                         .sum();
+
+            // Create directories
+            files.get(Boolean.TRUE)
+                 .forEach(d -> {
+                              try {
+                                  // LOG: Creating directory %s...
+                                  ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
+                                                                                      PROGRESS,
+                                                                                      resolveTextKey(LOG_CREATE_DIRECTORY,
+                                                                                                    d.getFileName()),
+                                                                                      0,
+                                                                                      total
+                                  ));
+                                  Files.createDirectories(Paths.get(targetDir.toAbsolutePath()
+                                                                           .toString(), d.getFileName()));
+                              } catch(IOException ex) {
+                              }
+                          }
+                 );
+            // Create files
+            files.get(Boolean.FALSE)
+                 .forEach(f -> fxArchiveInfo.getReadService()
+                                            .extractFile(sessionId,
+                                                         Paths.get(targetDir.toAbsolutePath()
+                                                                          .toString(),
+                                                                   f.getFileName()
+                                                         ),
+                                                         fxArchiveInfo.getArchiveInfo(),
+                                                         f
+                                            )
+                 );
+        } catch (Exception e) {
+
+        } finally {
+            // LOG: Extraction of directory %s has completed.
+            ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
+                                                                COMPLETED,
+                                                                resolveTextKey(LOG_DIR_EXTRACT_COMPLETE,
+                                                                              selectedFile.getFileName()),
+                                                                -1,
+                                                                0
+            ));
         }
     }
 }

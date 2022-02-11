@@ -39,6 +39,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
@@ -115,179 +116,199 @@ public abstract class PearlZipApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
-        APP = this;
-
-        CountDownLatch readyLatch = new CountDownLatch(1);
-
-        // Loading additional EventBus consumers
-        MESSAGE_TRACE_LOGGER = ProgressMessageTraceLogger.getMessageTraceLogger();
-        ArchiveService.DEFAULT_BUS.register(MESSAGE_TRACE_LOGGER);
-
-        ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();
-        ArchiveService.DEFAULT_BUS.register(ERROR_ALERT_CONSUMER);
-
-        ////////////////////////////////////////////
-        ///// Create files and dir structure //////
-        //////////////////////////////////////////
-
-        // Create temporary store folder
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp");
-        if (!Files.exists(STORE_TEMP)) {
-            Files.createDirectories(STORE_TEMP);
-        }
-
-        // Providers
-        Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "providers");
-        Files.createDirectories(providerPath);
-
-        // Themes
-        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                              .toString(), "themes");
-
-        // Copy over and overwrite core themes...
-        for (String theme : CORE_THEMES) {
-            Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                  .toString(), "themes", theme);
-            Files.createDirectories(defThemePath);
-            Files.list(Paths.get(getClass().getClassLoader()
-                                           .getResource(theme)
-                                           .getPath()))
-                 .forEach(f -> {
-                              try {
-                                  Files.copy(f,
-                                             Paths.get(defThemePath.toAbsolutePath()
-                                                                 .toString(),
-                                                       f.getFileName()
-                                                        .toString()
-                                             ),
-                                             StandardCopyOption.REPLACE_EXISTING);
-                              } catch(IOException e) {
-                              }
-                          }
-                 );
-        }
-
-        // Initialise theme...
-        String themeName = System.getProperty(CNS_THEME_NAME, "modena");
-        JFXUtil.initialiseTheme(themesPath, themeName);
-
-        // Recent files
-        RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
-                                          .toString(), "rf");
-        if (!Files.exists(RECENT_FILE)) {
-            Files.createFile(RECENT_FILE);
-        }
-
-        // Setting about form...
-        Stage aboutStage = genFrmAbout();
-
-        // Load custom menus from plugins
-        List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
-        createSystemMenu(aboutStage, customMenus);
-
-        readyLatch.countDown();
-
-        // Show Notifications dialog
         try {
-            if (OS_FILES.size() == 0 && Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
-                                                                                        "true"))) {
-                JFXUtil.runLater(JFXUtil::showNotifications);
+            APP = this;
+
+            CountDownLatch readyLatch = new CountDownLatch(1);
+
+            // Loading additional EventBus consumers
+            MESSAGE_TRACE_LOGGER = ProgressMessageTraceLogger.getMessageTraceLogger();
+            ArchiveService.DEFAULT_BUS.register(MESSAGE_TRACE_LOGGER);
+
+            ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();
+            ArchiveService.DEFAULT_BUS.register(ERROR_ALERT_CONSUMER);
+
+            ////////////////////////////////////////////
+            ///// Create files and dir structure //////
+            //////////////////////////////////////////
+
+            // Create temporary store folder
+            ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                          .toString(), "temp");
+            if (!Files.exists(STORE_TEMP)) {
+                Files.createDirectories(STORE_TEMP);
+            }
+
+            // Providers
+            Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                    .toString(), "providers");
+            Files.createDirectories(providerPath);
+
+            // Themes
+            Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                  .toString(), "themes");
+
+            // Copy over and overwrite core themes...
+            for (String theme : CORE_THEMES) {
+                Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                        .toString(), "themes", theme);
+                Files.createDirectories(defThemePath);
+                Stream<Path> themeFiles;
+                try {
+                    themeFiles = Files.list(Paths.get(getClass().getClassLoader()
+                                                   .getResource(theme)
+                                                   .getPath()));
+                } catch (Exception e) {
+                    themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
+                                            theme).toAbsolutePath());
+                }
+                themeFiles.forEach(f -> {
+                                        try {
+                                            Files.copy(f,
+                                                       Paths.get(defThemePath.toAbsolutePath()
+                                                                             .toString(),
+                                                                 f.getFileName()
+                                                                  .toString()
+                                                       ),
+                                                       StandardCopyOption.REPLACE_EXISTING);
+                                        } catch(IOException e) {
+                                        }
+                 }
+                );
+            }
+
+            // Initialise theme...
+            String themeName = System.getProperty(CNS_THEME_NAME, "modena");
+            JFXUtil.initialiseTheme(themesPath, themeName);
+
+            // Initialise drag out constants...
+            try {
+                long maxSize = Long.parseLong(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MAX_SIZE_DRAG_OUT));
+                MAX_SIZE_DRAG_OUT = maxSize;
+            } catch (Exception e) {
+
+            }
+
+            // Recent files
+            RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
+                                              .toString(), "rf");
+            if (!Files.exists(RECENT_FILE)) {
+                Files.createFile(RECENT_FILE);
+            }
+
+            // Setting about form...
+            Stage aboutStage = genFrmAbout();
+
+            // Load custom menus from plugins
+            List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
+            createSystemMenu(aboutStage, customMenus);
+
+            readyLatch.countDown();
+
+            // Show Notifications dialog
+            try {
+                if (OS_FILES.size() == 0 && Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
+                                                                                              "true"))) {
+                    JFXUtil.runLater(JFXUtil::showNotifications);
+                }
+            } catch(Exception e) {
+
+            }
+
+            // Initialise archive information
+            FXArchiveInfo fxArchiveInfo;
+            String archivePath;
+            if (APP.getParameters()
+                   .getRaw()
+                   .size() > 0 && Files.exists(Paths.get(APP.getParameters()
+                                                            .getRaw()
+                                                            .get(0)))) {
+                archivePath = APP.getParameters()
+                                 .getRaw()
+                                 .get(0);
+                addToRecentFile(new File(archivePath));
+            } else if (OS_FILES.size() > 0) {
+                // LOG: OS Trigger detected...
+                LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_OS_TRIGGER_DETECTED));
+
+                while (OS_FILES.size() < 1) {
+                    Thread.sleep(250);
+                }
+
+                archivePath = OS_FILES.remove(0);
+
+                if (archivePath.endsWith(".pzax")) {
+                    ArchiveUtil.loadPzaxPackage(archivePath);
+                    return;
+                }
+            } else {
+                String extension = WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT, "zip");
+                if (ZipState.getCompressorArchives()
+                            .contains(extension)) {
+                    archivePath = Paths.get(STORE_TEMP.toString(),
+                                            String.format("a%s.tar.%s", System.currentTimeMillis(),
+                                                          extension))
+                                       .toAbsolutePath()
+                                       .toString();
+                } else if (ZipState.supportedWriteArchives()
+                                   .contains(extension)) {
+                    archivePath = Paths.get(STORE_TEMP.toString(),
+                                            String.format("a%s.%s", System.currentTimeMillis(),
+                                                          extension))
+                                       .toAbsolutePath()
+                                       .toString();
+                } else {
+                    archivePath = Paths.get(STORE_TEMP.toString(),
+                                            String.format("a%s.zip", System.currentTimeMillis()))
+                                       .toAbsolutePath()
+                                       .toString();
+                }
+                ZipState.getWriteArchiveServiceForFile(archivePath)
+                        .get()
+                        .createArchive(System.currentTimeMillis(), archivePath);
+            }
+
+            ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(archivePath)
+                                                     .get();
+            ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(archivePath)
+                                                       .orElse(null);
+            fxArchiveInfo = new FXArchiveInfo(archivePath,
+                                              readService, writeService);
+
+            // Generates PreOpen dialog, if required
+            Optional<ArchiveService.FXForm> optFXForm;
+            if ((optFXForm = readService.getFXFormByIdentifier(ArchiveReadService.OPEN_ARCHIVE_OPTIONS,
+                                                               fxArchiveInfo.getArchiveInfo())).isPresent()) {
+                stage.initStyle(StageStyle.TRANSPARENT);
+                stage.show();
+
+                Stage preOpenStage = new Stage();
+                Node root = optFXForm.get()
+                                     .getContent();
+                JFXUtil.loadPreOpenDialog(preOpenStage, root);
+
+                Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
+
+                if (Objects.nonNull(result) && Objects.nonNull(result.getKey()) && !result.getKey()
+                                                                                          .get()) {
+                    // LOG: Issue occurred when opening archive %s. Issue reason: %s
+                    ROOT_LOGGER.error(resolveTextKey(LOG_INVALID_ARCHIVE_SETUP, fxArchiveInfo.getArchivePath(),
+                                                     result.getValue()));
+
+                    JFXUtil.runLater(() -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+                    return;
+                }
+
+                JFXUtil.runLater(() -> {
+                    launchMainStage(new Stage(), fxArchiveInfo);
+                    stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                });
+            } else {
+                launchMainStage(stage, fxArchiveInfo);
             }
         } catch (Exception e) {
-
-        }
-
-        // Initialise archive information
-        FXArchiveInfo fxArchiveInfo;
-        String archivePath;
-        if (APP.getParameters()
-               .getRaw()
-               .size() > 0 && Files.exists(Paths.get(APP.getParameters()
-                                                        .getRaw()
-                                                        .get(0)))) {
-            archivePath = APP.getParameters()
-                             .getRaw()
-                             .get(0);
-            addToRecentFile(new File(archivePath));
-        } else if (OS_FILES.size() > 0) {
-            // LOG: OS Trigger detected...
-            LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_OS_TRIGGER_DETECTED));
-
-            while (OS_FILES.size() < 1) {
-                Thread.sleep(250);
-            }
-
-            archivePath = OS_FILES.remove(0);
-
-            if (archivePath.endsWith(".pzax")) {
-                ArchiveUtil.loadPzaxPackage(archivePath);
-                return;
-            }
-        } else {
-            String extension = WORKING_APPLICATION_SETTINGS.getProperty(CNS_DEFAULT_FORMAT, "zip");
-            if (ZipState.getCompressorArchives()
-                        .contains(extension)) {
-                archivePath = Paths.get(STORE_TEMP.toString(),
-                                        String.format("a%s.tar.%s", System.currentTimeMillis(),
-                                                      extension))
-                                   .toAbsolutePath()
-                                   .toString();
-            } else if (ZipState.supportedWriteArchives()
-                               .contains(extension)) {
-                archivePath = Paths.get(STORE_TEMP.toString(),
-                                        String.format("a%s.%s", System.currentTimeMillis(),
-                                                      extension))
-                                   .toAbsolutePath()
-                                   .toString();
-            } else {
-                archivePath = Paths.get(STORE_TEMP.toString(),
-                                        String.format("a%s.zip", System.currentTimeMillis()))
-                                   .toAbsolutePath()
-                                   .toString();
-            }
-            ZipState.getWriteArchiveServiceForFile(archivePath)
-                    .get()
-                    .createArchive(System.currentTimeMillis(), archivePath);
-        }
-
-        ArchiveReadService readService = ZipState.getReadArchiveServiceForFile(archivePath)
-                                                 .get();
-        ArchiveWriteService writeService = ZipState.getWriteArchiveServiceForFile(archivePath)
-                                                   .orElse(null);
-        fxArchiveInfo = new FXArchiveInfo(archivePath,
-                                          readService, writeService);
-
-        // Generates PreOpen dialog, if required
-        Optional<ArchiveService.FXForm> optFXForm;
-        if ((optFXForm = readService.getFXFormByIdentifier(ArchiveReadService.OPEN_ARCHIVE_OPTIONS,
-                                                         fxArchiveInfo.getArchiveInfo())).isPresent()) {
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.show();
-
-            Stage preOpenStage = new Stage();
-            Node root = optFXForm.get().getContent();
-            JFXUtil.loadPreOpenDialog(preOpenStage, root);
-
-            Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
-
-            if (Objects.nonNull(result) && Objects.nonNull(result.getKey()) && !result.getKey()
-                                                                                      .get()) {
-                // LOG: Issue occurred when opening archive %s. Issue reason: %s
-                ROOT_LOGGER.error(resolveTextKey(LOG_INVALID_ARCHIVE_SETUP, fxArchiveInfo.getArchivePath(),
-                                                 result.getValue()));
-
-                JFXUtil.runLater(() -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
-                return;
-            }
-
-            JFXUtil.runLater(() -> {
-                launchMainStage(new Stage(), fxArchiveInfo);
-                stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            });
-        } else {
-            launchMainStage(stage, fxArchiveInfo);
+            ROOT_LOGGER.error(LoggingUtil.getStackTraceFromException(e));
+            throw e;
         }
     }
 

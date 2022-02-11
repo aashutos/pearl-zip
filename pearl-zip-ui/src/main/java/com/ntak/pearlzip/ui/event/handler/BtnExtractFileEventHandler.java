@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -13,12 +13,14 @@ import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -47,18 +49,32 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
 
         FileInfo selectedFile = fileContentsView.getSelectionModel().getSelectedItem();
         long sessionId = System.currentTimeMillis();
-        if (Objects.isNull(selectedFile) || selectedFile.isFolder()) {
+        if (Objects.isNull(selectedFile)) {
             // LOG: No file has been selected from archive %s
             LOGGER.warn(resolveTextKey(LOG_NO_FILE_SELECTED, fxArchiveInfo.getArchivePath()));
             // TITLE: Information: No file selected
             // HEADER: A file has not been selected
             // BODY: Please select a file.
             raiseAlert(Alert.AlertType.INFORMATION,
-                       resolveTextKey(TITLE_NO_FILE_SELECTED),
-                       resolveTextKey(HEADER_NO_FILE_SELECTED),
-                       resolveTextKey(BODY_NO_FILE_SELECTED),
-                       fileContentsView.getScene().getWindow()
+                       resolveTextKey(TITLE_NO_FILE_FOLDER_SELECTED),
+                       resolveTextKey(HEADER_NO_FILE_FOLDER_SELECTED),
+                       resolveTextKey(BODY_NO_FILE_FOLDER_SELECTED),
+                       fileContentsView.getScene()
+                                       .getWindow()
             );
+            return;
+        }
+        if (selectedFile.isFolder()) {
+                // Choose destination directory
+                DirectoryChooser extractDirChooser = new DirectoryChooser();
+                extractDirChooser.setTitle(resolveTextKey(TITLE_TARGET_DIR_LOCATION));
+                Path targetDir = extractDirChooser.showDialog(new Stage()).toPath();
+
+                JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
+                                                 () -> ArchiveUtil.extractDirectory(sessionId, targetDir, fxArchiveInfo,
+                                                                                 selectedFile),
+                                                 (s)->{}
+                );
         } else {
             FileChooser addFileView = new FileChooser();
             // Title: Extract file %s to...

@@ -186,7 +186,7 @@
             </TableColumn>
         </columns>
     </TableView>
-    <Pane fx:id="toastPane" minWidth="816" maxWidth="Infinity" minHeight="0" maxHeight="32" translateY="-25" style="-fx-text-box-border: 0; -fx-background-color: -fx-text-box-border, -fx-control-inner-background">
+    <Pane fx:id="toastPane" minWidth="816" maxWidth="Infinity" minHeight="0" maxHeight="32" translateY="-25" style="-fx-text-box-border: 0">
         <JFXSnackbar fx:id="toast" prefWidth="Infinity" />
     </Pane>
 </VBox>

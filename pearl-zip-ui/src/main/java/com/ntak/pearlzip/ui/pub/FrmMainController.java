@@ -15,13 +15,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -148,6 +154,56 @@ public class FrmMainController {
                 return row;
             });
 
+            fileContentsView.setOnDragDetected((e) -> {
+                try {
+                    FileInfo info = fileContentsView.getSelectionModel()
+                                                    .getSelectedItem();
+                    Dragboard db = fileContentsView.startDragAndDrop(TransferMode.COPY);
+                    Path tempDir = Files.createTempDirectory("pz");
+                    final ClipboardContent content = new ClipboardContent();
+                    if (!info.isFolder()) {
+                        final Path path = tempDir.resolve(Paths.get(info.getFileName())
+                                                                  .getFileName());
+                        if (info.getRawSize() > MAX_SIZE_DRAG_OUT) {
+                            // TITLE: Warning: Drag out functionality not supported for file
+                            // HEADER: File too big
+                            // BODY: Drag out functionality is currently not supported for large files > %s Bytes.
+                            //       Please use the extract file option in the toolbar.
+                            raiseAlert(Alert.AlertType.WARNING,
+                                       resolveTextKey(TITLE_CANNOT_DRAG_OUT_FILE),
+                                       resolveTextKey(HEADER_CANNOT_DRAG_OUT_FILE),
+                                       resolveTextKey(BODY_CANNOT_DRAG_OUT_FILE, MAX_SIZE_DRAG_OUT),
+                                       stage
+                            );
+
+                            return;
+                        }
+
+                        if (fxArchiveInfo.getReadService().extractFile(System.currentTimeMillis(),
+                                                                       path,
+                                                                       fxArchiveInfo.getArchiveInfo(),
+                                                                       info
+                        )) {
+                            // Add file to clipboard
+                            content.putFiles(List.of(path.toFile()));
+                            db.setContent(content);
+                        }
+                    }  else {
+                        // TITLE: WARNING: Cannot drag out folder
+                        // HEADER: Folder drag out not supported
+                        // BODY: Please utilise extract directory button as folders cannot be dragged out. This is
+                        // unsupported by PearlZip at this present time.
+                        raiseAlert(Alert.AlertType.WARNING,
+                                   resolveTextKey(TITLE_CANNOT_DRAG_OUT_FOLDER),
+                                   resolveTextKey(HEADER_CANNOT_DRAG_OUT_FOLDER),
+                                   resolveTextKey(BODY_CANNOT_DRAG_OUT_FOLDER),
+                                   stage
+                        );
+                    }
+                } catch (Exception exc) {
+
+                }
+            });
             fileContentsView.setOnDragOver(e->e.acceptTransferModes(TransferMode.COPY));
             fileContentsView.setOnDragDropped(new FileContentsDragDropRowEventHandler(fileContentsView, fxArchiveInfo));
             fileContentsView.setOnMouseClicked(e->{
