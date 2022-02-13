@@ -29,13 +29,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.spi.ResourceBundleProvider;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
@@ -295,25 +295,27 @@ public class ModuleUtil {
                            StandardCopyOption.REPLACE_EXISTING);
 
                 // N.B. SimpleFileVisitor implementation taken from javadoc
-                Files.walkFileTree(Paths.get(targetDir.toAbsolutePath().toString(), theme), new SimpleFileVisitor<Path>() {
+                Files.walkFileTree(Paths.get(targetDir.toAbsolutePath().toString(), theme), new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                            throws IOException
-                    {
+                            throws IOException {
                         Path targetdir = localThemeDir.resolve(targetDir.relativize(dir));
                         try {
                             Files.copy(dir, targetdir);
-                        } catch (FileAlreadyExistsException e) {
-                            if (!Files.isDirectory(targetdir))
+                        } catch(FileAlreadyExistsException e) {
+                            if (!Files.isDirectory(targetdir)) {
                                 throw e;
+                            }
                         }
                         return CONTINUE;
                     }
+
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                            throws IOException
-                    {
-                        Files.copy(file, localThemeDir.resolve(targetDir.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+                            throws IOException {
+                        Files.copy(file,
+                                   localThemeDir.resolve(targetDir.relativize(file)),
+                                   StandardCopyOption.REPLACE_EXISTING);
                         return CONTINUE;
                     }
                 });
@@ -564,5 +566,65 @@ public class ModuleUtil {
             Files.deleteIfExists(path);
         } catch(IOException e) {
         }
+    }
+
+    /**
+     *  Utilise module system to load resource bundles using providers supplied by installed plugins. If there are
+     *  multiple suitable plugins containing Resource Bundle, the bundle is taken in a non-deterministic manner.
+     *
+     *  @param modulePath
+     *  @param baseName Base name that corresponds with respurce bundle file
+     *  @param locale
+     *  @return ResourceBundle - Key-Value pairs holding i18n strings from resource file
+     */
+    public static ResourceBundle loadLangPackDynamic(Path modulePath, String baseName, Locale locale) {
+        ResourceBundle bundle = null;
+
+        // Safe mode execution...
+        if (System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
+            // Use default en_GB bundle
+            Locale defaultLocale = genLocale(new Properties());
+            bundle = ResourceBundle.getBundle(baseName,
+                                     defaultLocale);
+            return bundle;
+        }
+
+        try {
+            URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
+            ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
+            Configuration moduleConfig = Configuration.resolveAndBind(moduleFinder,
+                                                                      List.of(ModuleLayer.boot()
+                                                                                         .configuration()),
+                                                                      moduleFinder,
+                                                                      moduleFinder.findAll()
+                                                                                  .stream()
+                                                                                  .map(m -> m.descriptor()
+                                                                                             .name())
+                                                                                  .collect(
+                                                                                          Collectors.toSet()));
+
+            ModuleLayer moduleLayer =
+                    ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), urlClassLoader)
+                               .layer();
+            ServiceLoader<ResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
+                                                                                          ResourceBundleProvider.class);
+            for (ResourceBundleProvider prov : resourceBundleLoader) {
+                if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
+                    return bundle;
+                }
+            }
+
+            // Use default bundle if none found...
+            if (Objects.isNull(bundle)) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            // Use default en_GB bundle
+            Locale defaultLocale = genLocale(new Properties());
+            bundle = ResourceBundle.getBundle(baseName,
+                                              defaultLocale);
+        }
+
+        return bundle;
     }
 }

@@ -26,7 +26,6 @@ module com.ntak.pearlzip.ui {
 
     // PearlZip dependencies
     requires com.ntak.pearlzip.archive;
-    requires com.ntak.pearlzip.lang.enGB;
 
     opens com.ntak.pearlzip.ui.pub;
     exports com.ntak.pearlzip.ui.constants;
@@ -45,4 +44,5 @@ module com.ntak.pearlzip.ui {
     uses ArchiveWriteService;
     uses ArchiveReadService;
     uses LicenseService;
+    uses java.util.spi.ResourceBundleProvider;
 }

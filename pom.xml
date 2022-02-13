@@ -39,6 +39,7 @@
         <module>pearl-zip-assembly-osx</module>
         <module>pearl-zip-deploy-common</module>
         <module>ntak-testfx-util</module>
+        <module>pearl-zip-lang-pack-fr-FR</module>
     </modules>
 
     <licenses>
@@ -135,13 +136,6 @@
             <properties>
                 <lang>en</lang>
                 <country>GB</country>
-            </properties>
-        </profile>
-        <profile>
-            <id>fr-FR</id>
-            <properties>
-                <lang>fr</lang>
-                <country>FR</country>
             </properties>
         </profile>
         <profile>
