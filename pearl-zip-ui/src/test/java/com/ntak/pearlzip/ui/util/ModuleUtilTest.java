@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.ui.rules.*;
 import javafx.application.Platform;
@@ -19,10 +20,14 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_NTAK_PEARL_ZIP_VERSION;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.MANIFEST_RULES;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
@@ -44,15 +49,20 @@ public class ModuleUtilTest {
     public void setUp() throws IOException, NoSuchAlgorithmException, InterruptedException {
         try {
             System.setProperty(CNS_RES_BUNDLE, "pearlzip-ui");
-            LOG_BUNDLE.keySet()
-                      .forEach(k -> System.out.println(String.format("Property: (k=%s,v=%s)",
-                                                                     k,
-                                                                     LOG_BUNDLE.getString(k))));
             Platform.startup(() -> latch.countDown());
         } catch(Exception e) {
             latch.countDown();
         } finally {
             latch.await();
+            Locale defaultLocale = genLocale(new Properties());
+            LoggingConstants.LOG_BUNDLE = ResourceBundle.getBundle("pearlzip",
+                                                                   defaultLocale);
+            LoggingConstants.CUSTOM_BUNDLE = ResourceBundle.getBundle("custom",
+                                                                   defaultLocale);
+            LOG_BUNDLE.keySet()
+                      .forEach(k -> System.out.printf("Property: (k=%s,v=%s)%n",
+                                                      k,
+                                                      LOG_BUNDLE.getString(k)));
         }
         // Loading rules...
         MANIFEST_RULES.add(new MinVersionManifestRule());
@@ -108,7 +118,7 @@ public class ModuleUtilTest {
     }
 
     @Test
-    public void testParseManifest_Success() throws Exception {
+    public void testParseManifest_Success() {
         PluginInfo info = ModuleUtil.parseManifest(Paths.get(tempDir.toAbsolutePath().toString(), "MF")).get();
 
         Assertions.assertTrue(info.getDependencies()

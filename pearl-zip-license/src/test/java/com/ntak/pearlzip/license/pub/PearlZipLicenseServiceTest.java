@@ -56,12 +56,13 @@ public class PearlZipLicenseServiceTest {
                 "com.ntak.pearl-zip-assembly-osx:BSD 3-Clause",
                 "com.ntak.pearl-zip-license:BSD 3-Clause",
                 "com.ntak.pearl-zip-ui#graphics:Creative Commons Attribution 4.0 International",
-                "com.ntak.pearl-zip-ui#logo-resources:Creative Commons Attribution Non-Commercial No-Derivatives 4.0 International"
+                "com.ntak.pearl-zip-ui#logo-resources:Creative Commons Attribution Non-Commercial No-Derivatives 4.0 International",
+                "com.jfoenix.jfoenix:Apache License, Version 2.0"
         };
 
         Map<String,LicenseInfo> licenses = licenseService.retrieveDeclaredLicenses();
         Assertions.assertNotNull(licenses, "Licenses was unexpectedly null");
-        Assertions.assertEquals(41, licenses.size(), "The expected licenses were not retrieved");
+        Assertions.assertEquals(42, licenses.size(), "The expected licenses were not retrieved");
 
         for (String key : expectedKeys) {
             Assertions.assertTrue(licenses.containsKey(key), String.format("key '%s' was not found", key));
