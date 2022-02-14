@@ -8,5 +8,8 @@ import com.ntak.pearlzip.PearlZipFrProvider;
  *  Language pack for Pearl Zip for French.
  */
 module com.ntak.pearlzip.lang.frFR {
-    provides java.util.spi.ResourceBundleProvider with PearlZipFrProvider;
+    requires com.ntak.pearlzip.archive;
+    requires javafx.base;
+
+    provides com.ntak.pearlzip.archive.pub.PearlZipResourceBundleProvider with PearlZipFrProvider;
 }

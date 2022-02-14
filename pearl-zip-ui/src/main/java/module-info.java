@@ -44,5 +44,5 @@ module com.ntak.pearlzip.ui {
     uses ArchiveWriteService;
     uses ArchiveReadService;
     uses LicenseService;
-    uses java.util.spi.ResourceBundleProvider;
+    uses com.ntak.pearlzip.archive.pub.PearlZipResourceBundleProvider;
 }

@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
+import javafx.util.Pair;
 
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -315,6 +316,10 @@ public class ZipConstants {
     public static final String HEADER_CONFIRM_INSTALL_EXTENSION = "header.ntak.pearl-zip.confirm-install-extension";
     public static final String BODY_CONFIRM_INSTALL_EXTENSION = "body.ntak.pearl-zip.confirm-install-extension";
 
+    public static final String TITLE_CHANGE_LANG_PACK = "title.ntak.pearl-zip.change-lang-pack";
+    public static final String HEADER_CHANGE_LANG_PACK = "header.ntak.pearl-zip.change-lang-pack";
+    public static final String BODY_CHANGE_LANG_PACK = "body.ntak.pearl-zip.change-lang-pack";
+
     public static final String LOG_INVALID_ARCHIVE_SETUP = "logging.ntak.pearl-zip.invalid-archive-setup";
 
     public static final String LOG_ISSUE_SAVE_ARCHIVE = "logging.ntak.pearl-zip.issue-save-archive";
@@ -403,6 +408,7 @@ public class ZipConstants {
 
     public static long MAX_SIZE_DRAG_OUT = 250_000_000;
 
+    public static final Set<Pair<String,Locale>> LANG_PACKS = new LinkedHashSet<>();
     public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
     public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
     private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();

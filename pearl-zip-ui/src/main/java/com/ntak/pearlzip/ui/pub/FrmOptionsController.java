@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
@@ -127,6 +128,16 @@ public class FrmOptionsController {
     private TableColumn<String,String> colTheme;
     @FXML
     private Button btnSetTheme;
+
+    ///// Language Pack Properties /////
+    @FXML
+    private Tab tabLangs;
+    @FXML
+    private TableView<Pair<String,Locale>> tblLang;
+    @FXML
+    private TableColumn<Pair<String,Locale>,String> colLang;
+    @FXML
+    private Button btnSetLang;
 
     @FXML
     public void initialize() {
@@ -497,6 +508,34 @@ public class FrmOptionsController {
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_THEME_NAME, name);
         });
 
+        // Language Pack related functionality...
+        tabLangs.setOnSelectionChanged( (ev) -> {
+            try {
+                tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+                tblTheme.refresh();
+            } catch(Exception e) {
+
+            }
+        });
+        tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+        colLang.setCellValueFactory((p) -> new SimpleStringProperty(p.getValue().getKey()));
+        btnSetLang.setOnAction((e) -> {
+            Locale locale = tblLang.getSelectionModel().getSelectedItem().getValue();
+            WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_LANG, locale.getLanguage());
+            WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_COUNTRY, locale.getCountry());
+            WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_VARIANT, locale.getVariant());
+
+            // TITLE: Information: Changing Language Pack
+            // HEADER: Language pack will be changed after restart
+            // BODY: The selected language for PearlZip has been updated to %s. This will come into effect the next
+            // time you start up PearlZip.
+            raiseAlert(Alert.AlertType.INFORMATION,
+                       resolveTextKey(TITLE_CHANGE_LANG_PACK),
+                       resolveTextKey(HEADER_CHANGE_LANG_PACK),
+                       resolveTextKey(BODY_CHANGE_LANG_PACK, tblLang.getSelectionModel().getSelectedItem().getKey()),
+                       stage
+                       );
+        });
         // Button bar functionality
         btnApply.setOnMouseClicked(e -> {
             synchronized(CURRENT_SETTINGS) {

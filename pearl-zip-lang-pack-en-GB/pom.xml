@@ -15,6 +15,14 @@
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>pearl-zip-archive</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <artifactId>pearl-zip-lang-pack-en-GB</artifactId>
     <name>PearlZip en-GB language pack</name>

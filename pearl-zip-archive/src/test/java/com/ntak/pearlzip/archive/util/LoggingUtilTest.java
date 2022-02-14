@@ -1,16 +1,20 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.util;
 
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
+import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 
 public class LoggingUtilTest {
@@ -30,6 +34,15 @@ public class LoggingUtilTest {
         + No match default logging message
         + String format issue -> default logging message
      */
+
+    @BeforeAll
+    public static void setUpOnce() {
+        Locale defaultLocale = genLocale(new Properties());
+        LoggingConstants.LOG_BUNDLE = ResourceBundle.getBundle("pearlzip",
+                                                               defaultLocale);
+        LoggingConstants.CUSTOM_BUNDLE = ResourceBundle.getBundle("custom",
+                                                                  defaultLocale);
+    }
 
     @Test
     @DisplayName("Test: Generate Locale with Custom language: Klingon GB")

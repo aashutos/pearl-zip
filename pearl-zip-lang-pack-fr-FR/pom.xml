@@ -17,6 +17,14 @@
     <artifactId>pearl-zip-lang-pack-fr-FR</artifactId>
     <name>PearlZip fr-FR language pack</name>
     <url>https://blog.92ak.co.uk</url>
+    <dependencies>
+        <dependency>
+            <groupId>com.ntak</groupId>
+            <artifactId>pearl-zip-archive</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

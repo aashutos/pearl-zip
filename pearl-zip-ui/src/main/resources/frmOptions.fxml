@@ -54,13 +54,26 @@
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <TableView fx:id="tblTheme" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
                     <columns>
-                        <TableColumn fx:id="colTheme" prefWidth="408.0" text="%options.themes.theme.text"/>
+                        <TableColumn fx:id="colTheme" prefWidth="408.0" text="%options.themes.theme.text" />
                     </columns>
                 </TableView>
-                <Button fx:id="btnSetTheme" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0"
-                        prefWidth="149.0" text="%options.themes.set-theme.text"/>
+                <Button fx:id="btnSetTheme" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="149.0" text="%options.themes.set-theme.text" />
             </AnchorPane>
         </Tab>
+      <Tab fx:id="tabLangs" text="%options.langs.text">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <TableView fx:id="tblLang" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
+                     <columns>
+                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text" />
+                     </columns>
+                  </TableView>
+                  <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="215.0" text="%options.langs.set-lang.text" />
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
     </TabPane>
     <ButtonBar layoutY="364.0" prefHeight="51.0" prefWidth="428.0">
         <buttons>

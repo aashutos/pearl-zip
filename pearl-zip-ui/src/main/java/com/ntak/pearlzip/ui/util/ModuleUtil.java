@@ -5,10 +5,7 @@ package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
-import com.ntak.pearlzip.archive.pub.ArchiveReadService;
-import com.ntak.pearlzip.archive.pub.ArchiveService;
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.CheckManifestRule;
+import com.ntak.pearlzip.archive.pub.*;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -606,8 +603,9 @@ public class ModuleUtil {
             ModuleLayer moduleLayer =
                     ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), urlClassLoader)
                                .layer();
-            ServiceLoader<ResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
-                                                                                          ResourceBundleProvider.class);
+            ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
+                                                                                                    PearlZipResourceBundleProvider.class);
+            resourceBundleLoader.forEach(b -> LANG_PACKS.addAll(b.providedLanguages()));
             for (ResourceBundleProvider prov : resourceBundleLoader) {
                 if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
                     return bundle;
