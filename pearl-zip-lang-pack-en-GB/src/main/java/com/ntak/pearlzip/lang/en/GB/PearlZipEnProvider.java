@@ -1,7 +1,7 @@
 /*
  * Copyright © 2022 92AK
  */
-package com.ntak.pearlzip;
+package com.ntak.pearlzip.lang.en.GB;
 
 import com.ntak.pearlzip.archive.pub.PearlZipResourceBundleProvider;
 import javafx.util.Pair;
@@ -17,6 +17,6 @@ public class PearlZipEnProvider implements PearlZipResourceBundleProvider {
 
     @Override
     public List<Pair<String,Locale>> providedLanguages() {
-        return List.of(new Pair<>("English (United Kingdom)", new Locale("en", "EN")));
+        return List.of(new Pair<>("English (United Kingdom)", new Locale("en", "GB")));
     }
 }

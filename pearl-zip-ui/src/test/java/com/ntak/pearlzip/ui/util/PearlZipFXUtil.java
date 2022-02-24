@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
@@ -15,6 +16,7 @@ import com.ntak.pearlzip.ui.pub.FrmAboutController;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
+import com.ntak.pearlzip.ui.rules.*;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.NativeFileChooserUtil;
@@ -39,16 +41,21 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -434,6 +441,7 @@ public class PearlZipFXUtil {
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
         APP = Mockito.mock(PearlZipApplication.class);
+        RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
         ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
@@ -452,6 +460,43 @@ public class PearlZipFXUtil {
 
         initialiseApplicationSettings();
 
+        // Set local directories...
+        ZipConstants.STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
+        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
+                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
+        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
+                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
+        ZipConstants.LOCAL_TEMP =
+                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                  .orElse(STORE_ROOT.toString()));
+        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                      .toString(), "temp");
+
+        // Loading plugin manifests...
+        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        if (!Files.exists(LOCAL_MANIFEST_DIR)) {
+            Files.createDirectories(LOCAL_MANIFEST_DIR);
+        }
+
+        Files.list(LOCAL_MANIFEST_DIR)
+             .filter(m -> m.getFileName()
+                           .toString()
+                           .toUpperCase()
+                           .endsWith(".MF"))
+             .forEach(m -> {
+                 try {
+                     Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
+                     if (optInfo.isPresent()) {
+                         PluginInfo info = optInfo.get();
+                         synchronized(PLUGINS_METADATA) {
+                             PLUGINS_METADATA.put(info.getName(), info);
+                         }
+                     }
+                 } catch(Exception e) {
+                 }
+             });
+
         SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "settings.properties");
         if (!Files.exists(SETTINGS_FILE)) {
             Files.createFile(SETTINGS_FILE);
@@ -460,6 +505,56 @@ public class PearlZipFXUtil {
             CURRENT_SETTINGS.load(settingsIStream);
             WORKING_SETTINGS.load(settingsIStream);
         }
+
+        // Themes
+        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                              .toString(), "themes");
+
+        // Copy over and overwrite core themes...
+        for (String theme : CORE_THEMES) {
+            Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                    .toString(), "themes", theme);
+            Files.createDirectories(defThemePath);
+            Stream<Path> themeFiles;
+            try {
+                themeFiles = Files.list(Paths.get(PearlZipFXUtil.class.getClassLoader()
+                                                            .getResource(theme)
+                                                            .getPath()));
+            } catch (Exception e) {
+                themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
+                                                                theme).toAbsolutePath());
+            }
+            themeFiles.forEach(f -> {
+                                   try {
+                                       Files.copy(f,
+                                                  Paths.get(defThemePath.toAbsolutePath()
+                                                                        .toString(),
+                                                            f.getFileName()
+                                                             .toString()
+                                                  ),
+                                                  StandardCopyOption.REPLACE_EXISTING);
+                                   } catch(IOException e) {
+                                   }
+                               }
+            );
+        }
+
+        // Loading rules...
+        MANIFEST_RULES.add(new MinVersionManifestRule());
+        MANIFEST_RULES.add(new MaxVersionManifestRule());
+        MANIFEST_RULES.add(new LicenseManifestRule());
+        MANIFEST_RULES.add(new CheckLibManifestRule());
+        MANIFEST_RULES.add(new RemovePatternManifestRule());
+        MANIFEST_RULES.add(new ThemeManifestRule());
+
+        // Setting Locale
+        Locale.setDefault(genLocale(new Properties()));
+        LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                    Locale.getDefault());
+        CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                       System.getProperty(CNS_RES_BUNDLE,"custom"),
+                                                       Locale.getDefault());
 
         // Load services
         for (ArchiveReadService readService : readServices) {

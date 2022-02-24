@@ -123,7 +123,7 @@ public class ZipLauncher {
                                                         System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
                                               Locale.getDefault());
         CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                       System.getProperty(CNS_RES_BUNDLE,"custom"),
+                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
                                         Locale.getDefault());
 
         // Load License Declarations

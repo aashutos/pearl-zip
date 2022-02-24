@@ -46,6 +46,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_CUSTOM_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
@@ -187,14 +190,14 @@ public class FrmOptionsController {
 
         // CHECK BOX - SHOW NOTIFICATION
         try {
-            checkShowNotification.setSelected(Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
+            checkShowNotification.setSelected(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
                                                                                                 "true")));
         } catch (Exception e) {
             checkShowNotification.setSelected(true);
         }
         checkShowNotification.setOnAction(e -> {
-            synchronized(WORKING_SETTINGS) {
-                WORKING_SETTINGS.put(CNS_SHOW_NOTIFICATION,
+            synchronized(WORKING_APPLICATION_SETTINGS) {
+                WORKING_APPLICATION_SETTINGS.put(CNS_SHOW_NOTIFICATION,
                                                  checkShowNotification.isSelected()?"true":"false");
             }
         });
@@ -211,10 +214,6 @@ public class FrmOptionsController {
                 WORKING_APPLICATION_SETTINGS.put(CNS_NTAK_PEARL_ZIP_SAFE_MODE,
                                                  checkSafeMode.isSelected()?"true":"false");
             }
-        });
-
-        checkSafeMode.selectedProperty().addListener((l)-> {
-            JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));
         });
         
         ///// Provider Properties /////
@@ -621,6 +620,12 @@ public class FrmOptionsController {
                     if (response.isPresent() && response.get()
                                                         .equals(ButtonType.YES)) {
                         loadModuleFromExtensionPackage(pzaxArchive.toPath());
+                        LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                                    Locale.getDefault());
+                        CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
+                                                                       Locale.getDefault());
                     }
                 }
             }
@@ -641,6 +646,12 @@ public class FrmOptionsController {
                             ((Stage) tabPaneOptions.getScene()
                                                    .getWindow()).setAlwaysOnTop(false);
                             loadModuleFromExtensionPackage(pzaxArchive.toPath());
+                            LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                                        Locale.getDefault());
+                            CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                                           System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
+                                                                           Locale.getDefault());
                         } finally {
                             ((Stage) tabPaneOptions.getScene()
                                                    .getWindow()).setAlwaysOnTop(true);

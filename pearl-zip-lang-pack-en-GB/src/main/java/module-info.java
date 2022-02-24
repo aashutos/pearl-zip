@@ -2,7 +2,7 @@
  * Copyright © 2022 92AK
  */
 
-import com.ntak.pearlzip.PearlZipEnProvider;
+import com.ntak.pearlzip.lang.en.GB.PearlZipEnProvider;
 
 /**
  *  Language pack for Pearl Zip for British English.

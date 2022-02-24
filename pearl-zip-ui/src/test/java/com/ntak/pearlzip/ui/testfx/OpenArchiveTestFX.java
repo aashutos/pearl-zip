@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
+import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
+import static com.ntak.testfx.TestFXConstants.PLATFORM;
 
 public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
     /*
@@ -39,6 +41,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
      * + Open sixth recent file which replaces the oldest entry in rf file
      * + Double click text file to open externally
      * + Item ordering in archive
+     * + Save opened archive as another file with no extension will append extension automatically
      */
 
     @AfterEach
@@ -641,5 +644,31 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
             Assertions.assertEquals(expectations.get(i), files.get(i).getFileName(),
                                     String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    ////////// SAVE OPENED ARCHIVE /////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    @DisplayName("Test: Save opened archive as another file with no extension will append extension automatically")
+    public void testFX_SaveOpenArchiveAs_NoExtension_Success() throws IOException {
+        // Hard coded movement to open MenuItem
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+        final Path archivePath = Paths.get("src", "test", "resources", "test.zip")
+                                      .toAbsolutePath();
+        // Via Sys menu
+        simOpenArchive(this, archivePath, false, false);
+        sleep(50, TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(),"Expected archive " +
+                "was not present");
+
+        // Save as...
+        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 140));
+        final Path tempDirectory = Files.createTempDirectory("pz");
+        chooseFile(PLATFORM, this,
+                   tempDirectory.resolve(archivePath.getFileName().toString().replace(".zip", "")));
+        Assertions.assertTrue(Files.exists(tempDirectory.resolve(archivePath.getFileName())),
+                              "Target archive was not created with an extension");
     }
 }

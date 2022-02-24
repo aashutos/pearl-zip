@@ -287,6 +287,22 @@ public class ModuleUtil {
             // Copy themes to local directory
             for (String theme : info.getThemes()) {
                 Path localThemeDir = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "themes");
+                if (Files.exists(localThemeDir.resolve(theme))) {
+                    Files.walkFileTree(localThemeDir.resolve(theme), new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            Files.deleteIfExists(dir);
+                            return CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.deleteIfExists(file);
+                            return CONTINUE;
+                        }
+                    });
+                }
+                Files.createDirectories(localThemeDir);
                 Files.copy(targetDir.resolve(theme),
                            localThemeDir.resolve(theme),
                            StandardCopyOption.REPLACE_EXISTING);
@@ -448,7 +464,7 @@ public class ModuleUtil {
              .forEach(m -> {
                  try {
                      final Optional<PluginInfo> optPluginInfo = parseManifest(m);
-                     if (names.contains(optPluginInfo.get().getName())) {
+                     if (optPluginInfo.isPresent() && names.contains(optPluginInfo.get().getName())) {
                          Files.deleteIfExists(m);
 
                          synchronized(PLUGINS_METADATA) {
@@ -570,7 +586,7 @@ public class ModuleUtil {
      *  multiple suitable plugins containing Resource Bundle, the bundle is taken in a non-deterministic manner.
      *
      *  @param modulePath
-     *  @param baseName Base name that corresponds with respurce bundle file
+     *  @param baseName Base name that corresponds with resource bundle file
      *  @param locale
      *  @return ResourceBundle - Key-Value pairs holding i18n strings from resource file
      */
