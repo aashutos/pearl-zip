@@ -589,7 +589,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
                                     String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
         }
 
-        clickOn(new Point2D(350,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        clickOn(new Point2D(350,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
         Collections.reverse(expectations);
         files = new ArrayList<>(fileContentsView.getItems());
         Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
@@ -603,7 +603,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
         sleep(250,TimeUnit.MILLISECONDS);
 
         // Select Size and check item order
-        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
         expectations = new LinkedList<>(List.of("nested-dir/FILE-2", "nested-dir/FILE-3.md5", "nested-dir/FILE-3", "nested-dir/.DS_Store"));
         files = new ArrayList<>(fileContentsView.getItems());
         Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
@@ -613,7 +613,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
                                     String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
         }
 
-        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        clickOn(new Point2D(525,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
         Collections.reverse(expectations);
         files = new ArrayList<>(fileContentsView.getItems());
         Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");
@@ -624,7 +624,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
         }
 
         // Select Modified timestamp and check item order
-        clickOn(new Point2D(700,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        clickOn(new Point2D(800,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
         expectations = new LinkedList<>(List.of("nested-dir/.DS_Store", "nested-dir/FILE-2", "nested-dir/FILE-3",
                                                 "nested-dir/FILE-3.md5"));
         files = new ArrayList<>(fileContentsView.getItems());
@@ -635,7 +635,7 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
                                     String.format("Expectation: %s does not match: %s", expectations.get(i), files.get(i).getFileName()));
         }
 
-        clickOn(new Point2D(700,225), MouseButton.PRIMARY).sleep(250, TimeUnit.MILLISECONDS);
+        clickOn(new Point2D(800,225), MouseButton.PRIMARY).sleep(500, TimeUnit.MILLISECONDS);
         Collections.reverse(expectations);
         files = new ArrayList<>(fileContentsView.getItems());
         Assertions.assertEquals(expectations.size(), files.size(), "The expected number of files was not retrieved");

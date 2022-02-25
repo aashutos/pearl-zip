@@ -294,6 +294,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Load PZAX package successfully")
     public void testFX_LoadPZAXPackage_Success() throws IOException {
+        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub" +
+                                   ".Zip4jArchiveWriteService", "99999");
+        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.acc.pub" +
+                                   ".CommonsCompressArchiveWriteService", "0");
         System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
         WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
 

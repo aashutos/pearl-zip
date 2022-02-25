@@ -276,7 +276,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
 
         // Extract to destination
         Path targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
-        Files.deleteIfExists(targetFolderPath);
+        clearDirectory(targetFolderPath);
         Files.createDirectories(targetFolderPath);
         PearlZipFXUtil.simExtractFile(this, targetFolderPath);
 
