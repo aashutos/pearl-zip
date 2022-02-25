@@ -4,9 +4,8 @@
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
-import com.ntak.pearlzip.archive.pub.ArchiveReadService;
-import com.ntak.pearlzip.archive.pub.ArchiveService;
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.archive.pub.*;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -16,28 +15,30 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.spi.ResourceBundleProvider;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.COLONSV;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
 import static com.ntak.pearlzip.ui.util.JFXUtil.loadLicenseDetails;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
  *  Utility methods within this class are utilised by PearlZip to load Archive Service implementations.
@@ -90,6 +91,12 @@ public class ModuleUtil {
      *   @param modulePath The directory to scan for java modules
      */
     public static void loadModulesDynamic(Path modulePath) {
+        // Safe mode execution...
+        if (System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
+            loadModulesStatic();
+            return;
+        }
+
         try {
             URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
             ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
@@ -150,6 +157,14 @@ public class ModuleUtil {
                               .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
                                                                 .get()));
         } catch(Exception e) {
+            System.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
+            try(OutputStream bw = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
+                WORKING_APPLICATION_SETTINGS.store(bw, String.format("PearlZip Application Settings File Generated @ %s",
+                                                                     LocalDateTime.now()));
+            } catch(IOException ex) {
+            }
+
             loadModulesStatic();
         }
     }
@@ -200,10 +215,19 @@ public class ModuleUtil {
             }
 
             // Check manifest file
-            Map<String,List<Path>> files = checkManifestFile(targetDir);
+            final Path srcMF = Paths.get(targetDir.toAbsolutePath()
+                                                  .toString(), MANIFEST_FILE_NAME);
+            PluginInfo info = parseManifest(srcMF).get();
+            String name = info.getName();
+            checkManifest(info, targetDir);
 
             // Confirm licenses with user
-            List<Path> licenses = files.get("LICENSE");
+            List<Path> licenses =
+                    info.getLicenses()
+                        .stream()
+                        .map(l -> Paths.get(targetDir.toAbsolutePath().toString(), l))
+                        .collect(Collectors.toList());
+
             for (Path license : licenses) {
                 FrmLicenseDetailsController controller = loadLicenseDetails(license.toAbsolutePath()
                                                                                    .toString(),
@@ -224,18 +248,106 @@ public class ModuleUtil {
             }
 
             // Try loading libraries
-            List<Path> libs = files.get("LIB");
+            List<Path> libs = info.getDependencies()
+                                  .stream()
+                                  .map(l -> Paths.get(targetDir.toAbsolutePath().toString(), l))
+                                  .collect(Collectors.toList());
             Path moduleDirectory = Path.of(STORE_ROOT.toAbsolutePath()
                                                      .toString(), "providers");
+
             for (Path lib : libs) {
+                // Delete older version libs - if automatically managed
+                if (Objects.isNull(info.getProperties().get(KEY_MANIFEST_DELETED))) {
+                    purgeLibrary(moduleDirectory, lib, name);
+                }
+
+                // Copy files across
                 Files.copy(lib,
                            Paths.get(moduleDirectory.toAbsolutePath()
                                                     .toString(),
                                      lib.getFileName()
                                         .toString()),
                            StandardCopyOption.REPLACE_EXISTING);
+
+                // Delete old version and current version manifests from previous installs
+                String rootMF = Paths.get(LOCAL_MANIFEST_DIR.toAbsolutePath()
+                                                          .toString(),
+                                           lib.getFileName().toString()
+                                              .replaceAll("\\d(\\.\\d)+\\.*.jar", ".*")
+                                      )
+                                      .toString();
+                Files.list(LOCAL_MANIFEST_DIR)
+                     .filter(m -> m.toAbsolutePath()
+                                   .toString()
+                                   .matches(rootMF)
+                     )
+                     .forEach(ModuleUtil::safeDeletePath);
             }
 
+            // Copy themes to local directory
+            for (String theme : info.getThemes()) {
+                Path localThemeDir = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "themes");
+                if (Files.exists(localThemeDir.resolve(theme))) {
+                    Files.walkFileTree(localThemeDir.resolve(theme), new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            Files.deleteIfExists(dir);
+                            return CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.deleteIfExists(file);
+                            return CONTINUE;
+                        }
+                    });
+                }
+                Files.createDirectories(localThemeDir);
+                Files.copy(targetDir.resolve(theme),
+                           localThemeDir.resolve(theme),
+                           StandardCopyOption.REPLACE_EXISTING);
+
+                // N.B. SimpleFileVisitor implementation taken from javadoc
+                Files.walkFileTree(Paths.get(targetDir.toAbsolutePath().toString(), theme), new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                            throws IOException {
+                        Path targetdir = localThemeDir.resolve(targetDir.relativize(dir));
+                        try {
+                            Files.copy(dir, targetdir);
+                        } catch(FileAlreadyExistsException e) {
+                            if (!Files.isDirectory(targetdir)) {
+                                throw e;
+                            }
+                        }
+                        return CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                            throws IOException {
+                        Files.copy(file,
+                                   localThemeDir.resolve(targetDir.relativize(file)),
+                                   StandardCopyOption.REPLACE_EXISTING);
+                        return CONTINUE;
+                    }
+                });
+            }
+
+             Files.createDirectories(LOCAL_MANIFEST_DIR);
+            final Path localMF = Paths.get(LOCAL_MANIFEST_DIR.toString(),
+                                      String.format("%s.%s",
+                                                    pzaxArchive.getFileName()
+                                                               .toString(),
+                                                    MANIFEST_FILE_NAME));
+            Files.copy(srcMF,
+                       localMF
+                    , StandardCopyOption.REPLACE_EXISTING);
+            synchronized(PLUGINS_METADATA) {
+                PLUGINS_METADATA.put(info.getName(), info);
+            }
+
+            // Reload provider modules into PearlZip
             loadModulesDynamic(moduleDirectory);
 
             // TITLE: Library installed successfully
@@ -281,65 +393,252 @@ public class ModuleUtil {
         }
     }
 
-    public static Map<String,List<Path>> checkManifestFile(Path targetDir) throws Exception {
-        Map<String,List<Path>> files = new HashMap<>();
-        Path manifestFile = Paths.get(targetDir.toAbsolutePath()
-                                               .toString(), "MF");
+    public static void checkManifest(PluginInfo info, Path targetDir) throws Exception {
+        for (CheckManifestRule rule : MANIFEST_RULES) {
+            rule.processManifest(info, targetDir);
+        }
+    }
+
+    public static void purgeLibrary(Path moduleDirectory, Path lib, String pluginName) throws IOException {
+        String rootLib = Paths.get(moduleDirectory.toAbsolutePath()
+                                                  .toString(),
+                                   lib.getFileName().toString()
+                                      .replaceAll("\\d(\\.\\d)+\\.jar", ".*")
+                              )
+                              .toString();
+
+        synchronized(PLUGINS_METADATA) {
+            Set<Path> dependencies = PLUGINS_METADATA.entrySet()
+                                                     .stream()
+                                                     .filter(e -> !e.getKey()
+                                                                    .equals(pluginName))
+                                                     .map(Map.Entry::getValue)
+                                                     .flatMap(l -> l.getDependencies()
+                                                                    .stream())
+                                                     .map(s -> Paths.get(moduleDirectory.toAbsolutePath()
+                                                                                        .toString(), s))
+                                                     .filter(p -> p.toAbsolutePath()
+                                                                   .toString()
+                                                                   .matches(rootLib))
+                                                     .collect(Collectors.toSet());
+
+            Files.list(moduleDirectory)
+                 .filter(f -> f.toAbsolutePath()
+                               .toString()
+                               .matches(rootLib) && !dependencies.contains(f))
+                 .forEach(ModuleUtil::safeDeletePath);
+        }
+    }
+
+    public static void purgeLibraries(String moduleDirectory, Set<String> names) throws IOException {
+        // Remove libraries...
+        synchronized(PLUGINS_METADATA) {
+            PLUGINS_METADATA.values()
+                            .stream()
+                            .filter(m -> names.contains(m.getName()))
+                            .forEach(m -> {
+                                try {
+                                    for (String dependency : m.getDependencies()) {
+                                        purgeLibrary(Paths.get(moduleDirectory),
+                                                     Paths.get(moduleDirectory, dependency),
+                                                     m.getName());
+                                    }
+
+                                    // Remove themes by unique key...
+                                    for (String theme : m.getThemes()) {
+                                        Path themePath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                                             .toString(),
+                                                                   "themes",
+                                                                   theme
+                                        );
+
+                                        deleteDirectory(themePath, (p) -> false);
+                                    }
+                                } catch(IOException ex) {
+                                }
+                            });
+        }
+
+        // Remove manifests
+        Files.list(LOCAL_MANIFEST_DIR)
+             .forEach(m -> {
+                 try {
+                     final Optional<PluginInfo> optPluginInfo = parseManifest(m);
+                     if (optPluginInfo.isPresent() && names.contains(optPluginInfo.get().getName())) {
+                         Files.deleteIfExists(m);
+
+                         synchronized(PLUGINS_METADATA) {
+                             PLUGINS_METADATA.remove(optPluginInfo.get()
+                                                                  .getName());
+                         }
+                     }
+                 } catch(IOException ex) {
+                 }
+             });
+    }
+
+    public static void purgeAllLibraries() throws IOException {
+        Files.list(Path.of(STORE_ROOT.toAbsolutePath()
+                                     .toString(), "providers"))
+             .forEach(ModuleUtil::safeDeletePath);
+
+        Files.list(LOCAL_MANIFEST_DIR)
+             .forEach(ModuleUtil::safeDeletePath);
+
+        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                             .toString(),
+                                   "themes"
+        );
+
+        Files.list(themesPath)
+             .filter(d -> Files.isDirectory(d) && !CORE_THEMES.contains(d.getFileName().toString()))
+             .forEach(d -> deleteDirectory(d, (p) -> false));
+
+        synchronized(PLUGINS_METADATA) {
+            PLUGINS_METADATA.clear();
+        }
+    }
+
+    public static Optional<PluginInfo> parseManifest(Path manifestFile) {
+        final Pattern csv = Pattern.compile(Pattern.quote(":"));
         try(Scanner scanner = new Scanner(manifestFile)) {
+            String name = "";
+            String minVersion = "";
+            String maxVersion = "";
+            List<String> hashFormats = new LinkedList<>();
+            List<String> licenses = new LinkedList<>();
+            List<String> dependencies = new LinkedList<>();
+            List<String> themes = new LinkedList<>();
+            Map<String,String> properties = new HashMap<>();
+
             while (scanner.hasNextLine()) {
-                String[] config = COLONSV.split(scanner.nextLine());
+                String[] config = csv.split(scanner.nextLine());
 
                 if (config.length > 0) {
                     switch(config[0]) {
+                        case "name":
+                            name = config[1];
+                            properties.put("name", name);
+                            break;
+                        case "min-version":
+                            minVersion = config[1];
+                            properties.put("min-version", minVersion);
+                            break;
+
+                        case "max-version":
+                            maxVersion = config[1];
+                            properties.put("max-version", maxVersion);
+                            break;
+
                         case "license":
-                            Path licenseFile = Paths.get(targetDir.toAbsolutePath()
-                                                                  .toString(),
-                                                         config[1]);
-                            if (!Files.exists(licenseFile)) {
-                                // LOG: Required license file (%s) does not exist.
-                                throw new Exception(resolveTextKey(LOG_REQUIRED_LICENSE_FILE_NOT_EXIST, licenseFile));
-                            }
-                            files.putIfAbsent("LICENSE", new LinkedList<>());
-                            List<Path> licenses = files.get("LICENSE");
-                            licenses.add(licenseFile);
+                            licenses.add(config[1]);
+                            properties.put("license",
+                                           String.join(",", licenses));
+                            break;
+
+                        case "theme":
+                            themes.add(config[1]);
+                            properties.put("theme",
+                                           String.join(",", themes));
                             break;
 
                         case "lib-file":
-                            Path libFile = Paths.get(targetDir.toAbsolutePath()
-                                                              .toString(),
-                                                     config[2]);
                             String hashFormat = config[1];
+                            String lib = config[2];
 
-                            // Check hash, if required
-                            if (!hashFormat.equals("N/A")) {
-                                Path digestFile = Paths.get(targetDir.toAbsolutePath()
-                                                                     .toString(),
-                                                            config[2].replace(".jar",
-                                                                              String.format(".%s",
-                                                                                            hashFormat)));
-                                MessageDigest digest = MessageDigest.getInstance(hashFormat);
-                                String calculatedHash = HexFormat.of()
-                                                                 .formatHex(digest.digest(Files.readAllBytes(libFile)));
-                                String referenceHash = Files.readString(digestFile);
-                                if (!calculatedHash.equals(referenceHash.trim())) {
-                                    // LOG: Calculated hash (%s) does not match the expected
-                                    // reference (%s)
-                                    // value. Integrity check failed for library: %s.
-                                    throw new Exception(resolveTextKey(LOG_HASH_INTEGRITY_FAILURE,
-                                                                       calculatedHash, referenceHash,
-                                                                       libFile));
-                                }
+                            if ( !dependencies.contains(lib)) {
+                                hashFormats.add(hashFormat);
+                                dependencies.add(lib);
                             }
-                            files.putIfAbsent("LIB", new LinkedList<>());
-                            List<Path> libs = files.get("LIB");
-                            libs.add(libFile);
                             break;
                         default:
+                            // Handle non-standard keys and remove-pattern key...
+                            if (properties.containsKey(config[0])) {
+                                // colon split items are concat together with commas
+                                for (int i = 1; i < config.length; i++) {
+                                    properties.put(config[0], String.join(",", properties.get(config[0]), config[i]));
+                                }
+                            } else {
+                                properties.put(config[0], config[1]);
+                            }
                     }
                 }
             }
+
+            properties.put("lib-file",
+                           String.join(",", dependencies));
+            return Optional.of(new PluginInfo(name, minVersion, maxVersion, licenses, dependencies, hashFormats, themes,
+                                              properties));
+        } catch(Exception e) {
+        }
+        return Optional.empty();
+    }
+
+    public static void safeDeletePath(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch(IOException e) {
+        }
+    }
+
+    /**
+     *  Utilise module system to load resource bundles using providers supplied by installed plugins. If there are
+     *  multiple suitable plugins containing Resource Bundle, the bundle is taken in a non-deterministic manner.
+     *
+     *  @param modulePath
+     *  @param baseName Base name that corresponds with resource bundle file
+     *  @param locale
+     *  @return ResourceBundle - Key-Value pairs holding i18n strings from resource file
+     */
+    public static ResourceBundle loadLangPackDynamic(Path modulePath, String baseName, Locale locale) {
+        ResourceBundle bundle = null;
+
+        // Safe mode execution...
+        if (System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
+            // Use default en_GB bundle
+            Locale defaultLocale = genLocale(new Properties());
+            bundle = ResourceBundle.getBundle(baseName,
+                                     defaultLocale);
+            return bundle;
         }
 
-        return files;
+        try {
+            URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
+            ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
+            Configuration moduleConfig = Configuration.resolveAndBind(moduleFinder,
+                                                                      List.of(ModuleLayer.boot()
+                                                                                         .configuration()),
+                                                                      moduleFinder,
+                                                                      moduleFinder.findAll()
+                                                                                  .stream()
+                                                                                  .map(m -> m.descriptor()
+                                                                                             .name())
+                                                                                  .collect(
+                                                                                          Collectors.toSet()));
+
+            ModuleLayer moduleLayer =
+                    ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), urlClassLoader)
+                               .layer();
+            ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
+                                                                                                    PearlZipResourceBundleProvider.class);
+            resourceBundleLoader.forEach(b -> LANG_PACKS.addAll(b.providedLanguages()));
+            for (ResourceBundleProvider prov : resourceBundleLoader) {
+                if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
+                    return bundle;
+                }
+            }
+
+            // Use default bundle if none found...
+            if (Objects.isNull(bundle)) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            // Use default en_GB bundle
+            Locale defaultLocale = genLocale(new Properties());
+            bundle = ResourceBundle.getBundle(baseName,
+                                              defaultLocale);
+        }
+
+        return bundle;
     }
 }

@@ -1,8 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.cell.*;
 import com.ntak.pearlzip.ui.event.handler.*;
@@ -14,13 +15,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -56,6 +63,8 @@ public class FrmMainController {
     private TableColumn<FileInfo, FileInfo> hash;
     @FXML
     private TableColumn<FileInfo, FileInfo> comments;
+    @FXML
+    private JFXSnackbar toast;
 
     @FXML
     private MenuButton btnNew;
@@ -112,6 +121,16 @@ public class FrmMainController {
     }
 
     public void initData(Stage stage, FXArchiveInfo fxArchiveInfo) {
+        try {
+            stage.setMinWidth(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH, "816")));
+            stage.setMinHeight(Double.parseDouble(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT, "500")));
+        } catch (Exception e) {
+            stage.setMinWidth(816.0);
+            stage.setMinHeight(500.0);
+        }
+
+        stage.widthProperty().addListener((l) -> toast.setPrefWidth(stage.getWidth()));
+
         if (fxArchiveInfo != null) {
             this.FXArchiveInfo = fxArchiveInfo;
             stage.setUserData(fxArchiveInfo);
@@ -130,11 +149,61 @@ public class FrmMainController {
                                                                                      .collect(Collectors.toList())));
             fileContentsView.setRowFactory(tv -> {
                 TableRow<FileInfo> row = new TableRow<>();
-                row.setOnMouseClicked(new FileInfoRowEventHandler(fileContentsView, btnUp, row, fxArchiveInfo));
+                row.setOnMouseClicked(new FileInfoRowEventHandler(fileContentsView, btnUp, row, fxArchiveInfo, toast));
 
                 return row;
             });
 
+            fileContentsView.setOnDragDetected((e) -> {
+                try {
+                    FileInfo info = fileContentsView.getSelectionModel()
+                                                    .getSelectedItem();
+                    Dragboard db = fileContentsView.startDragAndDrop(TransferMode.COPY);
+                    Path tempDir = Files.createTempDirectory("pz");
+                    final ClipboardContent content = new ClipboardContent();
+                    if (!info.isFolder()) {
+                        final Path path = tempDir.resolve(Paths.get(info.getFileName())
+                                                                  .getFileName());
+                        if (info.getRawSize() > MAX_SIZE_DRAG_OUT) {
+                            // TITLE: Warning: Drag out functionality not supported for file
+                            // HEADER: File too big
+                            // BODY: Drag out functionality is currently not supported for large files > %s Bytes.
+                            //       Please use the extract file option in the toolbar.
+                            raiseAlert(Alert.AlertType.WARNING,
+                                       resolveTextKey(TITLE_CANNOT_DRAG_OUT_FILE),
+                                       resolveTextKey(HEADER_CANNOT_DRAG_OUT_FILE),
+                                       resolveTextKey(BODY_CANNOT_DRAG_OUT_FILE, MAX_SIZE_DRAG_OUT),
+                                       stage
+                            );
+
+                            return;
+                        }
+
+                        if (fxArchiveInfo.getReadService().extractFile(System.currentTimeMillis(),
+                                                                       path,
+                                                                       fxArchiveInfo.getArchiveInfo(),
+                                                                       info
+                        )) {
+                            // Add file to clipboard
+                            content.putFiles(List.of(path.toFile()));
+                            db.setContent(content);
+                        }
+                    }  else {
+                        // TITLE: WARNING: Cannot drag out folder
+                        // HEADER: Folder drag out not supported
+                        // BODY: Please utilise extract directory button as folders cannot be dragged out. This is
+                        // unsupported by PearlZip at this present time.
+                        raiseAlert(Alert.AlertType.WARNING,
+                                   resolveTextKey(TITLE_CANNOT_DRAG_OUT_FOLDER),
+                                   resolveTextKey(HEADER_CANNOT_DRAG_OUT_FOLDER),
+                                   resolveTextKey(BODY_CANNOT_DRAG_OUT_FOLDER),
+                                   stage
+                        );
+                    }
+                } catch (Exception exc) {
+
+                }
+            });
             fileContentsView.setOnDragOver(e->e.acceptTransferModes(TransferMode.COPY));
             fileContentsView.setOnDragDropped(new FileContentsDragDropRowEventHandler(fileContentsView, fxArchiveInfo));
             fileContentsView.setOnMouseClicked(e->{
@@ -232,7 +301,7 @@ public class FrmMainController {
 
             btnDelete.setOnMouseClicked(new BtnDeleteEventHandler(fileContentsView, fxArchiveInfo));
             btnInfo.setOnMouseClicked(new BtnFileInfoEventHandler(fileContentsView, fxArchiveInfo));
-            btnUp.setOnMouseClicked(new BtnUpEventHandler(fileContentsView, fxArchiveInfo, btnUp));
+            btnUp.setOnMouseClicked(new BtnUpEventHandler(fileContentsView, fxArchiveInfo, btnUp, toast));
 
             if (ZipState.getCompressorArchives()
                         .contains(fxArchiveInfo.getArchivePath()

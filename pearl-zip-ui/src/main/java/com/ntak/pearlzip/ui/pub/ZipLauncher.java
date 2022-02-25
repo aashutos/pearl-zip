@@ -3,13 +3,13 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
-import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
-import com.ntak.pearlzip.archive.constants.LoggingConstants;
+import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.rules.*;
 import com.ntak.pearlzip.ui.util.*;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -23,8 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -120,10 +119,12 @@ public class ZipLauncher {
 
         // Setting Locale
         Locale.setDefault(genLocale(props));
-        ResourceBundle.getBundle(System.getProperty(ConfigurationConstants.CNS_CUSTOM_RES_BUNDLE, "custom"),
-                                 Locale.getDefault());
-        LOG_BUNDLE = ResourceBundle.getBundle(System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+        LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
                                               Locale.getDefault());
+        CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
+                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
+                                        Locale.getDefault());
 
         // Load License Declarations
         try {
@@ -179,12 +180,48 @@ public class ZipLauncher {
         }
 
         ////////////////////////////////////////////
+        ///// Plugin Manifest Load ////////////////
+        //////////////////////////////////////////
+
+        // Loading rules...
+        MANIFEST_RULES.add(new MinVersionManifestRule());
+        MANIFEST_RULES.add(new MaxVersionManifestRule());
+        MANIFEST_RULES.add(new LicenseManifestRule());
+        MANIFEST_RULES.add(new CheckLibManifestRule());
+        MANIFEST_RULES.add(new RemovePatternManifestRule());
+        MANIFEST_RULES.add(new ThemeManifestRule());
+
+        // Loading plugin manifests...
+        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        if (!Files.exists(LOCAL_MANIFEST_DIR)) {
+            Files.createDirectories(LOCAL_MANIFEST_DIR);
+        }
+
+        Files.list(LOCAL_MANIFEST_DIR)
+                .filter(m -> m.getFileName()
+                              .toString()
+                              .toUpperCase()
+                              .endsWith(".MF"))
+             .forEach(m -> {
+            try {
+                Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
+                if (optInfo.isPresent()) {
+                    PluginInfo info = optInfo.get();
+                    synchronized(PLUGINS_METADATA) {
+                        PLUGINS_METADATA.put(info.getName(), info);
+                    }
+                }
+            } catch(Exception e) {
+            }
+        });
+
+        ////////////////////////////////////////////
         ///// Runtime Module Load /////////////////
         //////////////////////////////////////////
 
         if (Files.isDirectory(RUNTIME_MODULE_PATH)) {
             // LOG: Loading modules from path: %s
-            LoggingConstants.ROOT_LOGGER.info(resolveTextKey(LOG_LOADING_MODULE, RUNTIME_MODULE_PATH.toAbsolutePath().toString()));
+            ROOT_LOGGER.info(resolveTextKey(LOG_LOADING_MODULE, RUNTIME_MODULE_PATH.toAbsolutePath().toString()));
             ModuleUtil.loadModulesDynamic(RUNTIME_MODULE_PATH);
         } else {
             ModuleUtil.loadModulesStatic();

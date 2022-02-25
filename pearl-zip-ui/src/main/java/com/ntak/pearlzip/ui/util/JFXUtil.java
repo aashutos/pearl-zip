@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
@@ -13,6 +14,7 @@ import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +34,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -39,6 +42,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -58,8 +62,7 @@ import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.ESV;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.PSV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.LOCK_POLL_TIMEOUT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
@@ -482,5 +485,47 @@ public class JFXUtil {
         System.setProperties(props);
         LoggingConstants.ROOT_LOGGER.info(props);
         return props;
+    }
+
+    public static void toastMessage(JFXSnackbar toast, String message) {
+        try {
+            toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
+                                                        Duration.millis(Double.parseDouble(System.getProperty(
+                                                                CNS_NTAK_PEARL_ZIP_TOAST_DURATION, "500")))));
+        } catch (Exception e) {
+            if (Objects.nonNull(toast)) {
+                toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
+                                                            Duration.millis(500.0)));
+            }
+        }
+    }
+
+    public static void setSafeModeTitles(boolean isSafeMode, Stage stage) {
+            String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
+            if (isSafeMode) {
+                if (!stage.getTitle().contains(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName))) {
+                    stage.setTitle(stage.getTitle()
+                                        .replace(appName, resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName)));
+                }
+            } else {
+                stage.setTitle(stage.getTitle()
+                            .replace(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName), appName));
+            }
+        }
+
+    public static void initialiseTheme(Path themesPath, String themeName) {
+        String themePath = String.format(PATTERN_CSS_THEME_PATH,
+                                         themesPath.toAbsolutePath(),
+                                         themeName,
+                                         themeName);
+        if (!Files.exists(Paths.get(URI.create(themePath).getPath()))) {
+            themeName = "modena";
+            themePath = String.format(PATTERN_CSS_THEME_PATH,
+                                      themesPath.toAbsolutePath(),
+                                      themeName,
+                                      themeName);
+        }
+        Application.setUserAgentStylesheet(themePath);
+        System.setProperty(CNS_THEME_NAME, themeName);
     }
 }

@@ -1,16 +1,17 @@
 # Pearl Zip
 #### By Aashutos Kakshepati
-A front-end application wrapper for the 7zip and other compression libraries written using JavaFX 15. Aiming for stable
-release with OpenJDK Java 17 LTS. Currently, the application is in its Pre-Alpha phase and so is considered unstable.
+A front-end application wrapper for 7-Zip and other compression libraries written using OpenJDK Java 17 LTS. Currently, the application is in its Pre-Alpha phase and so is considered unstable.
 The aim going forward is to release a more stable application with sufficient regression test coverage and bug fixes
 to stabilise and sure-up the application.
 
 ## Build Status
-Compilation build of Pearl Zip from the Jenkins Build Server:<br/>
+Daily compilation status of latest Pearl Zip code from the Jenkins Build Server:<br/>
 ![Build Status](https://jenkins.92ak.co.uk:8443/buildStatus/icon?job=COMPILE-PearlZip&build=last:${params.branch=origin/master})
+
 ## Installation Instructions
 Pearl Zip is prepackaged as an Apple App native executable package and will be able for download from the releases page.
-This can be placed in the Applications folder as per usual.
+The application is bundled in an Apple pkg for ease of deployment. 
+The latest version of PearlZip can be found [here](https://github.com/aashutos/pearl-zip/releases).
 
 ### Minimum Requirements
 | Specification | Details |
@@ -21,7 +22,11 @@ This can be placed in the Applications folder as per usual.
 | Disk Space | 500 MB |
 
 ## Usage Instructions
-Currently, the application will be made available as a native apple binary with no modularity functionality enabled. On subsequent releases, modularity will be expanded for this using the java module SPI mechanism. Interface Javadocs will then be made available for interfaces in due course.
+Modularity has been added since version 0.0.0.3 via the java module SPI Service Loader mechanism. 
+Latest javadocs for the API can be found [here](https://api.pearlzip.92ak.co.uk/LATEST/).
+An example PearlZip plugin can be found [here](https://github.com/aashutos/zip4j-pearl-zip-plugin/releases/tag/PA-0.0.0.2). 
+Plugins can be installed automatically via PZAX packages. As of 0.0.4.0, 
+PZAX archives will support the installation of plugins and CSS driven themes.
 
 ## License Details
 There are three licenses pertaining to this repository. The BSD 3-Clause license provides an unrestricted use of the code for other projects commercial or non-commercial and for inspection, learning etc. However, the name PearlZip and I cannot be used to endorse derivative products. This has been backed up by the Creative Commons Non-Commercial Non-Derivative 4.0 license to prevent the use of the PearlZip logo/indicia in endorsement and in derivative products without permission. I wanted to however, keep free the other graphical assets I created and kept them under the permissive Creative Commons Attribution 4.0 license. By default, all assets will fall under Creative Commons Non-Commercial Non-Derivative 4.0 until release to a more permissive license.

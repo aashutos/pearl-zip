@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -34,6 +34,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
     /*
      *  Test cases:
      *  + Extract single file
+     *  + Extract directory
      *  + Extract all files
      *  + Extract single file - non existent archive
      *  + Extract all files - non existent archive
@@ -257,8 +258,38 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(dialogPane.getContentText().matches("Archive .* does not exist. PearlZip will now close the instance."), "The text in warning dialog was not matched as expected");
     }
 
+    @Test
+    @DisplayName("Test: Extract folder from jar archive")
+    public void testFX_extractFolderJarArchive_Success() throws IOException {
+        // Open archive
+        final Path archivePath = Paths.get("src", "test", "resources", "test.jar")
+                                      .toAbsolutePath();
+        simOpenArchive(this, archivePath, true, false);
+        sleep(50, TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive " +
+                "was not present");
+
+        // Select file to extract...
+        TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
+        FormUtil.selectTableViewEntry(this, fileContentsView, FileInfo::getFileName,
+                                      "first-folder").get();
+
+        // Extract to destination
+        Path targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+        clearDirectory(targetFolderPath);
+        Files.createDirectories(targetFolderPath);
+        PearlZipFXUtil.simExtractFile(this, targetFolderPath);
+
+        // Check extraction was successful...
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"first-folder")), "Folder was not extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"first-folder","first-nested-file")),
+                              "File first-nested-file was not " +
+                                      "extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"first-folder",".DS_Store")), "File .DS_Store was not extracted");
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
-    ////////// EXTRACT ALL //////////////////////////////////////////////////////
+    ////////// EXTRACT ALL /////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////
 
     @Test

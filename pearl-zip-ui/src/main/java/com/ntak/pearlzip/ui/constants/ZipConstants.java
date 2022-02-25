@@ -3,19 +3,20 @@
  */
 package com.ntak.pearlzip.ui.constants;
 
+import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
+import javafx.util.Pair;
 
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -37,6 +38,12 @@ public class ZipConstants {
     public static final String CNS_NTAK_PEARL_ZIP_LICENSE_LOCATION = "configuration.ntak.pearl-zip.license-location";
     public static final String CNS_NTAK_PEARL_ZIP_LICENSE_OVERRIDE_LOCATION = "configuration.ntak.pearl-zip.license-override-location";
     public static final String CNS_NTAK_PEARL_ZIP_MODULE_PATH = "configuration.ntak.pearl-zip.module-path";
+    public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_WIDTH = "configuration.ntak.pearl-zip.default-min-width";
+    public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MIN_HEIGHT = "configuration.ntak.pearl-zip.default-min-height";
+    public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MAX_FILES_DRAG_OUT = "configuration.ntak.pearl-zip.default-max-files-drag-out";
+    public static final String CNS_NTAK_PEARL_ZIP_DEFAULT_MAX_SIZE_DRAG_OUT = "configuration.ntak.pearl-zip.default-max-size-drag-out";
+    public static final String CNS_NTAK_PEARL_ZIP_TOAST_DURATION = "configuration.ntak.pearl-zip.toast-duration";
+    public static final String CNS_NTAK_PEARL_ZIP_SAFE_MODE = "configuration.ntak.pearl-zip.safe-mode";
     public static final String CNS_PROVIDER_PRIORITY_ROOT_KEY = "configuration.ntak.pearl-zip.provider.priority.%s";
     public static final String CNS_STORE_ROOT = "configuration.ntak.pearl-zip.store.temp";
     public static final String CNS_SETTINGS_FILE = "configuration.ntak.pearl-zip.settings-file";
@@ -49,6 +56,7 @@ public class ZipConstants {
     public static final String CNS_DEFAULT_FORMAT = "configuration.ntak.pearl-zip.default-format";
     public static final String CNS_LAUNCHER_CANONICAL_NAME = "configuration.ntak.pearl-zip.launcher-canonical-name";
     public static final String CNS_SHOW_NOTIFICATION = "configuration.ntak.pearl-zip.show-notification";
+    public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
@@ -65,6 +73,8 @@ public class ZipConstants {
     public static final String LOG_LICENSE_FILE_INFO = "logging.ntak.pearl-zip.license.license-file-info";
 
     public static final String LOG_OS_TRIGGER_DETECTED = "logging.ntak.pearl-zip.os-trigger-detected";
+
+    public static final String LOG_TOAST_CURRENT_DIRECTORY = "logging.ntak.pearl-zip.toast.current-directory";
 
     public static final String TITLE_ISSUE_INTEGRATING_CHANGES = "title.ntak.pearl-zip.issue-integrating-changes";
     public static final String HEADER_ISSUE_INTEGRATING_CHANGES = "header.ntak.pearl-zip.issue-integrating-changes";
@@ -267,6 +277,16 @@ public class ZipConstants {
     public static final String HEADER_ISSUE_LOAD_LIB = "header.ntak.pearl-zip.issue-load-lib";
     public static final String BODY_ISSUE_LOAD_LIB = "body.ntak.pearl-zip.issue-load-lib";
 
+    // Cannot drag out due to threshold breach
+    public static final String TITLE_CANNOT_DRAG_OUT_FILE = "title.ntak.pearl-zip.cannot-drag-out-file";
+    public static final String HEADER_CANNOT_DRAG_OUT_FILE = "header.ntak.pearl-zip.cannot-drag-out-file";
+    public static final String BODY_CANNOT_DRAG_OUT_FILE = "body.ntak.pearl-zip.cannot-drag-out-file";
+
+    // Cannot drag out folder
+    public static final String TITLE_CANNOT_DRAG_OUT_FOLDER = "title.ntak.pearl-zip.cannot-drag-out-folder";
+    public static final String HEADER_CANNOT_DRAG_OUT_FOLDER = "header.ntak.pearl-zip.cannot-drag-out-folder";
+    public static final String BODY_CANNOT_DRAG_OUT_FOLDER = "body.ntak.pearl-zip.cannot-drag-out-folder";
+
     public static final String TITLE_NO_COMPRESSOR_WRITE_SERVICES = "title.ntak.pearl-zip.no-compressor-write-services";
     public static final String BODY_NO_COMPRESSOR_WRITE_SERVICES = "body.ntak.pearl-zip.no-compressor-write-services";
 
@@ -288,10 +308,17 @@ public class ZipConstants {
     public static final String TITLE_ARCHIVE_CANNOT_CLOSE = "title.ntak.pearl-zip.archive-cannot-close";
     public static final String BODY_ARCHIVE_CANNOT_CLOSE = "body.ntak.pearl-zip.archive-cannot-close";
 
+    public static final String TITLE_SAFE_MODE_ENABLED = "title.ntak.pearl-zip.safe-mode-enabled";
+    public static final String BODY_SAFE_MODE_ENABLED = "body.ntak.pearl-zip.safe-mode-enabled";
+
     // Confirm pzax extension installation
     public static final String TITLE_CONFIRM_INSTALL_EXTENSION = "title.ntak.pearl-zip.confirm-install-extension";
     public static final String HEADER_CONFIRM_INSTALL_EXTENSION = "header.ntak.pearl-zip.confirm-install-extension";
     public static final String BODY_CONFIRM_INSTALL_EXTENSION = "body.ntak.pearl-zip.confirm-install-extension";
+
+    public static final String TITLE_CHANGE_LANG_PACK = "title.ntak.pearl-zip.change-lang-pack";
+    public static final String HEADER_CHANGE_LANG_PACK = "header.ntak.pearl-zip.change-lang-pack";
+    public static final String BODY_CHANGE_LANG_PACK = "body.ntak.pearl-zip.change-lang-pack";
 
     public static final String LOG_INVALID_ARCHIVE_SETUP = "logging.ntak.pearl-zip.invalid-archive-setup";
 
@@ -299,7 +326,13 @@ public class ZipConstants {
 
     public static final String LOG_REQUIRED_LICENSE_FILE_NOT_EXIST = "logging.ntak.pearl-zip.required-license-not-exist";
     public static final String LOG_HASH_INTEGRITY_FAILURE = "logging.ntak.pearl-zip.hash-integrity-failure";
+    public static final String LOG_LIB_FILE_MANIFEST_ENTRY_CORRUPT = "logging.ntak.pearl-zip.lib-file-manifest-entry-corrupt";
 
+    public static final String LOG_VERSION_MIN_VERSION_BREACH = "logging.ntak.pearl-zip.min-version-breach";
+    public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
+    public static final String LOG_THEME_NOT_EXIST = "logging.ntak.pearl-zip.theme-not-exist";
+
+    public static final String TITLE_SAFE_MODE_PATTERN = "title.ntak.pearl-zip.safe-mode-pattern";
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
     public static final String TITLE_NEW_ARCHIVE_PATTERN = "title.ntak.pearl-zip.new-archive-pattern";
@@ -313,12 +346,22 @@ public class ZipConstants {
     public static final String TITLE_SOURCE_DIR_LOCATION = "title.ntak.pearl-zip.source-dir-location";
     public static final String TITLE_TARGET_DIR_LOCATION = "title.ntak.pearl-zip.target-dir-location";
     public static final String TITLE_SELECT_INSTALL_EXTENSION = "title.ntak.pearl-zip.select-install-extension";
+    public static final String TITLE_SELECT_PLUGINS_PURGE = "title.ntak.pearl-zip.select-plugins-purge";
 
     public static final String TITLE_NEW_VERSION_AVAILABLE = "title.ntak.pearl-zip.new-version-available";
     public static final String BODY_NEW_VERSION_AVAILABLE = "body.ntak.pearl-zip.new-version-available";
 
     public static final String TITLE_LATEST_VERSION = "title.ntak.pearl-zip.latest-version";
     public static final String BODY_LATEST_VERSION = "body.ntak.pearl-zip.latest-version";
+
+    public static final String TITLE_CONFIRM_PURGE_ALL = "title.ntak.pearl-zip.confirm-purge-all";
+    public static final String BODY_CONFIRM_PURGE_ALL = "body.ntak.pearl-zip.confirm-purge-all";
+
+    public static final String TITLE_PURGE_COMPLETE = "title.ntak.pearl-zip.purge-complete";
+    public static final String BODY_PURGE_COMPLETE = "body.ntak.pearl-zip.purge-complete";
+
+    public static final String TITLE_CONFIRM_PURGE_SELECTED = "title.ntak.pearl-zip.confirm-purge-selected";
+    public static final String BODY_CONFIRM_PURGE_SELECTED = "body.ntak.pearl-zip.confirm-purge-selected";
 
     public static final String LBL_ARCHIVE_EXT_TYPE_PATTERN = "label.ntak.pearl-zip.archive-ext-type-pattern";
     public static final String LBL_BUTTON_MOVE = "label.ntak.pearl-zip.button.move";
@@ -333,6 +376,9 @@ public class ZipConstants {
     public static final String LBL_SKIP_OS_TEMP_CLEAN = "label.ntak.pearl-zip.skip-os-temp-clean";
     public static final String LBL_CLEAR_UP_RECENTS = "label.ntak.pearl-zip.clear-up-recents";
 
+    public static final String LOG_CREATE_DIRECTORY = "logging.ntak.pearl-zip.create-directory";
+    public static final String LOG_DIR_EXTRACT_COMPLETE = "logging.ntak.pearl-zip.dir-extract-complete";
+
     public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
 
     public static PearlZipApplication APP;
@@ -342,6 +388,7 @@ public class ZipConstants {
     public static Path RECENT_FILE;
     public static Path SETTINGS_FILE;
     public static Path APPLICATION_SETTINGS_FILE;
+    public static Path LOCAL_MANIFEST_DIR;
     public static ExecutorService PRIMARY_EXECUTOR_SERVICE;
     public static ThreadGroup THREAD_GROUP;
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
@@ -355,7 +402,16 @@ public class ZipConstants {
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
 
-    private static Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
+    public static final String MANIFEST_FILE_NAME = "MF";
+    public static final String KEY_MANIFEST_DELETED= "remove-pattern";
+    public static final Set<String> CORE_THEMES = Set.of("modena", "modena-dark");
+
+    public static long MAX_SIZE_DRAG_OUT = 250_000_000;
+
+    public static final Set<Pair<String,Locale>> LANG_PACKS = new LinkedHashSet<>();
+    public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
+    public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
+    private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
 
     public static <T> Optional<T> getAdditionalConfig(String key) {
         if (Objects.nonNull(key)) {

@@ -1,8 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
@@ -18,11 +19,10 @@ import org.mockito.internal.util.reflection.InstanceField;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static org.mockito.Mockito.when;
 
 @Tag("Excluded")
@@ -65,6 +65,11 @@ public class ContextMenuControllerTest {
         } finally {
             latch.await();
 
+            Locale defaultLocale = genLocale(new Properties());
+            LoggingConstants.LOG_BUNDLE = ResourceBundle.getBundle("pearlzip",
+                                                                   defaultLocale);
+            LoggingConstants.CUSTOM_BUNDLE = ResourceBundle.getBundle("custom",
+                                                                      defaultLocale);
             controller = new ContextMenuController();
             ctxMenu = new ContextMenu();
             fileInfo =  new FileInfo(1, 0, "file", 0, 0, 0,

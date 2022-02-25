@@ -1,8 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
+import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
@@ -54,14 +55,16 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
     private final Button btnUp;
     private final TableRow<FileInfo> row;
     private final FXArchiveInfo fxArchiveInfo;
+    private final JFXSnackbar toast;
 
     public FileInfoRowEventHandler(TableView<FileInfo> fileContentsView, Button btnUp, TableRow<FileInfo> row,
-            FXArchiveInfo fxArchiveInfo) {
+            FXArchiveInfo fxArchiveInfo, JFXSnackbar toast) {
         super();
         this.fileContentsView = fileContentsView;
         this.btnUp = btnUp;
         this.row = row;
         this.fxArchiveInfo = fxArchiveInfo;
+        this.toast = toast;
     }
 
     @Override
@@ -214,6 +217,9 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                     ArchiveUtil.openExternally(sessionId, thisStage,
                                                fxArchiveInfo, clickedRow);
                 }
+
+                // LOG: Current directory: /%s
+                JFXUtil.toastMessage(toast, resolveTextKey(LOG_TOAST_CURRENT_DIRECTORY, fxArchiveInfo.getPrefix()));
             }
             else if (!row.isEmpty() && event.getButton() == MouseButton.SECONDARY) {
                 try {

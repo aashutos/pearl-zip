@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
@@ -8,13 +8,13 @@
 
     <groupId>com.ntak</groupId>
     <artifactId>pearl-zip</artifactId>
-    <version>0.0.0.3</version>
+    <version>0.0.4.0</version>
     <name>PearlZip Application</name>
     <packaging>pom</packaging>
     <url>https://pearlzip.92ak.co.uk</url>
 
     <properties>
-        <log4j.version>2.17.0</log4j.version>
+        <log4j.version>2.17.1</log4j.version>
         <junit.version>5.5.2</junit.version>
         <junit-platform-runner.version>1.5.2</junit-platform-runner.version>
         <dryrun.release>true</dryrun.release>
@@ -39,6 +39,7 @@
         <module>pearl-zip-assembly-osx</module>
         <module>pearl-zip-deploy-common</module>
         <module>ntak-testfx-util</module>
+        <module>pearl-zip-lang-pack-fr-FR</module>
     </modules>
 
     <licenses>
@@ -138,13 +139,6 @@
             </properties>
         </profile>
         <profile>
-            <id>fr-FR</id>
-            <properties>
-                <lang>fr</lang>
-                <country>FR</country>
-            </properties>
-        </profile>
-        <profile>
             <id>increment-version</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
@@ -235,6 +229,12 @@
                             <additionalJOption>--release</additionalJOption>
                             <additionalJOption>17</additionalJOption>
                             <additionalJOption>-Xdoclint:none</additionalJOption>
+                            <additionalJOption>--add-opens</additionalJOption>
+                            <additionalJOption>com.ntak.pearlzip.license/com.ntak.pearlzip.license.pub.PearlZipLicenseService=com.ntak.pearlzip.ui</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>nsmenufx/de.jangassen.platform.mac=com.ntak.pearlzip.ui</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>nsmenufx/de.jangassen.platform=com.ntak.pearlzip.ui</additionalJOption>
                         </additionalJOptions>
                     </configuration>
                 </plugin>

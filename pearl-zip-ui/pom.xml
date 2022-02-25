@@ -9,7 +9,7 @@
     <parent>
         <artifactId>pearl-zip</artifactId>
         <groupId>com.ntak</groupId>
-        <version>0.0.0.3</version>
+        <version>0.0.4.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -107,6 +107,11 @@
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
             <version>21.4.0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jfoenix</groupId>
+            <artifactId>jfoenix</artifactId>
+            <version>9.0.10</version>
         </dependency>
     </dependencies>
 

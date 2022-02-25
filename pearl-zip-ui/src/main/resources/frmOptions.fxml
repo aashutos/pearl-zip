@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <?import javafx.scene.control.*?>
@@ -12,9 +12,11 @@
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="315.0" prefWidth="428.0">
                 <Button fx:id="btnClearCache" layoutX="23.0" layoutY="74.0" mnemonicParsing="false" text="%options.general.btnClearCache.text" />
                 <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="14.0" prefHeight="52.0" prefWidth="391.0" text="%options.general.description.text" wrapText="true" />
-                <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="117.0" prefWidth="150.0" promptText="zip" />
-                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="122.0" text="%options.general.defaultFormat.text" />
-            <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="166.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
+            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="14.0" layoutY="129.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
+                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="169.0" text="%options.general.defaultFormat.text" />
+                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="164.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
+                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="209.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
+                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="239.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabBootstrap" text="%options.bootstrap-properties.text">
@@ -22,14 +24,14 @@
                 <TableView fx:id="tblBootstrap" layoutX="10.0" layoutY="15.0" prefHeight="300.0" prefWidth="410.0">
                     <columns>
                         <TableColumn fx:id="key" prefWidth="211.0" text="%options.bootstrap-properties.key.text" />
-                        <TableColumn fx:id="value" minWidth="0.0" prefWidth="194.0" text="%options.bootstrap-properties.value.text" />
+                        <TableColumn fx:id="value" minWidth="0.0" prefWidth="198.0" text="%options.bootstrap-properties.value.text" />
                     </columns>
                 </TableView>
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabProviders" text="%options.providers.text">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <TableView fx:id="tblProviders" layoutX="10.0" layoutY="15.0" prefHeight="300.0" prefWidth="410.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="428.0">
+                <TableView fx:id="tblProviders" layoutX="10.0" layoutY="15.0" prefHeight="239.0" prefWidth="410.0">
                     <columns>
                         <TableColumn fx:id="name" prefWidth="109.0" text="%options.providers.name.text" />
                         <TableColumn fx:id="readCapability" prefWidth="68.0" text="%options.providers.name.readCapability.text" />
@@ -38,6 +40,8 @@
                         <TableColumn fx:id="supportedFormat" prefWidth="163.0" text="%options.providers.name.supportedFormat.text" />
                     </columns>
                 </TableView>
+            <Button fx:id="btnPurgePlugin" layoutX="10.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="107.0" text="%options.providers.purge-plugin.text" />
+            <Button fx:id="btnPurgeAll" layoutX="125.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="141.0" text="%options.providers.purge-all.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabPluginLoader" text="%options.plugin-loader.text">
@@ -46,11 +50,35 @@
                 <Label fx:id="lblPluginLoaderDescriptionlblPluginLoaderDescription" alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="58.0" prefWidth="399.0" text="%options.plugin-loader.description.text" wrapText="true" />
             </AnchorPane>
         </Tab>
+        <Tab fx:id="tabTheme" text="%options.themes.text">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <TableView fx:id="tblTheme" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
+                    <columns>
+                        <TableColumn fx:id="colTheme" prefWidth="408.0" text="%options.themes.theme.text" />
+                    </columns>
+                </TableView>
+                <Button fx:id="btnSetTheme" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="149.0" text="%options.themes.set-theme.text" />
+            </AnchorPane>
+        </Tab>
+      <Tab fx:id="tabLangs" text="%options.langs.text">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <TableView fx:id="tblLang" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
+                     <columns>
+                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text" />
+                     </columns>
+                  </TableView>
+                  <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="215.0" text="%options.langs.set-lang.text" />
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
     </TabPane>
     <ButtonBar layoutY="364.0" prefHeight="51.0" prefWidth="428.0">
         <buttons>
             <Button fx:id="btnOk" mnemonicParsing="false" text="%options.btnOk.text" />
-            <Button fx:id="btnApply" mnemonicParsing="false" text="%options.btnApply.text" />
+            <Button fx:id="btnApply" mnemonicParsing="false" text="%options.btnApply.text" translateX="-3.0" />
             <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" text="%options.btnCancel.text" translateX="-5.0" />
         </buttons>
     </ButtonBar>

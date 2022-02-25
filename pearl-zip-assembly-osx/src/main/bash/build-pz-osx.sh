@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright © 2021 92AK
+# Copyright © 2022 92AK
 #
 
 while read line; do
@@ -95,7 +95,7 @@ do
 done
 
 echo "Manual override with pre-compiled modules..."
-cp $rootDir/src/main/resources/lib/org.apache.logging.log4j.core/log4j-core-2.17.0.jar mods/
+cp $rootDir/src/main/resources/lib/org.apache.logging.log4j.core/log4j-core-2.17.1.jar mods/
 cp $rootDir/src/main/resources/lib/org.apache.commons.compress/commons-compress-1.21.jar mods/
 cp $rootDir/src/main/resources/lib/com.sun.jna/jna-5.6.0.jar mods/
 

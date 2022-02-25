@@ -1,7 +1,7 @@
 module org.apache.logging.log4j.core {
     requires java.logging;
     requires java.rmi;
-    requires java.xml;
+    requires org.apache.commons.compress;
 
     requires transitive java.compiler;
     requires transitive java.desktop;
@@ -9,8 +9,8 @@ module org.apache.logging.log4j.core {
     requires transitive java.naming;
     requires transitive java.scripting;
     requires transitive java.sql;
-
-    requires org.apache.logging.log4j;
+    requires transitive java.xml;
+    requires transitive org.apache.logging.log4j;
 
     exports org.apache.logging.log4j.core;
     exports org.apache.logging.log4j.core.appender;
