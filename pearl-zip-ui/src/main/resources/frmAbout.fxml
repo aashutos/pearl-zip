@@ -25,7 +25,7 @@
         <HBox prefWidth="490.0">
             <Button fx:id="btnLicenseInfo" text="%about.btnLicenseInfo.text" translateX="10" translateY="10" />
          <VBox.margin>
-            <Insets bottom="20.0" />
+            <Insets bottom="15.0" />
          </VBox.margin>
         </HBox>
     </VBox>
