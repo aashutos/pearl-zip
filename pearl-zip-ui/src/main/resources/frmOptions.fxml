@@ -4,19 +4,28 @@
   ~ Copyright © 2022 92AK
   -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmOptionsController">
     <TabPane fx:id="tabPaneOptions" prefHeight="364.0" prefWidth="428.0" tabClosingPolicy="UNAVAILABLE">
         <Tab fx:id="tabGeneral" text="%options.general.text">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="315.0" prefWidth="428.0">
-                <Button fx:id="btnClearCache" layoutX="23.0" layoutY="74.0" mnemonicParsing="false" text="%options.general.btnClearCache.text" />
-                <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="14.0" prefHeight="52.0" prefWidth="391.0" text="%options.general.description.text" wrapText="true" />
-            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="14.0" layoutY="129.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
-                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="169.0" text="%options.general.defaultFormat.text" />
-                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="164.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
-                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="209.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
-                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="239.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
+                <VBox>
+                    <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="14.0" prefWidth="391.0" text="%options.general.description.text" wrapText="true">
+                  <VBox.margin>
+                     <Insets bottom="10.0" top="5.0" />
+                  </VBox.margin></Label>
+                    <Button fx:id="btnClearCache" layoutX="23.0" layoutY="91.0" mnemonicParsing="false" text="%options.general.btnClearCache.text" />
+               <padding>
+                  <Insets left="15.0" right="15.0" />
+               </padding>
+                </VBox>
+            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="14.0" layoutY="146.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
+                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="189.0" text="%options.general.defaultFormat.text" />
+                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="184.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
+                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="229.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
+                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="259.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabBootstrap" text="%options.bootstrap-properties.text">
@@ -40,14 +49,22 @@
                         <TableColumn fx:id="supportedFormat" prefWidth="163.0" text="%options.providers.name.supportedFormat.text" />
                     </columns>
                 </TableView>
-            <Button fx:id="btnPurgePlugin" layoutX="10.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="107.0" text="%options.providers.purge-plugin.text" />
-            <Button fx:id="btnPurgeAll" layoutX="125.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="141.0" text="%options.providers.purge-all.text" />
+            <Button fx:id="btnPurgePlugin" layoutX="10.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" text="%options.providers.purge-plugin.text" />
+            <Button fx:id="btnPurgeAll" layoutX="125.0" layoutY="261.0" mnemonicParsing="false" prefHeight="27.0" text="%options.providers.purge-all.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabPluginLoader" text="%options.plugin-loader.text">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <Pane fx:id="paneDropArea" layoutX="14.0" layoutY="73.0" prefHeight="246.0" prefWidth="398.0" style="-fx-border-color: black; -fx-background-image: url('drop-area.png');" />
-                <Label fx:id="lblPluginLoaderDescriptionlblPluginLoaderDescription" alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="58.0" prefWidth="399.0" text="%options.plugin-loader.description.text" wrapText="true" />
+                <VBox alignment="CENTER">
+                    <Label fx:id="lblPluginLoaderDescription" layoutX="14.0" layoutY="14.0" prefWidth="399.0" text="%options.plugin-loader.description.text" wrapText="true">
+                  <VBox.margin>
+                     <Insets bottom="5.0" top="5.0" />
+                  </VBox.margin></Label>
+                    <Pane fx:id="paneDropArea" layoutX="14.0" layoutY="83.0" prefHeight="246.0" prefWidth="398.0" style="-fx-border-color: black; -fx-background-image: url('drop-area.png');" />
+               <padding>
+                  <Insets left="15.0" />
+               </padding>
+                </VBox>
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabTheme" text="%options.themes.text">
@@ -57,23 +74,20 @@
                         <TableColumn fx:id="colTheme" prefWidth="408.0" text="%options.themes.theme.text" />
                     </columns>
                 </TableView>
-                <Button fx:id="btnSetTheme" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="149.0" text="%options.themes.set-theme.text" />
+                <Button fx:id="btnSetTheme" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" text="%options.themes.set-theme.text" />
             </AnchorPane>
         </Tab>
-      <Tab fx:id="tabLangs" text="%options.langs.text">
-         <content>
+        <Tab fx:id="tabLangs" text="%options.langs.text">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <TableView fx:id="tblLang" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
-                     <columns>
-                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text" />
-                     </columns>
-                  </TableView>
-                  <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="215.0" text="%options.langs.set-lang.text" />
-               </children>
+                <TableView fx:id="tblLang" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
+                    <columns>
+                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text"/>
+                    </columns>
+                </TableView>
+                <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0"
+                        prefWidth="215.0" text="%options.langs.set-lang.text"/>
             </AnchorPane>
-         </content>
-      </Tab>
+        </Tab>
     </TabPane>
     <ButtonBar layoutY="364.0" prefHeight="51.0" prefWidth="428.0">
         <buttons>

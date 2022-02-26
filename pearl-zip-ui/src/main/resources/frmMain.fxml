@@ -21,8 +21,7 @@
         <padding>
             <Insets left="5.0"/>
         </padding>
-        <MenuButton fx:id="btnNew" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
-                    minWidth="64.0" contentDisplay="TOP" text="%main.new.text"
+        <MenuButton fx:id="btnNew" graphicTextGap="2.0" contentDisplay="TOP" text="%main.new.text"
                     translateX="-5.0">
             <graphic>
                 <ImageView fx:id="imgNew" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -35,8 +34,8 @@
                           text="%main.new.single-file-compressor.text"/>
             </items>
         </MenuButton>
-        <Button fx:id="btnOpen" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
-                minWidth="64.0" contentDisplay="TOP" text="%main.open.text"
+        <Button fx:id="btnOpen" graphicTextGap="2.0"
+                contentDisplay="TOP" text="%main.open.text"
                 translateX="-10.0">
             <graphic>
                 <ImageView fx:id="imgOpen" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -45,8 +44,7 @@
                 </ImageView>
             </graphic>
         </Button>
-        <MenuButton fx:id="btnAdd" graphicTextGap="2.0" layoutX="15.0" layoutY="10.0" maxHeight="64.0"
-                    maxWidth="70.0" minHeight="64.0" minWidth="70.0" contentDisplay="TOP"
+        <MenuButton fx:id="btnAdd" graphicTextGap="2.0" layoutX="15.0" layoutY="10.0" contentDisplay="TOP"
                     text="%main.add.text" translateX="-15.0">
             <graphic>
                 <ImageView fx:id="imgAdd" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -58,8 +56,7 @@
                 <MenuItem fx:id="mnuAddDir" text="%main.add.dir.text"/>
             </items>
         </MenuButton>
-        <MenuButton fx:id="btnExtract" graphicTextGap="2.0" layoutX="10.0" layoutY="10.0" maxHeight="64.0"
-                    maxWidth="80.0" minHeight="64.0" minWidth="80.0" contentDisplay="TOP"
+        <MenuButton fx:id="btnExtract" graphicTextGap="2.0" layoutX="10.0" layoutY="10.0" contentDisplay="TOP"
                     text="%main.extract.text" translateX="-20.0">
             <graphic>
                 <ImageView fx:id="imgExtract" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -72,8 +69,8 @@
                 <MenuItem fx:id="mnuExtractSelectedFile" text="%main.extract.item.text"/>
             </items>
         </MenuButton>
-        <Button fx:id="btnTest" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
-                minWidth="64.0" contentDisplay="TOP" text="%main.test.text"
+        <Button fx:id="btnTest" graphicTextGap="2.0"
+                contentDisplay="TOP" text="%main.test.text"
                 translateX="-25.0">
             <graphic>
                 <ImageView fx:id="imgTest" translateX="5" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -82,8 +79,8 @@
                 </ImageView>
             </graphic>
         </Button>
-        <MenuButton fx:id="btnCopy" graphicTextGap="2.0" maxHeight="64.0" maxWidth="72.0" minHeight="64.0"
-                    minWidth="72.0" contentDisplay="TOP" text="%main.copy.text"
+        <MenuButton fx:id="btnCopy" graphicTextGap="2.0"
+                    contentDisplay="TOP" text="%main.copy.text"
                     translateX="-30.0">
             <graphic>
                 <ImageView fx:id="imgCopy" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -96,8 +93,8 @@
                 <MenuItem fx:id="mnuCancelCopy" text="%main.copy.cancel.text"/>
             </items>
         </MenuButton>
-        <MenuButton fx:id="btnMove" graphicTextGap="2.0" maxHeight="64.0" maxWidth="72.0" minHeight="64.0"
-                    minWidth="72.0" contentDisplay="TOP" text="%main.move.text"
+        <MenuButton fx:id="btnMove" graphicTextGap="2.0"
+                    contentDisplay="TOP" text="%main.move.text"
                     translateX="-35.0">
             <graphic>
                 <ImageView fx:id="imgMove" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -110,8 +107,8 @@
                 <MenuItem fx:id="mnuCancelMove" text="%main.move.cancel.text"/>
             </items>
         </MenuButton>
-        <Button fx:id="btnDelete" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
-                minWidth="64.0" contentDisplay="TOP" text="%main.delete.text"
+        <Button fx:id="btnDelete" graphicTextGap="2.0"
+                contentDisplay="TOP" text="%main.delete.text"
                 translateX="-40.0">
             <graphic>
                 <ImageView fx:id="imgDel" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -119,8 +116,8 @@
                 </ImageView>
             </graphic>
         </Button>
-        <Button fx:id="btnInfo" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0"
-                minWidth="64.0" contentDisplay="TOP" text="%main.info.text"
+        <Button fx:id="btnInfo" graphicTextGap="2.0"
+                contentDisplay="TOP" text="%main.info.text"
                 translateX="-45.0">
             <graphic>
                 <ImageView fx:id="imgInfo" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true"
@@ -129,7 +126,7 @@
                 </ImageView>
             </graphic>
         </Button>
-        <Button fx:id="btnUp" graphicTextGap="2.0" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0"
+        <Button fx:id="btnUp" graphicTextGap="2.0"
                 contentDisplay="TOP" text="%main.up.text" visible="false" translateX="-50.0">
             <graphic>
                 <ImageView fx:id="imgUp" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">

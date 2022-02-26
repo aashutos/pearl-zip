@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<VBox prefHeight="487.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.ntak.pearlzip.ui.pub.FrmAboutController">
+<VBox prefHeight="487.0" style="-fx-background-color: #44c3ec;" prefWidth="490.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmAboutController">
     <minWidth>490.0</minWidth>
     <maxWidth>490.0</maxWidth>
     <minHeight>449.0</minHeight>
-    <maxHeight>528.0</maxHeight>
+    <maxHeight>538.0</maxHeight>
     <alignment>CENTER</alignment>
-    <VBox fx:id="vbAbout" prefHeight="600.0" prefWidth="490.0"
-          style="-fx-background-color: #ccddee; -fx-background-image: url(about-splash.png); -fx-background-repeat: no-repeat;">
-        <ImageView fx:id="imgViewAbtSplash" fitHeight="310.0" fitWidth="490.0" pickOnBounds="true"
-                   preserveRatio="true"/>
-        <Label fx:id="lblAppName" prefHeight="20.0" prefWidth="490.0"
-               style="-fx-padding: 0 0 0 10" text="%about.app-name.text"/>
-        <Label fx:id="lblVersion" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10"
-               text="%about.version.text"/>
-        <Label fx:id="lblCopyright" prefHeight="40.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10"
-               text="%about.copyright.text"/>
-        <Label fx:id="lblWeblink" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10"
-               text="%about.weblink.text"/>
-        <Label fx:id="lblGeneral" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10"
-               text="%about.description.text"/>
-        <HBox prefHeight="65.0" prefWidth="490.0">
-            <Button fx:id="btnLicenseInfo" text="%about.btnLicenseInfo.text" translateX="10" translateY="10"/>
+    <VBox fx:id="vbAbout" style="-fx-background-color: #44c3ec; -fx-background-image: url(about-splash.png); -fx-background-repeat: no-repeat;">
+        <ImageView fx:id="imgViewAbtSplash" fitHeight="310.0" fitWidth="490.0" pickOnBounds="true" preserveRatio="true" />
+        <Label fx:id="lblAppName" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10" text="%about.app-name.text" />
+        <Label fx:id="lblVersion" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10" text="%about.version.text" />
+        <Label fx:id="lblCopyright" prefHeight="40.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10" text="%about.copyright.text" />
+        <Label fx:id="lblWeblink" prefHeight="20.0" prefWidth="490.0" style="-fx-padding: 0 0 0 10" text="%about.weblink.text" />
+        <Label fx:id="lblGeneral" prefWidth="490.0" style="-fx-padding: 0 0 0 10" text="%about.description.text" wrapText="true" />
+        <HBox prefWidth="490.0">
+            <Button fx:id="btnLicenseInfo" text="%about.btnLicenseInfo.text" translateX="10" translateY="10" />
+         <VBox.margin>
+            <Insets bottom="20.0" />
+         </VBox.margin>
         </HBox>
     </VBox>
 </VBox>
