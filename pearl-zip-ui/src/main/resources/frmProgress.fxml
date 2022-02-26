@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.layout.AnchorPane?>
-<AnchorPane minHeight="116.0" minWidth="442.0" prefHeight="116.0" prefWidth="442.0"
-            xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.ntak.pearlzip.ui.pub.FrmProgressController">
-   <Label fx:id="lblTitle" prefHeight="26.0" prefWidth="442.0"
-          style="-fx-font-weight: bold; -fx-background-color: #464646; -fx-label-padding: 3px;"
-          text="%progress.title.text" textFill="#6c6e70" wrapText="true"/>
-   <Label fx:id="lblProgress" alignment="BOTTOM_LEFT" layoutX="14.0" layoutY="22.0" prefHeight="58.0"
-          prefWidth="417.0" text="%progress.default-loading.text" wrapText="true"/>
-   <ProgressBar fx:id="barProgress" layoutX="14.0" layoutY="87.0" prefHeight="20.0" prefWidth="417.0"
-                progress="-0.01"/>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane minHeight="116.0" minWidth="442.0" prefHeight="116.0" prefWidth="442.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmProgressController">
+   <VBox>
+      <Label fx:id="lblTitle" prefHeight="26.0" prefWidth="442.0" style="-fx-font-weight: bold; -fx-background-color: #464646; -fx-label-padding: 3px;" text="%progress.title.text" textFill="#6c6e70" wrapText="true" />
+      <Label fx:id="lblProgress" alignment="BOTTOM_LEFT" layoutX="14.0" layoutY="22.0" prefHeight="17.0" prefWidth="442.0" text="%progress.default-loading.text" wrapText="true">
+         <padding>
+            <Insets left="15.0" right="15.0" top="10.0" />
+         </padding></Label>
+   </VBox>
+   <ProgressBar fx:id="barProgress" layoutX="14.0" layoutY="87.0" prefHeight="20.0" prefWidth="417.0" progress="-0.01" />
 </AnchorPane>
