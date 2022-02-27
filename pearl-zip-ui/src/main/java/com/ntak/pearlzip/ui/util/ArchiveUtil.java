@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.*;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -213,6 +214,10 @@ public class ArchiveUtil {
                 if (Objects.nonNull(line)) {
                     writer.println(line);
                 }
+            }
+
+            synchronized(ResourceConstants.RECENT_FILES_MENU) {
+                JFXUtil.runLater(()->refreshRecentFileMenu(ResourceConstants.RECENT_FILES_MENU));
             }
         } catch(IOException e) {
         }

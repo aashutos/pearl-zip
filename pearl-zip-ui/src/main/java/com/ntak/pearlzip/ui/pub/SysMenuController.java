@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.event.handler.BtnNewEventHandler;
 import com.ntak.pearlzip.ui.event.handler.BtnNewSingleFileEventHandler;
 import com.ntak.pearlzip.ui.event.handler.BtnOpenEventHandler;
@@ -65,6 +66,7 @@ public class SysMenuController {
     private MenuItem mnuNewVersion;
 
     public void initData() {
+        ResourceConstants.RECENT_FILES_MENU = mnuOpenRecent;
         mnuNew.setOnAction((e)->new BtnNewEventHandler().handle(null));
 
         if (ZipState.getSupportedCompressorWriteFormats().size() == 0) {
@@ -119,7 +121,6 @@ public class SysMenuController {
         });
 
         ArchiveUtil.refreshRecentFileMenu(mnuOpenRecent);
-        mnuOpenRecent.setOnShowing(e-> ArchiveUtil.refreshRecentFileMenu(mnuOpenRecent));
 
         mnuOptions.setOnAction((e)->{
             try {
