@@ -190,14 +190,14 @@ public class FrmOptionsController {
 
         // CHECK BOX - SHOW NOTIFICATION
         try {
-            checkShowNotification.setSelected(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
+            checkShowNotification.setSelected(Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
                                                                                                 "true")));
         } catch (Exception e) {
             checkShowNotification.setSelected(true);
         }
         checkShowNotification.setOnAction(e -> {
-            synchronized(WORKING_APPLICATION_SETTINGS) {
-                WORKING_APPLICATION_SETTINGS.put(CNS_SHOW_NOTIFICATION,
+            synchronized(WORKING_SETTINGS) {
+                WORKING_SETTINGS.put(CNS_SHOW_NOTIFICATION,
                                                  checkShowNotification.isSelected()?"true":"false");
             }
         });
@@ -488,7 +488,7 @@ public class FrmOptionsController {
         tabTheme.setOnSelectionChanged( (ev) -> {
              try {
                  tblTheme.setItems(FXCollections.observableArrayList(Files.list(themesPath)
-                                                                          .filter(t -> Files.isDirectory(t))
+                                                                          .filter(Files::isDirectory)
                                                                           .map(p -> p.getFileName()
                                                                                      .toString())
                                                                           .collect(Collectors.toList()))

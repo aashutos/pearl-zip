@@ -37,6 +37,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
@@ -709,14 +710,14 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                 this.clickOn(checkSafeMode)
                     .clickOn("#btnApply");
                 Assertions.assertEquals("false",
-                                        WORKING_APPLICATION_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
+                                        WORKING_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
                                         "Show notification was not reset in properties");
                 this.clickOn(checkSafeMode)
                     .clickOn("#btnApply");
             }
 
             Assertions.assertEquals("true",
-                                    WORKING_APPLICATION_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
+                                    WORKING_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
                                     "Show notification was not enabled in properties");
         } finally {
             Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
