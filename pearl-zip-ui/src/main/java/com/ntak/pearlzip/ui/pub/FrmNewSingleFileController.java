@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -33,6 +33,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_NEW_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
@@ -198,6 +199,7 @@ public class FrmNewSingleFileController {
                                                                                                              .get(),
                                                                                                      writeService);
                                                      launchMainStage(stage, fxArchiveInfo);
+                                                     addToRecentFile(new File(archivePath));
                                                  });
                     } else {
                         // LOG: No compatible Write Service found for the archive %s. Archive could not be created.
