@@ -16,7 +16,7 @@
       </columns>
     </TableView>
     <Button fx:id="btnPurgeSelected" layoutX="14.0" layoutY="239.0" mnemonicParsing="false" prefHeight="27.0"
-            prefWidth="114.0" text="%purge-plugin.btnPurgeSelected.text"/>
+            text="%purge-plugin.btnPurgeSelected.text"/>
     <Button fx:id="btnCancel" layoutX="303.0" layoutY="239.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="79.0"
             text="%purge-plugin.btnCancel.textpurge-plugin.btnCancel.text"/>
 </AnchorPane>
