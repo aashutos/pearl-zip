@@ -472,6 +472,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Change language pack successfully")
     public void testFX_ChangeLanguagePack_Success() throws IOException {
+        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+
         //  Back up existing application.properties file
         Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
                                                 .toString(), "application.properties");
@@ -541,12 +544,19 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                            .toString(), "manifests", "pearl-zip-lang-pack-fr-CA-0.0.4.0.pzax.MF"));
             Files.deleteIfExists(Paths.get(STORE_ROOT.toAbsolutePath()
                                                      .toString(), "providers", "pearl-zip-lang-pack-fr-CA-0.0.4.0.jar"));
+
+            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
     @Test
     @DisplayName("Test: Install theme, switch theme and uninstall successfully")
     public void testFX_InstallTheme_Success() throws IOException {
+        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+
         //  Back up existing application.properties file
         Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
                                                 .toString(), "application.properties");
@@ -643,6 +653,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                    "Theme manifest not removed");
         } finally {
             Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
+
+            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -758,6 +772,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                     "Exception message was not as expected");
         } finally {
             Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
+
+            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -795,6 +813,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                   "Exception message was not as expected");
         } finally {
             Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
+
+            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -833,7 +855,8 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                 .sleep(250, MILLISECONDS);
 
             Assertions.assertEquals(0,
-                                    Files.list(providersDir).collect(Collectors.toList()).size(),
+                                    (int) Files.list(providersDir)
+                                               .count(),
                                     "Plugins were not removed");
         } finally {
             clearDirectory(providersDir);
@@ -902,9 +925,8 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
                 Set<DialogPane> dialogPanes = lookup(".dialog-pane").queryAllAs(DialogPane.class);
                 Assertions.assertEquals(2,
-                                        Files.list(providersDir)
-                                             .collect(Collectors.toList())
-                                             .size(),
+                                        (int) Files.list(providersDir)
+                                                   .count(),
                                         "Unexpected number of plugins found.");
 
                 dialogPanes.forEach(d -> this.sleep(250, MILLISECONDS)
