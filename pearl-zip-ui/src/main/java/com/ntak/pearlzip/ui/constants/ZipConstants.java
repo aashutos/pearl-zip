@@ -103,6 +103,7 @@ public class ZipConstants {
     public static final String LOG_LOADING_MODULE = "logging.ntak.pearl-zip.loading-module";
     public static final String LOG_READ_SERVICES_IDENTIFIED = "logging.ntak.pearl-zip.read-services-identified";
     public static final String LOG_WRITE_SERVICES_IDENTIFIED = "logging.ntak.pearl-zip.write-services-identified";
+    public static final String LOG_MISSING_KEYS_LANG_PACK = "logging.ntak.pearl-zip.missing-keys-lang-pack";
 
     public static final String LOG_ARCHIVE_LOCKED = "logging.ntak.pearl-zip.archive-locked";
     public static final String TITLE_ARCHIVE_LOCKED = "title.ntak.pearl-zip.archive-locked";
@@ -401,6 +402,7 @@ public class ZipConstants {
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
+    public static final String CNS_PROP_HEADER = "PearlZip Application Settings File Generated @ %s";
 
     public static final String MANIFEST_FILE_NAME = "MF";
     public static final String KEY_MANIFEST_DELETED= "remove-pattern";

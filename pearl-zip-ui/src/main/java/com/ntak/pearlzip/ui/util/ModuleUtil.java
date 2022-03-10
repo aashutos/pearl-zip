@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.*;
@@ -160,7 +161,7 @@ public class ModuleUtil {
             System.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             try(OutputStream bw = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
-                WORKING_APPLICATION_SETTINGS.store(bw, String.format("PearlZip Application Settings File Generated @ %s",
+                WORKING_APPLICATION_SETTINGS.store(bw, String.format(CNS_PROP_HEADER,
                                                                      LocalDateTime.now()));
             } catch(IOException ex) {
             }
@@ -592,13 +593,14 @@ public class ModuleUtil {
      */
     public static ResourceBundle loadLangPackDynamic(Path modulePath, String baseName, Locale locale) {
         ResourceBundle bundle = null;
+        Locale defaultLocale = genLocale(new Properties());
+        ResourceBundle enGBBundle = ResourceBundle.getBundle(baseName,
+                                          defaultLocale);
 
         // Safe mode execution...
         if (System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false").equals("true")) {
             // Use default en_GB bundle
-            Locale defaultLocale = genLocale(new Properties());
-            bundle = ResourceBundle.getBundle(baseName,
-                                     defaultLocale);
+            bundle = enGBBundle;
             return bundle;
         }
 
@@ -623,8 +625,20 @@ public class ModuleUtil {
                                                                                                     PearlZipResourceBundleProvider.class);
             resourceBundleLoader.forEach(b -> LANG_PACKS.addAll(b.providedLanguages()));
             for (ResourceBundleProvider prov : resourceBundleLoader) {
+                final Set<String> diffLoggingKeys = new HashSet<>(enGBBundle.keySet());
                 if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
-                    return bundle;
+                    diffLoggingKeys.removeAll(bundle.keySet());
+                    if (diffLoggingKeys.size() == 0) {
+                        return bundle;
+                    } else {
+                        // Warn of potential missing keys. If UI key is missing, the program may not start...
+                        if (!bundle.getLocale().toString().isEmpty()) {
+                            ROOT_LOGGER.warn(resolveTextKey(LOG_MISSING_KEYS_LANG_PACK, diffLoggingKeys, locale));
+                            return bundle;
+                        }
+
+                        bundle = null;
+                    }
                 }
             }
 
@@ -634,9 +648,20 @@ public class ModuleUtil {
             }
         } catch (Exception e) {
             // Use default en_GB bundle
-            Locale defaultLocale = genLocale(new Properties());
-            bundle = ResourceBundle.getBundle(baseName,
-                                              defaultLocale);
+            bundle = enGBBundle;
+
+            // Set locale for application.
+            WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_LANG, "en");
+            WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_COUNTRY, "GB");
+            WORKING_APPLICATION_SETTINGS.remove(ConfigurationConstants.CNS_LOCALE_VARIANT);
+            try (OutputStream wr = Files.newOutputStream(APPLICATION_SETTINGS_FILE, StandardOpenOption.WRITE)){
+                WORKING_APPLICATION_SETTINGS.store(wr, String.format(CNS_PROP_HEADER,
+                                                                     LocalDateTime.now()));
+            } catch(IOException exc) {
+            }
+
+            System.setProperty(ConfigurationConstants.CNS_LOCALE_LANG, "en");
+            System.setProperty(ConfigurationConstants.CNS_LOCALE_COUNTRY, "GB");
         }
 
         return bundle;
