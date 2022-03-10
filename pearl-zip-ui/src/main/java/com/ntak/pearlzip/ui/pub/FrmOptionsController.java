@@ -550,7 +550,7 @@ public class FrmOptionsController {
             synchronized(WORKING_APPLICATION_SETTINGS) {
                 try(OutputStream settingsOutputStream = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
                     WORKING_APPLICATION_SETTINGS.store(settingsOutputStream,
-                                                       String.format("PearlZip Application Settings File Generated @ %s",
+                                                       String.format(CNS_PROP_HEADER,
                                                                      LocalDateTime.now()));
                     // Reloading providers and cached System settings into PearlZip
                     WORKING_APPLICATION_SETTINGS.keySet()
