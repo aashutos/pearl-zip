@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -93,6 +94,8 @@ public class ArchiveUtilTest {
                 try {
                     tableView = new TableView<>();
                     scene = new Scene(tableView);
+                    ResourceConstants.RECENT_FILES_MENU = new Menu();
+
                     stage.set(new Stage());
                     stage.get()
                          .setScene(scene);
