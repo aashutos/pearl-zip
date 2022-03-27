@@ -1,0 +1,13 @@
+/*
+ * Copyright © 2022 92AK
+ */
+
+-- DECLARATION
+-- read only user to view
+CREATE USER APP
+    IDENTIFIED BY PZAUser0003Plus
+    TEMPORARY TABLESPACE temp
+    QUOTA 10M ON system;
+
+-- PERMISSIONS
+GRANT CREATE SESSION TO APP;
