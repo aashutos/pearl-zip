@@ -1,0 +1,15 @@
+/*
+ * Copyright © 2022 92AK
+ */
+
+-- DECLARATION
+-- Write access to dbo tables
+CREATE USER DBO
+IDENTIFIED BY DatabaseOwnerSchema2020
+TEMPORARY TABLESPACE temp
+QUOTA 10M ON system;
+
+ALTER USER DBO QUOTA 128M ON users;
+
+-- PERMISSIONS
+GRANT CREATE SESSION TO DBO;
