@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2021 92AK
+# Copyright © 2022 92AK
 #
 
 # Parameters
@@ -20,4 +20,4 @@ echo "Release name has been set to: ${P_RELEASE}"
 echo "Signing plugin archive..."
 ARCHIVE=$(ls target/pearl-zip-archive-${RELEASE}.jar)
 echo "Archive to sign: $ARCHIVE"
-echo $(cat /opt/.store/.pw-signer) | ${JAVA_HOME}/bin/jarsigner -tsa https://freetsa.org/tsr -keystore /opt/.store/.ks-signer -storepass $(cat /opt/.store/.pw-signer) "$ARCHIVE" 92ak
+echo $(cat /opt/.store/.pw-signer) | ${JAVA_HOME}/bin/jarsigner -tsa https://freetsa.org/tsr -keystore /opt/.store/.ks-signer -storepass $(cat /opt/.store/.pw) "$ARCHIVE" 92ak
