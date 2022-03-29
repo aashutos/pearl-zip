@@ -47,6 +47,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -521,9 +523,42 @@ public class PearlZipFXUtil {
                                                             .getResource(theme)
                                                             .getPath()));
             } catch (Exception e) {
-                themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
-                                                                theme).toAbsolutePath());
+                try {
+                    themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
+                                                                    theme)
+                                                           .toAbsolutePath());
+                } catch(Exception exc) {
+                    final String themePath = PearlZipFXUtil.class.getClassLoader()
+                                                            .getResource(theme)
+                                                            .getPath();
+                    Path jarArchive =
+                        Paths.get(themePath.substring(0, themePath.indexOf('!'))
+                                        .replaceAll("file:",""));
+
+                    Path tempDir = Files.createTempDirectory("pz");
+                    Path srcThemePath =
+                            Paths.get(tempDir.toAbsolutePath().toString(),
+                                      themePath.substring(themePath.indexOf('!')+1));
+
+                    try (JarFile jar = new JarFile(jarArchive.toFile())) {
+                        for (JarEntry entry : jar.stream().toList()) {
+                            if (entry.isDirectory()) {
+                                Path entryDest = tempDir.resolve(entry.getName());
+
+                                if (entry.isDirectory()) {
+                                    Files.createDirectory(entryDest);
+                                    continue;
+                                }
+
+                                Files.copy(jar.getInputStream(entry), entryDest);
+                            }
+                        }
+                    }
+
+                    themeFiles = Files.list(srcThemePath);
+                }
             }
+
             themeFiles.forEach(f -> {
                                    try {
                                        Files.copy(f,
