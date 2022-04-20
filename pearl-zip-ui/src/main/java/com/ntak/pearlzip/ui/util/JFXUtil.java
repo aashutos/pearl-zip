@@ -340,7 +340,7 @@ public class JFXUtil {
     public static boolean checkNewVersionAvailable() {
         List<NotificationEntry> entries = getNotifications("PearlZip Version");
         Optional<NotificationEntry> optVersion = entries.stream()
-                                                        .sorted(Comparator.comparingInt(NotificationEntry::id))
+                                                        .sorted(Comparator.comparingInt(NotificationEntry::id).reversed())
                                                         .findFirst();
         if (optVersion.isPresent()) {
             NotificationEntry version = optVersion.get();
