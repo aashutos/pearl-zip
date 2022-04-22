@@ -80,6 +80,12 @@ public class FrmOptionsController {
     private ComboBox<String> comboDefaultFormat;
 
     @FXML
+    private CheckBox checkShowTargetFolderExtractAll;
+
+    @FXML
+    private CheckBox checkShowTargetFolderExtractSelected;
+
+    @FXML
     private CheckBox checkShowNotification;
 
     @FXML
@@ -186,6 +192,36 @@ public class FrmOptionsController {
             }
 
 
+        });
+
+        // CHECK BOX - Show target folder on extract selected
+        try {
+            checkShowTargetFolderExtractSelected.setSelected(Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,
+                                                                                                "true")));
+        } catch (Exception e) {
+            checkShowTargetFolderExtractSelected.setSelected(true);
+        }
+
+        checkShowTargetFolderExtractSelected.setOnAction(e -> {
+            synchronized(WORKING_SETTINGS) {
+                WORKING_SETTINGS.put(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,
+                                     checkShowTargetFolderExtractSelected.isSelected()?"true":"false");
+            }
+        });
+
+        // CHECK BOX - Show target folder on extract all
+        try {
+            checkShowTargetFolderExtractAll.setSelected(Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL,
+                                                                                                "true")));
+        } catch (Exception e) {
+            checkShowTargetFolderExtractAll.setSelected(true);
+        }
+
+        checkShowTargetFolderExtractAll.setOnAction(e -> {
+            synchronized(WORKING_SETTINGS) {
+                WORKING_SETTINGS.put(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL,
+                                     checkShowTargetFolderExtractAll.isSelected()?"true":"false");
+            }
         });
 
         // CHECK BOX - SHOW NOTIFICATION

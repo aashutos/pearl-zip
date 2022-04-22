@@ -21,11 +21,13 @@
                   <Insets left="15.0" right="15.0" />
                </padding>
                 </VBox>
-            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="14.0" layoutY="146.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
-                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="189.0" text="%options.general.defaultFormat.text" />
-                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="184.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
-                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="229.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
-                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="259.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
+            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="13.0" layoutY="164.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
+                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="207.0" text="%options.general.defaultFormat.text" />
+                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="202.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
+                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="247.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
+                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="277.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
+            <CheckBox fx:id="checkShowTargetFolderExtractAll" layoutX="14.0" layoutY="130.0" mnemonicParsing="false" text="%options.general.checkShowTargetFolderExtractAll.text" />
+            <CheckBox fx:id="checkShowTargetFolderExtractSelected" layoutX="14.0" layoutY="101.0" mnemonicParsing="false" text="%options.general.checkShowTargetFolderExtractSelected.text" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabBootstrap" text="%options.bootstrap-properties.text">
@@ -81,11 +83,10 @@
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <TableView fx:id="tblLang" layoutX="9.0" layoutY="14.0" prefHeight="208.0" prefWidth="410.0">
                     <columns>
-                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text"/>
+                        <TableColumn fx:id="colLang" prefWidth="408.0" text="%options.langs.lang.text" />
                     </columns>
                 </TableView>
-                <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0"
-                        prefWidth="215.0" text="%options.langs.set-lang.text"/>
+                <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="215.0" text="%options.langs.set-lang.text" />
             </AnchorPane>
         </Tab>
     </TabPane>
