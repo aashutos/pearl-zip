@@ -8,7 +8,7 @@
     <parent>
         <artifactId>pearl-zip</artifactId>
         <groupId>com.ntak</groupId>
-        <version>0.0.4.0</version>
+        <version>0.0.4.1</version>
     </parent>
 
     <artifactId>pearl-zip-deploy-common</artifactId>

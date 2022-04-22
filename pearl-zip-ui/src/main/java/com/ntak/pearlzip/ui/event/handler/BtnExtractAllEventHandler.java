@@ -1,9 +1,10 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
@@ -19,7 +20,9 @@ import org.apache.logging.log4j.core.LoggerContext;
 import java.io.File;
 import java.util.Objects;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.TITLE_TARGET_DIR_LOCATION;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
 
@@ -49,7 +52,12 @@ public class BtnExtractAllEventHandler implements CheckEventHandler<ActionEvent>
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene()
                                                                          .getWindow(),
                                                  () -> extractToDirectory(sessionId, fxArchiveInfo, dir),
-                                                 (s) -> {}
+                                                 (s) -> {
+                                                    if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL,"true"))) {
+                                                        ZipConstants.APP.getHostServices()
+                                                                        .showDocument(dir.toURI().toString());
+                                                    }
+                                                 }
                 );
             }
         }

@@ -5,6 +5,7 @@ package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
@@ -73,7 +75,12 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                                  () -> ArchiveUtil.extractDirectory(sessionId, targetDir, fxArchiveInfo,
                                                                                  selectedFile),
-                                                 (s)->{}
+                                                 (s)->{
+                                                     if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
+                                                         ZipConstants.APP.getHostServices()
+                                                                         .showDocument(targetDir.toAbsolutePath().toUri().toString());
+                                                     }
+                                                 }
                 );
         } else {
             FileChooser addFileView = new FileChooser();
@@ -88,7 +95,12 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                                  ()->readService.extractFile(sessionId, destPath.toPath(),
                                                                              fxArchiveInfo.getArchiveInfo(), selectedFile),
-                                                 (s)->{}
+                                                 (s)->{
+                                                     if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
+                                                         ZipConstants.APP.getHostServices()
+                                                                         .showDocument(destPath.toPath().getParent().toUri().toString());
+                                                     }
+                                                 }
                 );
             }
         }

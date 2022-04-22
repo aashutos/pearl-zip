@@ -56,6 +56,8 @@ public class ZipConstants {
     public static final String CNS_DEFAULT_FORMAT = "configuration.ntak.pearl-zip.default-format";
     public static final String CNS_LAUNCHER_CANONICAL_NAME = "configuration.ntak.pearl-zip.launcher-canonical-name";
     public static final String CNS_SHOW_NOTIFICATION = "configuration.ntak.pearl-zip.show-notification";
+    public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED = "configuration.ntak.pearl-zip.show-target-folder-extract-selected";
+    public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL = "configuration.ntak.pearl-zip.show-target-folder-extract-all";
     public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
 
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
