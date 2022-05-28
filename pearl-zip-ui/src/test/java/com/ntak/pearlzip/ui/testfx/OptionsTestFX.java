@@ -947,7 +947,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                        .map(p -> p.getFileName()
                                                   .toString())
                                        .collect(Collectors.toList())
-                                       .contains("zip4j-2.8.0.jar"),
+                                       .contains("zip4j-2.10.0.jar"),
                                   "Dependency plugin not present as expected");
         } finally {
             clearDirectory(providersDir);
