@@ -404,7 +404,7 @@ public class ModuleUtil {
         String rootLib = Paths.get(moduleDirectory.toAbsolutePath()
                                                   .toString(),
                                    lib.getFileName().toString()
-                                      .replaceAll("\\d(\\.\\d)+\\.jar", ".*")
+                                      .replaceAll("\\d+(\\.\\d+)+\\.jar", ".*")
                               )
                               .toString();
 
