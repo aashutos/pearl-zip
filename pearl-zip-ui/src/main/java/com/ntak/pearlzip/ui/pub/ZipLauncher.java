@@ -158,9 +158,10 @@ public class ZipLauncher {
             String keystorePathString = Paths.get(storePath.toString(), "keystore.jks")
                                              .toString();
             final Path keystorePath = Paths.get(keystorePathString);
-            if (!Files.exists(keystorePath)) {
-                Files.copy(kis, keystorePath);
+            if (Files.exists(keystorePath)) {
+                Files.deleteIfExists(keystorePath);
             }
+            Files.copy(kis, keystorePath);
             System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE, keystorePathString);
             System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD));
 
@@ -168,9 +169,10 @@ public class ZipLauncher {
             String truststorePathString = Paths.get(storePath.toString(), "truststore.jks")
                                                .toString();
             final Path truststorePath = Paths.get(truststorePathString);
-            if (!Files.exists(truststorePath)) {
-                Files.copy(tis, truststorePath);
+            if (Files.exists(truststorePath)) {
+                Files.deleteIfExists(truststorePath);
             }
+            Files.copy(tis, truststorePath);
             System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE, truststorePathString);
             System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD));
         } catch(Exception e) {
