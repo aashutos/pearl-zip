@@ -5,9 +5,10 @@
 /*
  *  Insert message with a given topic into the DBO.PearlZipNotifications table
  */
+-- Currently unsupported by Cockroach DB PostGres SQL DB (Oracle DB implementation)
 CREATE OR REPLACE PROCEDURE DBO.InsertPearlZipNotification (
-	PARAM_TOPIC IN VARCHAR2,
-	PARAM_MESSAGE IN VARCHAR2
+	PARAM_TOPIC IN VARCHAR,
+	PARAM_MESSAGE IN VARCHAR
 )
 AS
 BEGIN
