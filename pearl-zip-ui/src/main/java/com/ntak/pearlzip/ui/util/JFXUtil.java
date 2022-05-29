@@ -340,8 +340,7 @@ public class JFXUtil {
     public static boolean checkNewVersionAvailable() {
         List<NotificationEntry> entries = getNotifications("PearlZip Version");
         Optional<NotificationEntry> optVersion = entries.stream()
-                                                        .sorted(Comparator.comparingInt(NotificationEntry::id).reversed())
-                                                        .findFirst();
+                                                        .max(Comparator.comparingInt(NotificationEntry::id));
         if (optVersion.isPresent()) {
             NotificationEntry version = optVersion.get();
             String message = version.message();
@@ -387,7 +386,7 @@ public class JFXUtil {
                   String.format(
                    """
                    SELECT ID, TOPIC, MESSAGE, CREATIONTIMESTAMP
-                   FROM PUB.PearlZipNotifications
+                   FROM PUBLIC.PearlZipNotifications
                    WHERE TOPIC IN (%s)
                    """,
                   Arrays.stream(filters)

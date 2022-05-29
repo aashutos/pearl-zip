@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.pub;
 
@@ -85,6 +85,7 @@ public interface ArchiveService {
      *
      *   @return boolean - returns true if the implementation is enabled and to be used by PearlZip
      */
+    @Deprecated(forRemoval = true)
     default boolean isEnabled() {
         return Boolean.parseBoolean(System.getProperty(
                 String.format("configuration.ntak.pearl-zip.provider.priority.enabled.%s",
@@ -102,6 +103,7 @@ public interface ArchiveService {
      *
      *  @return Set&lt;String&gt; - List of compressor archives to be identified by PearlZip
      */
+    @Deprecated(forRemoval = true)
     default Set<String> getCompressorArchives() {
         return Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz");
     }
@@ -114,6 +116,7 @@ public interface ArchiveService {
      *
      *   @return Set&lt;String&gt; - Set of alias file extensions
      */
+    @Deprecated(forRemoval = true)
     default Set<String> getAliasFormats() { return Set.of("tgz"); }
 
     /**
@@ -125,6 +128,7 @@ public interface ArchiveService {
      *   @return Optional&lt;Pair&lt;String,Node&gt;&gt; - The representation of the Options tab for the archive
      *   service implementation
      */
+    @Deprecated(forRemoval = true)
     default Optional<Pair<String,Node>> getOptionsPane() { return Optional.empty(); }
 
     /**
@@ -133,6 +137,7 @@ public interface ArchiveService {
      *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
      *   or empty if not required
      */
+    @Deprecated(forRemoval = true)
     default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
 
     default Optional<FXForm> getFXFormByIdentifier(String name, Object... parameters) { return Optional.empty();}

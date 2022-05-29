@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.pub;
 
@@ -91,6 +91,7 @@ public interface ArchiveReadService extends ArchiveService {
      *   @return Optional&lt;Node&gt; - The JavaFX Node representing the form to show prior to opening the archive or
      *   Empty if none is available.
      */
+    @Deprecated(forRemoval = true)
     default Optional<Node> getOpenArchiveOptionsPane(ArchiveInfo archiveInfo) { return Optional.empty(); }
 
     /**
@@ -98,5 +99,6 @@ public interface ArchiveReadService extends ArchiveService {
      *
      *   @return List&lt;String&gt; - List of unique archive formats supported
      */
+    @Deprecated(forRemoval = true)
     List<String> supportedReadFormats();
 }

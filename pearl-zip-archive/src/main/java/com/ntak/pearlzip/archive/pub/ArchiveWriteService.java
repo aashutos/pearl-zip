@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.pub;
 
@@ -86,6 +86,7 @@ public interface ArchiveWriteService extends ArchiveService {
      *   @return Optional&lt;Pair&lt;String,Node&gt;&gt; - The object representing a New Form configuration tab for
      *   the archive service implementation
      */
+    @Deprecated(forRemoval = true)
     default Optional<Pair<String,Node>> getCreateArchiveOptionsPane() { return Optional.empty(); }
 
     /**
@@ -94,5 +95,6 @@ public interface ArchiveWriteService extends ArchiveService {
      *   @return List&lt;String&gt; - List of archive extensions that can be created and modified by the archive
      *   service implementation
      */
+    @Deprecated(forRemoval = true)
     List<String> supportedWriteFormats();
 }
