@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
@@ -286,6 +285,69 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                               "File first-nested-file was not " +
                                       "extracted");
         Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"first-folder",".DS_Store")), "File .DS_Store was not extracted");
+    }
+
+    @Test
+    @DisplayName("Test: Extract nested folder from zip archive")
+    public void testFX_extractNestedFolderZipJArchive_Success() throws IOException {
+        // Open archive
+        final Path archivePath = Paths.get("src", "test", "resources", "dd.zip")
+                                      .toAbsolutePath();
+        simOpenArchive(this, archivePath, true, false);
+        sleep(50, TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive " +
+                "was not present");
+
+        // Select file to extract...
+        TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
+        simTraversalArchive(this, archivePath.getFileName().toString(), "#fileContentsView",
+                                                     (r)->{},
+                                                     "a", "b", "c").get();
+
+        // Extract to destination
+        Path targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        clearDirectory(targetFolderPath);
+        Files.createDirectories(targetFolderPath);
+        PearlZipFXUtil.simExtractFile(this, targetFolderPath);
+
+        // Check extraction was successful...
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"c")), "Folder a was not extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"c","temp-file")),
+                "temp-file was not extracted");
+
+        PearlZipFXUtil.simUp(this);
+        PearlZipFXUtil.simUp(this);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Select file to extract...
+        simTraversalArchive(this, archivePath.getFileName().toString(), "#fileContentsView",
+                                                     (r)->{},
+                                                     "a").get();
+
+        // Extract to destination
+        targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+        clearDirectory(targetFolderPath);
+        Files.createDirectories(targetFolderPath);
+        PearlZipFXUtil.simExtractFile(this, targetFolderPath);
+
+        // Check extraction was successful...
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"a")), "Folder a was not extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"a","b")),
+                              "Folder a/b was not extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"a","b", "c")),
+                              "Folder a/b/c was not extracted");
+        Assertions.assertTrue(Files.exists(Paths.get(targetFolderPath.toString(),"a","b","c","temp-file")),
+                              "temp-file was not extracted");
+
+        clearDirectory(targetFolderPath);
     }
 
     ////////////////////////////////////////////////////////////////////////////////

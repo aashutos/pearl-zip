@@ -681,12 +681,16 @@ public class ArchiveUtil {
                                   ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
                                                                                       PROGRESS,
                                                                                       resolveTextKey(LOG_CREATE_DIRECTORY,
-                                                                                                    d.getFileName()),
+                                                                                                     Paths.get(d.getFileName()).getFileName().toString()),
                                                                                       0,
                                                                                       total
                                   ));
                                   Files.createDirectories(Paths.get(targetDir.toAbsolutePath()
-                                                                           .toString(), d.getFileName()));
+                                                                           .toString(),
+                                                                    Paths.get(selectedFile.getFileName()).getFileName().toString(),
+                                                                    Paths.get(selectedFile.getFileName())
+                                                                         .relativize(Paths.get(d.getFileName()))
+                                                                         .toString()));
                               } catch(IOException ex) {
                               }
                           }
@@ -696,8 +700,12 @@ public class ArchiveUtil {
                  .forEach(f -> fxArchiveInfo.getReadService()
                                             .extractFile(sessionId,
                                                          Paths.get(targetDir.toAbsolutePath()
-                                                                          .toString(),
-                                                                   f.getFileName()
+                                                                          .toString().replace("/" + selectedFile.getFileName() + "/",
+                                                                                          "/"),
+                                                                   Paths.get(selectedFile.getFileName()).getFileName().toString(),
+                                                                   Paths.get(selectedFile.getFileName())
+                                                                        .relativize(Paths.get(f.getFileName()))
+                                                                                         .toString()
                                                          ),
                                                          fxArchiveInfo.getArchiveInfo(),
                                                          f
