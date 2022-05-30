@@ -186,14 +186,14 @@
             </licenses>
         </dependency>
         <dependency>
-            <groupId>com.oracle.jdbc.database</groupId>
-            <artifactId>ojdbc11</artifactId>
-            <version>21.4.0.0.1</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.3.6</version>
             <licenses>
                 <license>
-                    <name>Oracle Free Usage Terms &amp; Conditions</name>
-                    <url>https://www.oracle.com/downloads/licenses/oracle-free-license.html</url>
-                    <file>Oracle-FUTC.html</file>
+                    <name>BSD-2-Clause</name>
+                    <url>https://jdbc.postgresql.org/about/license.html</url>
+                    <file>bsd 2-clause.txt</file>
                 </license>
             </licenses>
         </dependency>
