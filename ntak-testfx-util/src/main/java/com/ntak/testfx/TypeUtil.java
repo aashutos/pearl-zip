@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 
 package com.ntak.testfx;
@@ -45,32 +45,188 @@ public class TypeUtil {
         MAC_CHARMAP.put("9", new KeyCodeCombination(KeyCode.DIGIT9));
         MAC_CHARMAP.put(";", new KeyCodeCombination(KeyCode.SEMICOLON));
         MAC_CHARMAP.put("=", new KeyCodeCombination(KeyCode.EQUALS));
-        MAC_CHARMAP.put("A", new KeyCodeCombination(KeyCode.A));
-        MAC_CHARMAP.put("B", new KeyCodeCombination(KeyCode.B));
-        MAC_CHARMAP.put("C", new KeyCodeCombination(KeyCode.C));
-        MAC_CHARMAP.put("D", new KeyCodeCombination(KeyCode.D));
-        MAC_CHARMAP.put("E", new KeyCodeCombination(KeyCode.E));
-        MAC_CHARMAP.put("F", new KeyCodeCombination(KeyCode.F));
-        MAC_CHARMAP.put("G", new KeyCodeCombination(KeyCode.G));
-        MAC_CHARMAP.put("H", new KeyCodeCombination(KeyCode.H));
-        MAC_CHARMAP.put("I", new KeyCodeCombination(KeyCode.I));
-        MAC_CHARMAP.put("J", new KeyCodeCombination(KeyCode.J));
-        MAC_CHARMAP.put("K", new KeyCodeCombination(KeyCode.K));
-        MAC_CHARMAP.put("L", new KeyCodeCombination(KeyCode.L));
-        MAC_CHARMAP.put("M", new KeyCodeCombination(KeyCode.M));
-        MAC_CHARMAP.put("N", new KeyCodeCombination(KeyCode.N));
-        MAC_CHARMAP.put("O", new KeyCodeCombination(KeyCode.O));
-        MAC_CHARMAP.put("P", new KeyCodeCombination(KeyCode.P));
-        MAC_CHARMAP.put("Q", new KeyCodeCombination(KeyCode.Q));
-        MAC_CHARMAP.put("R", new KeyCodeCombination(KeyCode.R));
-        MAC_CHARMAP.put("S", new KeyCodeCombination(KeyCode.S));
-        MAC_CHARMAP.put("T", new KeyCodeCombination(KeyCode.T));
-        MAC_CHARMAP.put("U", new KeyCodeCombination(KeyCode.U));
-        MAC_CHARMAP.put("V", new KeyCodeCombination(KeyCode.V));
-        MAC_CHARMAP.put("W", new KeyCodeCombination(KeyCode.W));
-        MAC_CHARMAP.put("X", new KeyCodeCombination(KeyCode.X));
-        MAC_CHARMAP.put("Y", new KeyCodeCombination(KeyCode.Y));
-        MAC_CHARMAP.put("Z", new KeyCodeCombination(KeyCode.Z));
+        MAC_CHARMAP.put("a", new KeyCodeCombination(KeyCode.A));
+        MAC_CHARMAP.put("b", new KeyCodeCombination(KeyCode.B));
+        MAC_CHARMAP.put("c", new KeyCodeCombination(KeyCode.C));
+        MAC_CHARMAP.put("d", new KeyCodeCombination(KeyCode.D));
+        MAC_CHARMAP.put("e", new KeyCodeCombination(KeyCode.E));
+        MAC_CHARMAP.put("f", new KeyCodeCombination(KeyCode.F));
+        MAC_CHARMAP.put("g", new KeyCodeCombination(KeyCode.G));
+        MAC_CHARMAP.put("h", new KeyCodeCombination(KeyCode.H));
+        MAC_CHARMAP.put("i", new KeyCodeCombination(KeyCode.I));
+        MAC_CHARMAP.put("j", new KeyCodeCombination(KeyCode.J));
+        MAC_CHARMAP.put("k", new KeyCodeCombination(KeyCode.K));
+        MAC_CHARMAP.put("l", new KeyCodeCombination(KeyCode.L));
+        MAC_CHARMAP.put("m", new KeyCodeCombination(KeyCode.M));
+        MAC_CHARMAP.put("n", new KeyCodeCombination(KeyCode.N));
+        MAC_CHARMAP.put("o", new KeyCodeCombination(KeyCode.O));
+        MAC_CHARMAP.put("p", new KeyCodeCombination(KeyCode.P));
+        MAC_CHARMAP.put("q", new KeyCodeCombination(KeyCode.Q));
+        MAC_CHARMAP.put("r", new KeyCodeCombination(KeyCode.R));
+        MAC_CHARMAP.put("s", new KeyCodeCombination(KeyCode.S));
+        MAC_CHARMAP.put("t", new KeyCodeCombination(KeyCode.T));
+        MAC_CHARMAP.put("u", new KeyCodeCombination(KeyCode.U));
+        MAC_CHARMAP.put("v", new KeyCodeCombination(KeyCode.V));
+        MAC_CHARMAP.put("w", new KeyCodeCombination(KeyCode.W));
+        MAC_CHARMAP.put("x", new KeyCodeCombination(KeyCode.X));
+        MAC_CHARMAP.put("y", new KeyCodeCombination(KeyCode.Y));
+        MAC_CHARMAP.put("z", new KeyCodeCombination(KeyCode.Z));
+        MAC_CHARMAP.put("A", new KeyCodeCombination(KeyCode.A,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("B", new KeyCodeCombination(KeyCode.B,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("C", new KeyCodeCombination(KeyCode.C,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("D", new KeyCodeCombination(KeyCode.D,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("E", new KeyCodeCombination(KeyCode.E,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("F", new KeyCodeCombination(KeyCode.F,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("G", new KeyCodeCombination(KeyCode.G,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("H", new KeyCodeCombination(KeyCode.H,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("I", new KeyCodeCombination(KeyCode.I,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("J", new KeyCodeCombination(KeyCode.J,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("K", new KeyCodeCombination(KeyCode.K,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("L", new KeyCodeCombination(KeyCode.L,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("M", new KeyCodeCombination(KeyCode.M,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("N", new KeyCodeCombination(KeyCode.N,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("O", new KeyCodeCombination(KeyCode.O,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("P", new KeyCodeCombination(KeyCode.P,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("Q", new KeyCodeCombination(KeyCode.Q,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("R", new KeyCodeCombination(KeyCode.R,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("S", new KeyCodeCombination(KeyCode.S,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("T", new KeyCodeCombination(KeyCode.T,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("U", new KeyCodeCombination(KeyCode.U,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("V", new KeyCodeCombination(KeyCode.V,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("W", new KeyCodeCombination(KeyCode.W,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("X", new KeyCodeCombination(KeyCode.X,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("Y", new KeyCodeCombination(KeyCode.Y,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
+        MAC_CHARMAP.put("Z", new KeyCodeCombination(KeyCode.Z,
+                                                    KeyCombination.ModifierValue.DOWN,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP,
+                                                    KeyCombination.ModifierValue.UP));
         MAC_CHARMAP.put("[", new KeyCodeCombination(KeyCode.OPEN_BRACKET));
         MAC_CHARMAP.put("\\", new KeyCodeCombination(KeyCode.BACK_SLASH));
         MAC_CHARMAP.put("]", new KeyCodeCombination(KeyCode.CLOSE_BRACKET));
@@ -110,7 +266,7 @@ public class TypeUtil {
 
     public static void typeString(FxRobot robot, TestFXConstants.Platform platform, String value) {
         switch (platform) {
-            case MAC:   typeMacString(robot, value.toUpperCase());
+            case MAC:   typeMacString(robot, value);
                         break;
             case WIN:
             case LINUX:
