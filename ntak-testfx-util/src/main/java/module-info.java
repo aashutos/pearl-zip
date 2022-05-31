@@ -9,4 +9,5 @@ module ntak.testfx.util {
     requires javafx.controls;
     requires com.ntak.pearlzip.archive;
     requires org.mockito;
+    requires java.desktop;
 }

@@ -505,7 +505,12 @@ public class PearlZipFXUtil {
         }
         try(InputStream settingsIStream = Files.newInputStream(SETTINGS_FILE)) {
             CURRENT_SETTINGS.load(settingsIStream);
+            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
+            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
+
             WORKING_SETTINGS.load(settingsIStream);
+            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
+            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
         }
 
         // Themes
