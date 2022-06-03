@@ -72,4 +72,36 @@
             </build>
         </profile>
     </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <goals>
+                    <goal>exec</goal>
+                </goals>
+                <configuration>
+                    <executable>${project.basedir}/scripts/create-deploy-package.sh</executable>
+                    <arguments>
+                        <argument>${project.version}</argument>
+                        <argument>${project.version}</argument>
+                    </arguments>
+                    <environmentVariables>
+                        <JAVA_HOME>${jdk.location}</JAVA_HOME>
+                    </environmentVariables>
+                    <async>false</async>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
