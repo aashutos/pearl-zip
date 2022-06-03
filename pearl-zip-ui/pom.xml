@@ -229,8 +229,8 @@
                 <configuration>
                     <executable>cp</executable>
                     <arguments>
-                        <argument>${project.basedir}/src/main/resources/keystore.jks</argument>
-                        <argument>${project.basedir}/src/main/resources/truststore.jks</argument>
+                        <argument>${project.basedir}/src/main/resources/keystore</argument>
+                        <argument>${project.basedir}/src/main/resources/truststore</argument>
                         <argument>${project.build.directory}/classes</argument>
                     </arguments>
                     <async>false</async>
