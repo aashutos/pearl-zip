@@ -122,7 +122,7 @@ curl --progress-bar -sH "${P_TOKEN_HEADER}" --data-binary @"${INSTALLER_HASH}" -
 fr_FR_LANG_PACK=$(ls ${P_fr_FR_LANG_PACK_DIRECTORY}/pearl-zip-lang-pack-fr-FR-*pzax)
 
 echo "Creating SHA-512 hash of ${fr_FR_LANG_PACK}..."
-fr_FR_LANG_PACK_HASH=${P_fr_FR_LANG_PACK_DIRECTORY}/pearl-zip-lang-pack-fr-FR-${P_RELEASE}.sha512
+fr_FR_LANG_PACK_HASH=${P_fr_FR_LANG_PACK_DIRECTORY}/pearl-zip-lang-pack-fr-FR-${P_RELEASE}.pzax.sha512
 shasum -a 512 "${fr_FR_LANG_PACK}" | cut -d" " -f1 > "${fr_FR_LANG_PACK_HASH}"
 
 echo "Uploading asset ${fr_FR_LANG_PACK} to ${P_REPOSITORY} for tag ${P_RELEASE}... "

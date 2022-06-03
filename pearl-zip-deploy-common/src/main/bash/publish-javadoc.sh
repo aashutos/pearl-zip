@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2021 92AK
+# Copyright © 2022 92AK
 #
 
 # Reading Parameters

@@ -15,12 +15,16 @@ import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
 import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -151,8 +155,21 @@ public class ZipLauncher {
 
         // Key Stores
         // Load key store and trust store
-        try(InputStream kis = new BufferedInputStream(ZipLauncher.class.getClassLoader().getResourceAsStream("keystore.jks"));
-            InputStream tis = ZipLauncher.class.getClassLoader().getResourceAsStream("truststore.jks")) {
+        try(InputStream kis = ZipLauncher.class.getClassLoader().getResourceAsStream("keystore");
+            InputStream tis = ZipLauncher.class.getClassLoader().getResourceAsStream("truststore");
+            InputStream cis = ZipLauncher.class.getClassLoader().getResourceAsStream("root.crt")) {
+
+            // Postgres certificate setup...
+            String crtPathString = Paths.get(System.getProperty("user.home"),".postgresql", "root.crt")
+                                        .toString();
+            final Path certTargetPath = Paths.get(crtPathString);
+            if (Files.notExists(certTargetPath.getParent())) {
+                Files.createDirectories(certTargetPath.getParent());
+            }
+            if (Files.exists(certTargetPath)) {
+                Files.deleteIfExists(certTargetPath);
+            }
+            Files.copy(cis, certTargetPath, StandardCopyOption.REPLACE_EXISTING);
 
             // Copy KeyStore files
             String keystorePathString = Paths.get(storePath.toString(), "keystore.jks")
