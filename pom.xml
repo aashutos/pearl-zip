@@ -8,7 +8,7 @@
 
     <groupId>com.ntak</groupId>
     <artifactId>pearl-zip</artifactId>
-    <version>0.0.4.1</version>
+    <version>0.0.5.0</version>
     <name>PearlZip Application</name>
     <packaging>pom</packaging>
     <url>https://pearlzip.92ak.co.uk</url>
