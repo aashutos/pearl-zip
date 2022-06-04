@@ -4,12 +4,13 @@
 package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TableView;
 import javafx.stage.DirectoryChooser;
@@ -22,8 +23,7 @@ import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.TITLE_TARGET_DIR_LOCATION;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
 
 /**
@@ -54,8 +54,11 @@ public class BtnExtractAllEventHandler implements CheckEventHandler<ActionEvent>
                                                  () -> extractToDirectory(sessionId, fxArchiveInfo, dir),
                                                  (s) -> {
                                                     if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL,"true"))) {
-                                                        ZipConstants.APP.getHostServices()
-                                                                        .showDocument(dir.toURI().toString());
+                                                        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                            .<HostServices>getAdditionalConfig(CK_HOST_SERVICES)
+                                                                            .get()
+                                                                            .showDocument(dir.toURI()
+                                                                                             .toString());
                                                     }
                                                  }
                 );

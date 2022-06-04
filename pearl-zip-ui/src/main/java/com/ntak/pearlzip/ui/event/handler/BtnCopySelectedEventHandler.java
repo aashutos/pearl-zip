@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -158,9 +158,8 @@ public class BtnCopySelectedEventHandler implements CheckEventHandler<ActionEven
                                                                                    "",
                                                                                    0,
                                                                                    String.format(
-                                                                                           "File %s copied into archive by %s",
-                                                                                           fileName,
-                                                                                           APP),
+                                                                                           "File %s copied into archive by PearlZip",
+                                                                                           fileName),
                                                                                    Files.isDirectory(tempFile),
                                                                                    false,
                                                                                    Collections.singletonMap(

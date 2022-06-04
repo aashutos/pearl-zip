@@ -5,7 +5,6 @@ package com.ntak.pearlzip.ui.constants;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
-import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
 import javafx.util.Pair;
@@ -384,7 +383,13 @@ public class ZipConstants {
 
     public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
 
-    public static PearlZipApplication APP;
+    ///// CACHE KEYS START /////
+    public static String CK_APP = "APP";
+    public static String CK_HOST_SERVICES = "HOST_SERVICES";
+    public static String CK_PARAMETERS = "PARAMETERS";
+    ///// CACHE KEYS END /////
+
+    //public static PearlZipApplication APP;
     public static Path LOCAL_TEMP;
     public static Path STORE_ROOT;
     public static Path STORE_TEMP;

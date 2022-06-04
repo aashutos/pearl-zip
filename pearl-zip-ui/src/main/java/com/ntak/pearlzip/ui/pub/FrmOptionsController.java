@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
@@ -602,7 +603,10 @@ public class FrmOptionsController {
                     // Load custom menus from plugins
                     Stage aboutStage = genFrmAbout();
                     List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
-                    APP.createSystemMenu(aboutStage, customMenus);
+                    InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                        .<PearlZipApplication>getAdditionalConfig(CK_APP)
+                                        .get()
+                                        .createSystemMenu(aboutStage, customMenus);
                 } catch(IOException exc) {
                 }  finally {
                     JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));

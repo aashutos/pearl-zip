@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
@@ -117,7 +118,9 @@ public abstract class PearlZipApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         try {
-            APP = this;
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, this);
+            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_HOST_SERVICES, this.getHostServices());
+            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PARAMETERS, this.getParameters());
 
             CountDownLatch readyLatch = new CountDownLatch(1);
 
@@ -218,12 +221,12 @@ public abstract class PearlZipApplication extends Application {
             // Initialise archive information
             FXArchiveInfo fxArchiveInfo;
             String archivePath;
-            if (APP.getParameters()
-                   .getRaw()
-                   .size() > 0 && Files.exists(Paths.get(APP.getParameters()
+            if (this.getParameters()
+                    .getRaw()
+                    .size() > 0 && Files.exists(Paths.get(this.getParameters()
                                                             .getRaw()
                                                             .get(0)))) {
-                archivePath = APP.getParameters()
+                archivePath = this.getParameters()
                                  .getRaw()
                                  .get(0);
                 addToRecentFile(new File(archivePath));

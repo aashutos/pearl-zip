@@ -5,12 +5,13 @@ package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -77,8 +78,10 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
                                                                                  selectedFile),
                                                  (s)->{
                                                      if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
-                                                         ZipConstants.APP.getHostServices()
-                                                                         .showDocument(targetDir.toAbsolutePath().toUri().toString());
+                                                         InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                             .<HostServices>getAdditionalConfig(CK_HOST_SERVICES)
+                                                                             .get()
+                                                                             .showDocument(targetDir.toAbsolutePath().toUri().toString());
                                                      }
                                                  }
                 );
@@ -97,8 +100,10 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
                                                                              fxArchiveInfo.getArchiveInfo(), selectedFile),
                                                  (s)->{
                                                      if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
-                                                         ZipConstants.APP.getHostServices()
-                                                                         .showDocument(destPath.toPath().getParent().toUri().toString());
+                                                         InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                             .<HostServices>getAdditionalConfig(CK_HOST_SERVICES)
+                                                                             .get()
+                                                                             .showDocument(destPath.toPath().getParent().toUri().toString());
                                                      }
                                                  }
                 );

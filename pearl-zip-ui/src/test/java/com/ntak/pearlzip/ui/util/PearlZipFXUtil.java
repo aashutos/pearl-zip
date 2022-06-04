@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -442,7 +443,8 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
-        APP = Mockito.mock(PearlZipApplication.class);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
+
         RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
@@ -514,8 +516,6 @@ public class PearlZipFXUtil {
         }
 
         // Themes
-        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                              .toString(), "themes");
 
         // Copy over and overwrite core themes...
         for (String theme : CORE_THEMES) {

@@ -5,11 +5,12 @@ package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.*;
 import com.ntak.pearlzip.ui.constants.ResourceConstants;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
 import com.ntak.pearlzip.ui.pub.FrmProgressController;
+import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -433,9 +434,11 @@ public class ArchiveUtil {
                 fxArchiveInfo.getReadService()
                              .extractFile(sessionId, destPath, fxArchiveInfo.getArchivePath(),
                                           clickedRow);
-                ZipConstants.APP.getHostServices()
-                                .showDocument(destPath.toUri()
-                                                      .toString());
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                    .<HostServices>getAdditionalConfig(CK_HOST_SERVICES)
+                                    .get()
+                                    .showDocument(destPath.toUri()
+                                                          .toString());
             } catch (Exception e) {
                 // TITLE: Error: Issue opening file
                 // HEADER: Could not open the selected file externally
