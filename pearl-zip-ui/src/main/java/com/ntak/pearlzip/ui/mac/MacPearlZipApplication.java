@@ -1,12 +1,12 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.mac;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
@@ -86,13 +86,14 @@ public class MacPearlZipApplication extends PearlZipApplication {
             // Add before Window and Help menus
             sysMenu.getMenus().add(sysMenu.getMenus().size()-2, menu);
         }
-        ResourceConstants.WINDOW_MENU =
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_WINDOW_MENU,
                 sysMenu.getMenus()
                        .stream()
                        .filter(m -> m.getText()
                                      .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
                        .findFirst()
-                       .get();
+                       .get()
+        );
 
         // Use the menu sysMenu for all stages including new ones
         if (menuToolkit.systemUsesDarkMode()) {

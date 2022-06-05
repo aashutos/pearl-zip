@@ -44,6 +44,6 @@ public class ResourceConstants {
 
     public static final int NO_FILES_HISTORY = Integer.parseInt(System.getProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY,
                                                                                    "5"));
-    public static Menu WINDOW_MENU;
+    //public static Menu WINDOW_MENU;
     public static Menu RECENT_FILES_MENU;
 }

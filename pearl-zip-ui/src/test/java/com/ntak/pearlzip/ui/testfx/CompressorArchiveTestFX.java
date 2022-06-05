@@ -1,10 +1,11 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.ui.UITestSuite;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
@@ -24,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -547,7 +548,9 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
 
         // Check window menu (incl. active window)
         sleep(200, MILLISECONDS);
-        final ObservableList<MenuItem> mnuWindowItems = WINDOW_MENU.getItems();
+        final ObservableList<MenuItem> mnuWindowItems = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems();
         Assertions.assertEquals(1,
                                 mnuWindowItems.size(),
                                 "Windows menu did not have the expected number of entries");
@@ -579,18 +582,24 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
 
         // Check window menu (incl. active window)
         Assertions.assertEquals(2,
-                                WINDOW_MENU.getItems()
+                                InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                                            .size(),
                                 "Windows menu did not have the expected number of " +
                                         "entries");
         sleep(500, MILLISECONDS);
 
-        Assertions.assertTrue(WINDOW_MENU.getItems()
+        Assertions.assertTrue(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                                          .stream()
                                          .anyMatch(s -> s.getText()
                                                          .contains(String.format("%s%s", nestedArchiveName, " • "))
                                          ), "Expected archive path not found as active");
-        Assertions.assertTrue(WINDOW_MENU.getItems()
+        Assertions.assertTrue(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                                          .stream()
                                          .anyMatch(s -> s.getText()
                                                          .contains(String.format("%s",
@@ -620,7 +629,9 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
 
         // 4. Reintegrate nested archive
         String nestedArchivePath =
-                WINDOW_MENU.getItems()
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                            .stream()
                            .map(MenuItem::getText)
                            .filter(t -> t.startsWith(ZipConstants.LOCAL_TEMP.toAbsolutePath()
@@ -642,11 +653,15 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
 
         // Check window menu (incl. active window)
         Assertions.assertEquals(1,
-                                WINDOW_MENU.getItems()
+                                InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                                            .size(),
                                 "Windows menu did not have the expected number of " +
                                         "entries");
-        Assertions.assertTrue(WINDOW_MENU.getItems()
+        Assertions.assertTrue(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get().getItems()
                                          .stream()
                                          .anyMatch(s -> s.getText()
                                                          .contains(String.format("%s%s",

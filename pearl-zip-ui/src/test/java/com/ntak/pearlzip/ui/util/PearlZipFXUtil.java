@@ -60,7 +60,8 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.mac.MacZipConstants.MENU_TOOLKIT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
@@ -672,12 +673,14 @@ public class PearlZipFXUtil {
         menuToolkit.setGlobalMenuBar(sysMenu);
 
         // Set Windows menu variable...
-        WINDOW_MENU = sysMenu.getMenus()
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_WINDOW_MENU,
+                      sysMenu.getMenus()
                              .stream()
                              .filter(m -> m.getText()
                                            .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
                              .findFirst()
-                             .get();
+                             .get()
+        );
     }
 
     private static FXArchiveInfo initFxArchiveInfo(Path archive) throws IOException {
@@ -721,6 +724,10 @@ public class PearlZipFXUtil {
     }
 
     public static boolean simWindowSelect(FxRobot robot, Path archive) {
+        Menu WINDOW_MENU = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                               .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                               .get();
+
         int index =
                 WINDOW_MENU.getItems()
                            .stream()

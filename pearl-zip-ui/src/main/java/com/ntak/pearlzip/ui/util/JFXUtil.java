@@ -10,6 +10,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
@@ -526,5 +527,29 @@ public class JFXUtil {
         }
         Application.setUserAgentStylesheet(themePath);
         System.setProperty(CNS_THEME_NAME, themeName);
+    }
+
+    public static Optional<String> getActiveWindowFromMenu() {
+        return InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                   .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                   .get()
+                                   .getItems()
+                                   .stream()
+                                   .filter(f -> f.getText()
+                                                 .contains(WINDOW_FOCUS_SYMBOL)
+                                   )
+                                   .map(f -> f.getText().replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
+                                   .findFirst();
+    }
+
+    public static List<String> getWindowsFromMenu() {
+        return InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                   .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                   .get()
+                                   .getItems()
+                                   .stream()
+                                   .map(m -> m.getText()
+                                              .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
+                                   .collect(Collectors.toList());
     }
 }
