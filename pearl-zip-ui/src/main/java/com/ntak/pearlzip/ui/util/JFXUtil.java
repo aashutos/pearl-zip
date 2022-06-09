@@ -77,11 +77,13 @@ import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 public class JFXUtil {
     private static final Logger LOGGER = LoggerContext.getContext().getLogger(JFXUtil.class);
 
+    // NOTE: External
     public static Optional<ButtonType> raiseAlert(Alert.AlertType type, String title, String header, String body,
             Window stage) {
         return raiseAlert(type, title, header, body, null, stage);
     }
 
+    // NOTE: External
     public static Optional<ButtonType> raiseAlert(Alert.AlertType type, String title, String header, String body,
             Exception exception, Window stage, ButtonType... buttons) {
         Alert alert = new Alert(type, body, buttons);
@@ -112,17 +114,20 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static void changeButtonPicText(ButtonBase button, String imgResource, String labelText) {
         ((ImageView)button.getGraphic()).setImage(new Image(String.valueOf(JFXUtil.class.getClassLoader().getResource(imgResource))));
         button.setText(labelText);
     }
 
+    // NOTE: Internal
     public static void highlightCellIfMatch(TableCell cell, FileInfo row, FileInfo ref, BackgroundFill backgroundColor) {
         if (row.getFileName().equals(ref.getFileName())) {
             cell.setBackground(new Background(backgroundColor));
         }
     }
 
+    // NOTE: External
     public static Optional<Stage> getActiveStage() {
         return (Stage.getWindows()
                      .stream()
@@ -131,6 +136,7 @@ public class JFXUtil {
                 .findFirst();
     }
 
+    // NOTE: External
     public static List<Stage> getMainStageInstances() {
         return Stage.getWindows()
                     .stream()
@@ -144,6 +150,7 @@ public class JFXUtil {
                     .collect(Collectors.toList());
     }
 
+    // NOTE: External
     public static Optional<Stage> getMainStageByArchivePath(String archivePath) {
         return getMainStageInstances()
                 .stream()
@@ -152,6 +159,7 @@ public class JFXUtil {
                 .findFirst();
     }
 
+    // NOTE: External
     public static void refreshFileView(TableView<FileInfo> fileInfoTableView, FXArchiveInfo fxArchiveInfo, int depth,
             String prefix) {
         fxArchiveInfo.refresh();
@@ -167,6 +175,7 @@ public class JFXUtil {
         fileInfoTableView.refresh();
     }
 
+    // NOTE: External
     public static Predicate<FileInfo> isFileInArchiveLevel(FXArchiveInfo fxArchiveInfo) {
         return f -> {
             final boolean sameDepth = f.getLevel() == fxArchiveInfo.getDepth()
@@ -186,11 +195,13 @@ public class JFXUtil {
         };
     }
 
+    // NOTE: External
     public static void executeBackgroundProcess(long sessionId, Stage parent, CaughtRunnable process,
             Consumer<Stage> callback) {
         executeBackgroundProcess(sessionId, parent, process, (e)->{}, callback);
     }
 
+    // NOTE: External
     public static void executeBackgroundProcess(long sessionId, Stage parent, CaughtRunnable process,
             Consumer<Throwable> handler, Consumer<Stage> callback) {
         CountDownLatch latch = new CountDownLatch(1);
@@ -234,6 +245,7 @@ public class JFXUtil {
         launchProgress(sessionId, parent, latch, callback);
     }
 
+    // NOTE: Internal
     public static void loadPreOpenDialog(Stage stage, Node root) {
         AnchorPane pane = new AnchorPane(root);
         Scene scene = new Scene(pane);
@@ -245,6 +257,7 @@ public class JFXUtil {
         stage.showAndWait();
     }
 
+    // NOTE: External
     public static Optional<FXArchiveInfo> lookupArchiveInfo(String archiveName) {
         return Optional.of((FXArchiveInfo) Stage.getWindows()
                                                 .stream()
@@ -265,6 +278,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static FrmLicenseDetailsController loadLicenseDetails(String licensePath, String content,
             boolean withAcceptDecline) throws IOException {
         Stage licDetailsStage = new Stage();
@@ -291,6 +305,7 @@ public class JFXUtil {
         return controller;
     }
 
+    // NOTE: Internal
     public static void checkWebEngineScrollToBottom(WebEngine engine, Consumer<Boolean> callback) {
         int scrollY = (Integer) engine.executeScript("window.scrollY");
         int innerHeight = (Integer) engine.executeScript("window.innerHeight");
@@ -300,6 +315,7 @@ public class JFXUtil {
         callback.accept(isScrollBottom);
     }
 
+    // NOTE: Internal
     public static <S> Optional<TableCell<S,?>> getTableCellForColumnRow(TableView<S> table, int rowIndex,
             String columnName) {
         Integer columnIndex = table.getColumns()
@@ -319,6 +335,7 @@ public class JFXUtil {
         return Optional.empty();
     }
 
+    // NOTE: Internal
     public static void showNotifications() {
         try {
             Stage notificationStage = new Stage();
@@ -338,6 +355,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static boolean checkNewVersionAvailable() {
         List<NotificationEntry> entries = getNotifications("PearlZip Version");
         Optional<NotificationEntry> optVersion = entries.stream()
@@ -377,6 +395,7 @@ public class JFXUtil {
         return false;
     }
 
+    // NOTE: Internal
     public static List<NotificationEntry> getNotifications(String... filters) {
         List<NotificationEntry> entries = new CopyOnWriteArrayList<>();
 
@@ -424,6 +443,7 @@ public class JFXUtil {
         return entries;
     }
 
+    // NOTE: Internal
     public static Properties initialiseBootstrapProperties() throws IOException {
         Properties props = new Properties();
         props.load(MacPearlZipApplication.class.getClassLoader()
@@ -487,6 +507,7 @@ public class JFXUtil {
         return props;
     }
 
+    // NOTE: External
     public static void toastMessage(JFXSnackbar toast, String message) {
         try {
             toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
@@ -500,6 +521,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static void setSafeModeTitles(boolean isSafeMode, Stage stage) {
             String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
             if (isSafeMode) {
@@ -513,6 +535,7 @@ public class JFXUtil {
             }
         }
 
+    // NOTE: Internal
     public static void initialiseTheme(Path themesPath, String themeName) {
         String themePath = String.format(PATTERN_CSS_THEME_PATH,
                                          themesPath.toAbsolutePath(),
@@ -529,27 +552,50 @@ public class JFXUtil {
         System.setProperty(CNS_THEME_NAME, themeName);
     }
 
+    // NOTE: External
     public static Optional<String> getActiveWindowFromMenu() {
-        return InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                   .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
-                                   .get()
-                                   .getItems()
-                                   .stream()
-                                   .filter(f -> f.getText()
-                                                 .contains(WINDOW_FOCUS_SYMBOL)
-                                   )
-                                   .map(f -> f.getText().replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
-                                   .findFirst();
+        Menu WINDOW_MENU =
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
+        synchronized(WINDOW_MENU) {
+            return WINDOW_MENU
+                    .getItems()
+                    .stream()
+                    .filter(f -> f.getText()
+                                  .contains(WINDOW_FOCUS_SYMBOL)
+                    )
+                    .map(f -> f.getText()
+                               .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
+                    .findFirst();
+        }
     }
 
+    // NOTE: External
     public static List<String> getWindowsFromMenu() {
-        return InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                   .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
-                                   .get()
-                                   .getItems()
-                                   .stream()
-                                   .map(m -> m.getText()
-                                              .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
-                                   .collect(Collectors.toList());
+        Menu WINDOW_MENU =
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
+        synchronized(WINDOW_MENU) {
+            return WINDOW_MENU.getItems()
+                              .stream()
+                              .map(m -> m.getText()
+                                         .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, "")
+                              )
+                    .collect(Collectors.toList());
+        }
+    }
+
+    // NOTE: External
+    // Untested functionality...
+    public static List<String> getRecentFilesFromMenu() {
+        final Menu RECENT_FILES_MENU = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Menu>getAdditionalConfig(CK_RECENT_FILES_MENU)
+                .get();
+        synchronized(RECENT_FILES_MENU) {
+            return RECENT_FILES_MENU
+                    .getItems()
+                    .stream()
+                    .sequential()
+                    .map(m -> DSV.split(m.getText())[1].trim())
+                    .collect(Collectors.toList());
+        }
     }
 }

@@ -388,6 +388,7 @@ public class ZipConstants {
     public static String CK_HOST_SERVICES = "HOST_SERVICES";
     public static String CK_PARAMETERS = "PARAMETERS";
     public static String CK_WINDOW_MENU = "WINDOW_MENU";
+    public static String CK_RECENT_FILES_MENU = "RECENT_FILES_MENU";
     ///// CACHE KEYS END /////
 
     //public static PearlZipApplication APP;

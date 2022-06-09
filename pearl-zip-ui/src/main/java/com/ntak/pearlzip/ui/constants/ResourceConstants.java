@@ -4,7 +4,6 @@
 package com.ntak.pearlzip.ui.constants;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.Menu;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -45,5 +44,5 @@ public class ResourceConstants {
     public static final int NO_FILES_HISTORY = Integer.parseInt(System.getProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY,
                                                                                    "5"));
     //public static Menu WINDOW_MENU;
-    public static Menu RECENT_FILES_MENU;
+    //public static Menu RECENT_FILES_MENU;
 }

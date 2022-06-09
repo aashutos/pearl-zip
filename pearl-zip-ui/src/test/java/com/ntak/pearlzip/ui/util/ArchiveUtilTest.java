@@ -7,8 +7,8 @@ import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_RECENT_FILES_MENU;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
@@ -94,7 +95,7 @@ public class ArchiveUtilTest {
                 try {
                     tableView = new TableView<>();
                     scene = new Scene(tableView);
-                    ResourceConstants.RECENT_FILES_MENU = new Menu();
+                    InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILES_MENU, new Menu());
 
                     stage.set(new Stage());
                     stage.get()
