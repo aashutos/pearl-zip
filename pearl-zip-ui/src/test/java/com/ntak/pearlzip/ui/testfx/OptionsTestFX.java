@@ -10,6 +10,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
@@ -76,9 +77,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        ZipConstants.LOCAL_TEMP =
+        Path LOCAL_TEMP =
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
         ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                       .toString(), "temp");
 

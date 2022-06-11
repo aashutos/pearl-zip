@@ -4,7 +4,6 @@
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.ui.UITestSuite;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -634,8 +634,9 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                                                  .get().getItems()
                            .stream()
                            .map(MenuItem::getText)
-                           .filter(t -> t.startsWith(ZipConstants.LOCAL_TEMP.toAbsolutePath()
-                                                                            .toString()))
+                           .filter(t -> t.startsWith(STORE_TEMP.toAbsolutePath()
+                                                               .toString())
+                           )
                            .findFirst()
                            .get();
         Assertions.assertTrue(simWindowSelect(this, Paths.get(nestedArchivePath)),

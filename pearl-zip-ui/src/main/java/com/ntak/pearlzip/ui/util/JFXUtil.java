@@ -451,9 +451,12 @@ public class JFXUtil {
         ZipConstants.STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT, String.format("%s/.pz",
                                                                                              System.getProperty(
                                                                                                      "user.home"))));
-        ZipConstants.LOCAL_TEMP =
-                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .setAdditionalConfig(CK_LOCAL_TEMP,
+                                    Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                                      .orElse(STORE_ROOT.toString())
+                                    )
+        );
         APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
         initialiseApplicationSettings();
 

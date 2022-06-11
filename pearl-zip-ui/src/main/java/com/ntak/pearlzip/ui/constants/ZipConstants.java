@@ -5,6 +5,7 @@ package com.ntak.pearlzip.ui.constants;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
 import javafx.util.Pair;
@@ -382,6 +383,7 @@ public class ZipConstants {
     public static final String LOG_DIR_EXTRACT_COMPLETE = "logging.ntak.pearl-zip.dir-extract-complete";
 
     public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
+    public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
 
     ///// CACHE KEYS START /////
     public static String CK_APP = "APP";
@@ -389,10 +391,9 @@ public class ZipConstants {
     public static String CK_PARAMETERS = "PARAMETERS";
     public static String CK_WINDOW_MENU = "WINDOW_MENU";
     public static String CK_RECENT_FILES_MENU = "RECENT_FILES_MENU";
+    public static String CK_LOCAL_TEMP = "LOCAL_TEMP";
     ///// CACHE KEYS END /////
 
-    //public static PearlZipApplication APP;
-    public static Path LOCAL_TEMP;
     public static Path STORE_ROOT;
     public static Path STORE_TEMP;
     public static Path RECENT_FILE;

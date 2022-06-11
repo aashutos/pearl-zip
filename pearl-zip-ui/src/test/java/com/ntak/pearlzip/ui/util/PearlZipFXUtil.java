@@ -472,9 +472,10 @@ public class PearlZipFXUtil {
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        ZipConstants.LOCAL_TEMP =
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP,
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()));
+                                  .orElse(STORE_ROOT.toString()))
+        );
         ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                       .toString(), "temp");
 

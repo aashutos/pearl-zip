@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -21,12 +22,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
-import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
+
+    private Path LOCAL_TEMP;
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
@@ -35,7 +39,9 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
                                   List.of(new CommonsCompressArchiveWriteService()),
                                   List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService())
         );
-        ZipConstants.LOCAL_TEMP = Paths.get(System.getProperty("user.home"), ".pz", "temp");
+        LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                       .orElse(STORE_ROOT.toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
         ZipConstants.STORE_TEMP = Paths.get(System.getProperty("user.home"), ".pz", "temp");
     }
 
@@ -52,7 +58,7 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
             Files.deleteIfExists(archivePath);
         }
 
-        Files.list(ZipConstants.LOCAL_TEMP).filter(f->f.getFileName().toString().startsWith("test")).forEach(path -> {
+        Files.list(LOCAL_TEMP).filter(f->f.getFileName().toString().startsWith("test")).forEach(path -> {
             try {
                 Files.deleteIfExists(
                         path);

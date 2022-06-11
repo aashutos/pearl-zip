@@ -7,7 +7,7 @@ import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.*;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
@@ -188,8 +188,11 @@ public class ModuleUtil {
     public static void loadModuleFromExtensionPackage(Path pzaxArchive) {
         // pzax package checks
         final long startTime = System.currentTimeMillis();
-        Path tempDir = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath()
-                                                        .toString(),
+        Path tempDir = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                         .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
+                                         .get()
+                                         .toAbsolutePath()
+                                         .toString(),
                                  String.format("pz%d", startTime));
         Path tempArchive = Paths.get(tempDir.toAbsolutePath()
                                             .toString(),

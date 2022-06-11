@@ -1,11 +1,12 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
 import org.apache.logging.log4j.Logger;
@@ -80,7 +81,9 @@ public class ClearCacheRunnable implements CaughtRunnable {
                                                                 1));
             LinkedList<Path> tempDirectories = new LinkedList<>();
             try(DirectoryStream<Path> dirs =
-                        Files.newDirectoryStream(ZipConstants.LOCAL_TEMP,
+                        Files.newDirectoryStream(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                     .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
+                                                                     .get(),
                                                  (f) -> f.getFileName()
                                                          .toString()
                                                          .startsWith(TMP_DIR_PREFIX) || f.getFileName()
