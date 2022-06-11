@@ -5,6 +5,7 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.ModuleUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -65,8 +66,12 @@ public class FrmPurgePluginController {
                                       ButtonType.YES,
                                       ButtonType.NO);
                 if (response.isPresent() && response.get().equals(ButtonType.YES)) {
-                    final String moduleDirectory = Path.of(STORE_ROOT.toAbsolutePath()
-                                                                   .toString(), "providers")
+                    final String moduleDirectory = Path.of(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                               .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                                               .get()
+                                                                               .toAbsolutePath()
+                                                                               .toString(),
+                                                           "providers")
                                                        .toString();
                     ModuleUtil.purgeLibraries(moduleDirectory, new HashSet<>(selectedManifests));
                 }

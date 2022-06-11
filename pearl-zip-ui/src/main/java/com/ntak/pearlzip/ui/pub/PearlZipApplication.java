@@ -136,6 +136,9 @@ public abstract class PearlZipApplication extends Application {
             //////////////////////////////////////////
 
             // Create temporary store folder
+            Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                  .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                  .get();
             ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                           .toString(), "temp");
             if (!Files.exists(STORE_TEMP)) {

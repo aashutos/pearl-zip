@@ -39,6 +39,7 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
                                   List.of(new CommonsCompressArchiveWriteService()),
                                   List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService())
         );
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT).get();
         LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                        .orElse(STORE_ROOT.toString()));
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);

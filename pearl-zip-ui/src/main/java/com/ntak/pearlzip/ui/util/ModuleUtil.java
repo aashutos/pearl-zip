@@ -186,6 +186,10 @@ public class ModuleUtil {
      * </ol>
      */
     public static void loadModuleFromExtensionPackage(Path pzaxArchive) {
+        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
+                                                             String.format("%s/.pz",
+                                                                           System.getProperty("user.home"))));
+
         // pzax package checks
         final long startTime = System.currentTimeMillis();
         Path tempDir = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
@@ -435,6 +439,10 @@ public class ModuleUtil {
     }
 
     public static void purgeLibraries(String moduleDirectory, Set<String> names) throws IOException {
+        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
+                                                             String.format("%s/.pz",
+                                                                           System.getProperty("user.home"))));
+
         // Remove libraries...
         synchronized(PLUGINS_METADATA) {
             PLUGINS_METADATA.values()
@@ -482,6 +490,9 @@ public class ModuleUtil {
     }
 
     public static void purgeAllLibraries() throws IOException {
+        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
+                                                             String.format("%s/.pz",
+                                                                           System.getProperty("user.home"))));
         Files.list(Path.of(STORE_ROOT.toAbsolutePath()
                                      .toString(), "providers"))
              .forEach(ModuleUtil::safeDeletePath);

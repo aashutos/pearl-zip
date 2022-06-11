@@ -520,7 +520,10 @@ public class FrmOptionsController {
         });
 
         // Theme related functionality
-        final Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+        final Path themesPath = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                              .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                              .get()
+                                                              .toAbsolutePath()
                                               .toString(), "themes");
         tabTheme.setOnSelectionChanged( (ev) -> {
              try {

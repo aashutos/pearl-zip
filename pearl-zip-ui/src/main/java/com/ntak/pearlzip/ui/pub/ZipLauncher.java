@@ -6,7 +6,7 @@ package com.ntak.pearlzip.ui.pub;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.rules.*;
@@ -88,7 +88,9 @@ public class ZipLauncher {
         ////////////////////////////////////////////
         ///// Settings File Load ///////////////////
         ////////////////////////////////////////////
-
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                .get();
         SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
                                                      "settings.properties").toString()));
         if (!Files.exists(SETTINGS_FILE)) {
@@ -104,7 +106,7 @@ public class ZipLauncher {
         //////////////////////////////////////////
 
         // Create root store
-        Files.createDirectories(ZipConstants.STORE_ROOT);
+        Files.createDirectories(STORE_ROOT);
 
         // Log4j configuration - handle fixed parameters when creating application image
         String log4jCfg = Paths.get(STORE_ROOT.toString(), "log4j2.xml")

@@ -448,9 +448,12 @@ public class JFXUtil {
         Properties props = new Properties();
         props.load(MacPearlZipApplication.class.getClassLoader()
                                                .getResourceAsStream("application.properties"));
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT, String.format("%s/.pz",
-                                                                                             System.getProperty(
-                                                                                                     "user.home"))));
+        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
+                                                        String.format("%s/.pz",
+                                                                      System.getProperty("user.home"))));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT
+                );
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                             .setAdditionalConfig(CK_LOCAL_TEMP,
                                     Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))

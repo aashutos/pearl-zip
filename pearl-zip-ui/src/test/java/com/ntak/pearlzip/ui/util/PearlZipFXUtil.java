@@ -466,7 +466,8 @@ public class PearlZipFXUtil {
         initialiseApplicationSettings();
 
         // Set local directories...
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        final Path STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
         System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
