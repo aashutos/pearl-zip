@@ -8,7 +8,6 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -139,8 +138,10 @@ public abstract class PearlZipApplication extends Application {
             Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                                                   .<Path>getAdditionalConfig(CK_STORE_ROOT)
                                                   .get();
-            ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+            Path STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                           .toString(), "temp");
+            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP, STORE_TEMP);
+
             if (!Files.exists(STORE_TEMP)) {
                 Files.createDirectories(STORE_TEMP);
             }

@@ -55,7 +55,9 @@ public class ClearCacheRunnable implements CaughtRunnable {
                                        .map(s -> ((FXArchiveInfo) s.getUserData()).getArchivePath())
                                        .collect(
                                                Collectors.toList());
-        Files.newDirectoryStream(ZipConstants.STORE_TEMP,
+        Path STORE_TEMP = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_TEMP).get();
+        Files.newDirectoryStream(STORE_TEMP,
                                  (f) -> !openFiles.contains(f.toAbsolutePath()
                                                              .toString()))
              .forEach(f -> {
@@ -94,7 +96,7 @@ public class ClearCacheRunnable implements CaughtRunnable {
             }
 
             // Remove nested pz directory in .pz/temp directory
-            Files.newDirectoryStream(ZipConstants.STORE_TEMP,
+            Files.newDirectoryStream(STORE_TEMP,
                                      f -> f.getFileName()
                                            .toString()
                                            .startsWith(TMP_DIR_PREFIX) || f.getFileName()

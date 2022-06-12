@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.ContextMenuController;
@@ -100,11 +101,13 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                 final Stage thisStage = (Stage) fileContentsView.getScene()
                                                              .getWindow();
                 // Extract tar ball into temp location from wrapped zip
-                final Path nestedArchive = Paths.get(STORE_TEMP.toAbsolutePath()
-                                                               .toString(), String.format("pz%d",
-                                                                                          sessionId),
-                                                     selectedFile
-                                                             .getFileName().toString());
+                final Path nestedArchive = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                             .<Path>getAdditionalConfig(CK_STORE_TEMP)
+                                                             .get()
+                                                             .toAbsolutePath()
+                                                             .toString(),
+                                                     String.format("pz%d",sessionId),
+                                                     selectedFile.getFileName().toString());
 
                 if (!clickedRow.isFolder() && ZipState.supportedReadArchives().stream().anyMatch(e -> clickedRow.getFileName().endsWith(String.format(".%s", e)))) {
                     JFXUtil.executeBackgroundProcess(sessionId, thisStage,

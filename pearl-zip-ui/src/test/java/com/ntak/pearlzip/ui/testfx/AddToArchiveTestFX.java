@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.util.CompressUtil;
 import com.ntak.pearlzip.ui.UITestFXSuite;
 import com.ntak.pearlzip.ui.UITestSuite;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
@@ -33,7 +34,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_LOCAL_TEMP;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -91,7 +92,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
                                  Collectors.toSet())) {
                 UITestSuite.clearDirectory(dir);
             }
-            Files.list(STORE_TEMP).forEach((d)->{
+            Files.list(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                           .<Path>getAdditionalConfig(CK_STORE_TEMP)
+                                           .get())
+                 .forEach((d)->{
                 try {
                     UITestSuite.clearDirectory(d);
                 } catch(IOException e) {

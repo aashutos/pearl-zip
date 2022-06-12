@@ -9,7 +9,6 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
@@ -51,6 +50,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     private Path tempOSDir;
     private Path tempPZDir;
     private Path STORE_ROOT;
+    private Path STORE_TEMP;
 
     /*
      *  Test cases:
@@ -83,8 +83,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+        STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                       .toString(), "temp");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP, STORE_TEMP);
 
         Files.list(STORE_TEMP)
              .filter(Files::isRegularFile)

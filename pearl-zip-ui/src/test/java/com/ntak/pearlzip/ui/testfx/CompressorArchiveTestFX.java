@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_TEMP;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -628,6 +628,9 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
                               "Nested tar archive was not focused");
 
         // 4. Reintegrate nested archive
+        Path STORE_TEMP = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                              .<Path>getAdditionalConfig(CK_STORE_TEMP)
+                                              .get();
         String nestedArchivePath =
                 InternalContextCache.INTERNAL_CONFIGURATION_CACHE
                                                  .<Menu>getAdditionalConfig(CK_WINDOW_MENU)

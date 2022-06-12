@@ -477,8 +477,10 @@ public class PearlZipFXUtil {
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()))
         );
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                            Paths.get(STORE_ROOT.toAbsolutePath()
+                                                      .toString(), "temp")
+        );
 
         // Loading plugin manifests...
         LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");

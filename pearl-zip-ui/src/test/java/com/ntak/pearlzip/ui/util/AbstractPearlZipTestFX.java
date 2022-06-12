@@ -6,7 +6,6 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import javafx.scene.input.KeyCode;
@@ -43,7 +42,8 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
         LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                        .orElse(STORE_ROOT.toString()));
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
-        ZipConstants.STORE_TEMP = Paths.get(System.getProperty("user.home"), ".pz", "temp");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                            Paths.get(System.getProperty("user.home"), ".pz", "temp"));
     }
 
     @AfterEach

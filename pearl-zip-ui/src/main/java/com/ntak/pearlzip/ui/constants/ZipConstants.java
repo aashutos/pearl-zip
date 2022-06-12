@@ -393,9 +393,9 @@ public class ZipConstants {
     public static String CK_RECENT_FILES_MENU = "RECENT_FILES_MENU";
     public static String CK_LOCAL_TEMP = "LOCAL_TEMP";
     public static String CK_STORE_ROOT = "STORE_ROOT";
+    public static String CK_STORE_TEMP = "STORE_TEMP";
     ///// CACHE KEYS END /////
 
-    public static Path STORE_TEMP;
     public static Path RECENT_FILE;
     public static Path SETTINGS_FILE;
     public static Path APPLICATION_SETTINGS_FILE;

@@ -74,9 +74,11 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
 
             final Path archivePath = Paths.get(fxArchiveInfo.getArchivePath());
             if (fxArchiveInfo.getArchivePath()
-                             .startsWith(STORE_TEMP.toString()) && !fxArchiveInfo.getCloseBypass()
-                                                                                 .get() && Files.exists(
-                    archivePath)) {
+                             .startsWith(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                             .<Path>getAdditionalConfig(CK_STORE_TEMP).get().toString())
+                                         && !fxArchiveInfo.getCloseBypass()
+                                                          .get()
+                                         && Files.exists(archivePath)) {
                 // If a nested file from a parent archive an option is given to update it
                 final String archiveFilePath = fxArchiveInfo.getArchivePath();
                 final String parentFilePath = fxArchiveInfo.getParentPath();
