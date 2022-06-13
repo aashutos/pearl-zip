@@ -29,7 +29,7 @@ import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
 
-    private Path LOCAL_TEMP;
+    Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
