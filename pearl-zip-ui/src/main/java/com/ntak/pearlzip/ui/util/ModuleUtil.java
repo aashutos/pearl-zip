@@ -158,6 +158,10 @@ public class ModuleUtil {
                               .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
                                                                 .get()));
         } catch(Exception e) {
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                            .get();
             System.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             try(OutputStream bw = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
@@ -668,6 +672,10 @@ public class ModuleUtil {
             WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_LANG, "en");
             WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_COUNTRY, "GB");
             WORKING_APPLICATION_SETTINGS.remove(ConfigurationConstants.CNS_LOCALE_VARIANT);
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                            .get();
             try (OutputStream wr = Files.newOutputStream(APPLICATION_SETTINGS_FILE, StandardOpenOption.WRITE)){
                 WORKING_APPLICATION_SETTINGS.store(wr, String.format(CNS_PROP_HEADER,
                                                                      LocalDateTime.now()));

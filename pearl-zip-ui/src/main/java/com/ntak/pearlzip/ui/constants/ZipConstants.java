@@ -396,9 +396,9 @@ public class ZipConstants {
     public static String CK_STORE_TEMP = "STORE_TEMP";
     public static String CK_RECENT_FILE = "RECENT_FILE";
     public static String CK_SETTINGS_FILE = "SETTINGS_FILE";
+    public static String CK_APPLICATION_SETTINGS_FILE = "APPLICATION_SETTINGS_FILE";
     ///// CACHE KEYS END /////
 
-    public static Path APPLICATION_SETTINGS_FILE;
     public static Path LOCAL_MANIFEST_DIR;
     public static ExecutorService PRIMARY_EXECUTOR_SERVICE;
     public static ThreadGroup THREAD_GROUP;

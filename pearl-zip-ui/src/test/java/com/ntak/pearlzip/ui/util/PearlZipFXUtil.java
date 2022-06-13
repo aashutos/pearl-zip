@@ -455,7 +455,9 @@ public class PearlZipFXUtil {
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
 
-        APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
+        Path APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
+                                                                            APPLICATION_SETTINGS_FILE);
         RK_KEYS = new HashSet<>();
         RK_KEYS.add("configuration.ntak.pearl-zip.app-name");
         RK_KEYS.add("configuration.ntak.pearl-zip.version");

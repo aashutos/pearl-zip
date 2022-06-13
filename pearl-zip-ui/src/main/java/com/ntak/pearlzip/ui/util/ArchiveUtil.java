@@ -494,6 +494,10 @@ public class ArchiveUtil {
 
     public static void initialiseApplicationSettings() {
         synchronized(WORKING_APPLICATION_SETTINGS) {
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                        .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                                        .get();
             try(InputStream settingsIStream = Files.newInputStream(APPLICATION_SETTINGS_FILE)) {
                 WORKING_APPLICATION_SETTINGS.clear();
                 WORKING_APPLICATION_SETTINGS.load(settingsIStream);

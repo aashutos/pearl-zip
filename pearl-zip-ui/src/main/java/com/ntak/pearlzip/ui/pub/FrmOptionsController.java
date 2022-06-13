@@ -591,6 +591,10 @@ public class FrmOptionsController {
             }
 
             synchronized(WORKING_APPLICATION_SETTINGS) {
+                Path APPLICATION_SETTINGS_FILE =
+                        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                                .get();
                 try(OutputStream settingsOutputStream = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
                     WORKING_APPLICATION_SETTINGS.store(settingsOutputStream,
                                                        String.format(CNS_PROP_HEADER,

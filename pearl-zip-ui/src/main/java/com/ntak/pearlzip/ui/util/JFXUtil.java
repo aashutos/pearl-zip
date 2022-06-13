@@ -460,7 +460,9 @@ public class JFXUtil {
                                                       .orElse(STORE_ROOT.toString())
                                     )
         );
-        APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
+        Path APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
+                                                                            APPLICATION_SETTINGS_FILE);
         initialiseApplicationSettings();
 
         String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
