@@ -7,7 +7,6 @@ import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_RECENT_FILE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_RECENT_FILES_MENU;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
@@ -61,6 +61,7 @@ public class ArchiveUtilTest {
     private static FrmMainController mockMainController;
     private static TableView<FileInfo> tableView;
     private static Scene scene;
+    private static Path RECENT_FILE;
 
     /*
         Test cases:
@@ -112,8 +113,9 @@ public class ArchiveUtilTest {
 
             digest = MessageDigest.getInstance("SHA-256");
             tempDirectory = Files.createTempDirectory("pz");
-            ZipConstants.RECENT_FILE = Paths.get(tempDirectory.toAbsolutePath()
-                                                              .toString(), "rf");
+            RECENT_FILE = Paths.get(tempDirectory.toAbsolutePath()
+                                                   .toString(), "rf");
+            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, RECENT_FILE);
 
             mockArchiveInfo = Mockito.mock(FXArchiveInfo.class);
             mockArchiveReadService = Mockito.mock(ArchiveReadService.class);
@@ -156,7 +158,7 @@ public class ArchiveUtilTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        Files.deleteIfExists(ZipConstants.RECENT_FILE);
+        Files.deleteIfExists(RECENT_FILE);
     }
 
     @Test
@@ -257,7 +259,7 @@ public class ArchiveUtilTest {
             Files.deleteIfExists(file);
             Files.createFile(file);
             ArchiveUtil.addToRecentFile(file.toFile());
-            final List<String> contents = Files.readAllLines(ZipConstants.RECENT_FILE);
+            final List<String> contents = Files.readAllLines(RECENT_FILE);
             Assertions.assertEquals(contents.size(),
                                     i,
                                     String.format("After adding file %d. The expected number of files were not kept",
@@ -285,7 +287,7 @@ public class ArchiveUtilTest {
         ArchiveUtil.addToRecentFile(file.toFile());
 
         // Apply sixth entry
-        final List<String> contents = Files.readAllLines(ZipConstants.RECENT_FILE);
+        final List<String> contents = Files.readAllLines(RECENT_FILE);
 
         // Confirm only 5 most recent entries exist
         Assertions.assertEquals(5, contents.size(), "After adding file 6. The expected number of files were not kept");

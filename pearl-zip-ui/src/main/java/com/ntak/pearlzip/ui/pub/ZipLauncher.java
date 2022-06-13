@@ -91,8 +91,9 @@ public class ZipLauncher {
         Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                 .<Path>getAdditionalConfig(CK_STORE_ROOT)
                 .get();
-        SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
+        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
                                                      "settings.properties").toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
         if (!Files.exists(SETTINGS_FILE)) {
             Files.createFile(SETTINGS_FILE);
         }

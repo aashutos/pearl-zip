@@ -28,6 +28,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
@@ -66,7 +67,13 @@ public class SysMenuController {
     private MenuItem mnuNewVersion;
 
     public void initData() {
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                .get();
+
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILES_MENU, mnuOpenRecent);
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(STORE_ROOT.toAbsolutePath()
+                                                                                                                  .toString(), "rf"));
         mnuNew.setOnAction((e)->new BtnNewEventHandler().handle(null));
 
         if (ZipState.getSupportedCompressorWriteFormats().size() == 0) {

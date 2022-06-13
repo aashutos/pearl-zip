@@ -197,8 +197,9 @@ public abstract class PearlZipApplication extends Application {
             }
 
             // Recent files
-            RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
+            Path RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
                                               .toString(), "rf");
+            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, RECENT_FILE);
             if (!Files.exists(RECENT_FILE)) {
                 Files.createFile(RECENT_FILE);
             }

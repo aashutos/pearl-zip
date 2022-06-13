@@ -4,7 +4,7 @@
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.testfx.FormUtil;
 import javafx.geometry.Point2D;
@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_RECENT_FILE;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -482,7 +483,9 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Opening the 5 files will update the recent files menu appropriately with new entries")
     public void testFX_OpenRecentFilesFirst5Files_MatchExpectations() throws IOException {
-        Files.deleteIfExists(ZipConstants.RECENT_FILE);
+        final Path RECENT_FILE = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE)
+                                                                         .get();
+        Files.deleteIfExists(RECENT_FILE);
         int count = 0;
         String[] extensions = {"zip","jar","tar","iso","cab"};
         for (String extension : extensions) {
@@ -495,10 +498,10 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
             sleep(50, TimeUnit.MILLISECONDS);
             count++;
 
-            Assertions.assertEquals(count, Files.lines(ZipConstants.RECENT_FILE).count(),
+            Assertions.assertEquals(count, Files.lines(RECENT_FILE).count(),
                                     "The number of entries in the rf file was not as expected");
-            Assertions.assertTrue(Files.lines(ZipConstants.RECENT_FILE).anyMatch(f-> f.contains(Paths.get("src",
-                                                                                                          "test",
+            Assertions.assertTrue(Files.lines(RECENT_FILE).anyMatch(f-> f.contains(Paths.get("src",
+                                                                                             "test",
                                                                                              "resources", String.format("test.%s", extension))
                                                                                       .toAbsolutePath().toString())),
                                   "The expected file was not found in list");
@@ -508,7 +511,9 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Opening the 6th file will update the recent files menu by overwriting the oldest entry")
     public void testFX_OpenRecentFilesSixthFileOverwrite_MatchExpectations() throws IOException {
-        Files.deleteIfExists(ZipConstants.RECENT_FILE);
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
+        Files.deleteIfExists(RECENT_FILE);
         int count = 0;
         String[] extensions = {"zip","jar","tar","iso","cab","tar.gz"};
         for (String extension : extensions) {
@@ -521,17 +526,13 @@ public class OpenArchiveTestFX extends AbstractPearlZipTestFX {
             sleep(50, TimeUnit.MILLISECONDS);
             count++;
 
-            Assertions.assertEquals(Math.min(5,count), Files.lines(ZipConstants.RECENT_FILE).count(),
+            Assertions.assertEquals(Math.min(5,count), Files.lines(RECENT_FILE).count(),
                                     "The number of entries in the rf file was not as expected");
-            Assertions.assertTrue(Files.lines(ZipConstants.RECENT_FILE).anyMatch(f-> f.contains(Paths.get("src",
-                                                                                                          "test",
-                                                                                                          "resources", String.format("test.%s", extension))
+            Assertions.assertTrue(Files.lines(RECENT_FILE).anyMatch(f-> f.contains(Paths.get("src", "test", "resources", String.format("test.%s", extension))
                                                                                                      .toAbsolutePath().toString())),
                                   "The expected file was not found in list");
         }
-        Assertions.assertTrue(Files.lines(ZipConstants.RECENT_FILE).noneMatch(f-> f.contains(Paths.get("src",
-                                                                                                      "test",
-                                                                                                      "resources",
+        Assertions.assertTrue(Files.lines(RECENT_FILE).noneMatch(f-> f.contains(Paths.get("src", "test", "resources",
                                                                                                        "test.zip")
                                                                                                  .toAbsolutePath().toString())),
                               "The file was found in list unexpectedly");

@@ -450,7 +450,8 @@ public class PearlZipFXUtil {
         POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
         ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
-        ZipConstants.RECENT_FILE = Paths.get(System.getProperty("user.home"), ".pz", "rf");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),
+                                                                                  ".pz", "rf"));
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
 
@@ -506,7 +507,9 @@ public class PearlZipFXUtil {
                  }
              });
 
-        SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "settings.properties");
+        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
+                                                                                       "settings.properties").toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
         if (!Files.exists(SETTINGS_FILE)) {
             Files.createFile(SETTINGS_FILE);
         }

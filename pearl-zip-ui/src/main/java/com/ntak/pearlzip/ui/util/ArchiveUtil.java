@@ -193,6 +193,8 @@ public class ArchiveUtil {
     }
 
     public static void addToRecentFile(File file) {
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
         final int size = Math.min(NO_FILES_HISTORY, 15);
         String[] files = new String[size];
         try {
@@ -229,6 +231,8 @@ public class ArchiveUtil {
     }
 
     public static void refreshRecentFileMenu(Menu mnuOpenRecent) {
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
         Stage stage = (Stage)Stage.getWindows().stream().filter(Window::isFocused).findFirst().orElse(new Stage());
         mnuOpenRecent.getItems().clear();
         try (Scanner scanner = new Scanner(Files.newInputStream(RECENT_FILE))) {

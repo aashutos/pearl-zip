@@ -5,7 +5,6 @@ package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
@@ -46,6 +45,8 @@ public class ClearCacheRunnable implements CaughtRunnable {
 
     @Override
     public void execute() throws Exception {
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
         // Clearing up temporary storage location...
         ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
                                                             resolveTextKey(LBL_CLEAR_UP_TEMP_STORAGE),
@@ -127,7 +128,7 @@ public class ClearCacheRunnable implements CaughtRunnable {
                                                                 resolveTextKey(
                                                                         LBL_CLEAR_UP_RECENTS),
                                                                 INDETERMINATE_PROGRESS, 1));
-            Files.deleteIfExists(ZipConstants.RECENT_FILE);
+            Files.deleteIfExists(RECENT_FILE);
         }
     }
 }

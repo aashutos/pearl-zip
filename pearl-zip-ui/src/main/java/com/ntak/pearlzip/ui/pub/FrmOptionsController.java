@@ -372,6 +372,9 @@ public class FrmOptionsController {
     @FXML
     public void initData(Stage stage) {
         ///// Load settings file /////
+        Path SETTINGS_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_SETTINGS_FILE).get();
+
         synchronized(CURRENT_SETTINGS) {
             try(InputStream settingsIStream = Files.newInputStream(SETTINGS_FILE)) {
                 CURRENT_SETTINGS.load(settingsIStream);
