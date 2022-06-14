@@ -449,7 +449,7 @@ public class PearlZipFXUtil {
         RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
-        ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),
                                                                                   ".pz", "rf"));
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");

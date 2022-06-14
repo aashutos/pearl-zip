@@ -54,6 +54,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -205,6 +206,9 @@ public class JFXUtil {
     public static void executeBackgroundProcess(long sessionId, Stage parent, CaughtRunnable process,
             Consumer<Throwable> handler, Consumer<Stage> callback) {
         CountDownLatch latch = new CountDownLatch(1);
+        ExecutorService PRIMARY_EXECUTOR_SERVICE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<ExecutorService>getAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE)
+                .get();
 
         PRIMARY_EXECUTOR_SERVICE.submit(()-> {
             Lock readLock = LCK_CLEAR_CACHE.readLock();

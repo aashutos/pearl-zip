@@ -262,17 +262,15 @@ public class ZipLauncher {
             } catch(Exception e) {
 
             }
-            PRIMARY_EXECUTOR_SERVICE =
-                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(
-                            CNS_THREAD_POOL_SIZE,
-                            "4")), 1),
-                                                     MetricThreadFactory.create(profile));
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE,
+                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(CNS_THREAD_POOL_SIZE,"4")), 1),
+                                                     MetricThreadFactory.create(profile))
+            );
         } else {
-            PRIMARY_EXECUTOR_SERVICE =
-                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(
-                            CNS_THREAD_POOL_SIZE,
-                            "4")), 1),
-                                                     MetricThreadFactory.create(MetricProfile.getDefaultProfile()));
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE,
+                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(CNS_THREAD_POOL_SIZE,"4")), 1),
+                                                     MetricThreadFactory.create(MetricProfile.getDefaultProfile()))
+            );
         }
     }
 }

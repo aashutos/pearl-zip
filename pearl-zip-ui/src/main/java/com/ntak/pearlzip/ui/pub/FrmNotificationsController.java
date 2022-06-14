@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.NotificationEntry;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,9 +14,10 @@ import javafx.scene.control.TableView;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ntak.pearlzip.ui.constants.ZipConstants.PRIMARY_EXECUTOR_SERVICE;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_PRIMARY_EXECUTOR_SERVICE;
 
 public class FrmNotificationsController {
     @FXML
@@ -25,6 +27,8 @@ public class FrmNotificationsController {
     private TableColumn<NotificationEntry,String> colTopic;
     @FXML
     private TableColumn<NotificationEntry,String> colMessage;
+
+    private ExecutorService PRIMARY_EXECUTOR_SERVICE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<ExecutorService>getAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE).get();
 
     @FXML
     public void initialize() {

@@ -37,6 +37,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -113,6 +114,10 @@ public abstract class PearlZipApplication extends Application {
                                                launchMainStage(stage, fxArchiveInfo);
                                            })));
     }
+
+    protected ExecutorService PRIMARY_EXECUTOR_SERVICE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+            .<ExecutorService>getAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE)
+            .get();
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
