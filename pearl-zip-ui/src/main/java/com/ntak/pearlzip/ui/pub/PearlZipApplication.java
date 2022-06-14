@@ -133,7 +133,8 @@ public abstract class PearlZipApplication extends Application {
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MESSAGE_TRACE_LOGGER, MESSAGE_TRACE_LOGGER);
             ArchiveService.DEFAULT_BUS.register(MESSAGE_TRACE_LOGGER);
 
-            ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();
+            ErrorAlertConsumer ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_ERROR_ALERT_CONSUMER, ERROR_ALERT_CONSUMER);
             ArchiveService.DEFAULT_BUS.register(ERROR_ALERT_CONSUMER);
 
             ////////////////////////////////////////////

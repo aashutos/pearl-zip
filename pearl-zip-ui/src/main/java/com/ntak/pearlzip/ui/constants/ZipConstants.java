@@ -6,7 +6,6 @@ package com.ntak.pearlzip.ui.constants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import javafx.util.Pair;
 
 import java.net.URI;
@@ -399,9 +398,9 @@ public class ZipConstants {
     public static String CK_PRIMARY_EXECUTOR_SERVICE = "PRIMARY_EXECUTOR_SERVICE";
     public static String CK_THREAD_GROUP = "THREAD_GROUP";
     public static String CK_MESSAGE_TRACE_LOGGER = "MESSAGE_TRACE_LOGGER";
+    public static String CK_ERROR_ALERT_CONSUMER = "ERROR_ALERT_CONSUMER";
     ///// CACHE KEYS END /////
 
-    public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
     public static Path RUNTIME_MODULE_PATH;
     public static Set<String> RK_KEYS;
     public static Runnable POST_PZAX_COMPLETION_CALLBACK = () -> System.exit(0);
