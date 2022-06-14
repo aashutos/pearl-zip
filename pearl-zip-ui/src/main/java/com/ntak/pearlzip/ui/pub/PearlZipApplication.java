@@ -129,7 +129,8 @@ public abstract class PearlZipApplication extends Application {
             CountDownLatch readyLatch = new CountDownLatch(1);
 
             // Loading additional EventBus consumers
-            MESSAGE_TRACE_LOGGER = ProgressMessageTraceLogger.getMessageTraceLogger();
+            ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER = ProgressMessageTraceLogger.getMessageTraceLogger();
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MESSAGE_TRACE_LOGGER, MESSAGE_TRACE_LOGGER);
             ArchiveService.DEFAULT_BUS.register(MESSAGE_TRACE_LOGGER);
 
             ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();

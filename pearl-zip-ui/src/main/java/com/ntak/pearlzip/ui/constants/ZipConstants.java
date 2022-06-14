@@ -7,7 +7,6 @@ import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
-import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
 import javafx.util.Pair;
 
 import java.net.URI;
@@ -397,11 +396,11 @@ public class ZipConstants {
     public static String CK_SETTINGS_FILE = "SETTINGS_FILE";
     public static String CK_APPLICATION_SETTINGS_FILE = "APPLICATION_SETTINGS_FILE";
     public static String CK_LOCAL_MANIFEST_DIR = "LOCAL_MANIFEST_DIR";
-    public static String CK_PRIMARY_EXECUTOR_SERVICE= "PRIMARY_EXECUTOR_SERVICE";
-    public static String CK_THREAD_GROUP= "THREAD_GROUP";
+    public static String CK_PRIMARY_EXECUTOR_SERVICE = "PRIMARY_EXECUTOR_SERVICE";
+    public static String CK_THREAD_GROUP = "THREAD_GROUP";
+    public static String CK_MESSAGE_TRACE_LOGGER = "MESSAGE_TRACE_LOGGER";
     ///// CACHE KEYS END /////
 
-    public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
     public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
     public static Path RUNTIME_MODULE_PATH;
     public static Set<String> RK_KEYS;
