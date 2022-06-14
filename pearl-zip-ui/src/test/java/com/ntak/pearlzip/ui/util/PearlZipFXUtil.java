@@ -486,7 +486,8 @@ public class PearlZipFXUtil {
         );
 
         // Loading plugin manifests...
-        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_MANIFEST_DIR, LOCAL_MANIFEST_DIR);
         if (!Files.exists(LOCAL_MANIFEST_DIR)) {
             Files.createDirectories(LOCAL_MANIFEST_DIR);
         }
