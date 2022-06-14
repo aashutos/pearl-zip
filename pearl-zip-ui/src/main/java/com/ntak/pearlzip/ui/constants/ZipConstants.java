@@ -398,9 +398,9 @@ public class ZipConstants {
     public static String CK_APPLICATION_SETTINGS_FILE = "APPLICATION_SETTINGS_FILE";
     public static String CK_LOCAL_MANIFEST_DIR = "LOCAL_MANIFEST_DIR";
     public static String CK_PRIMARY_EXECUTOR_SERVICE= "PRIMARY_EXECUTOR_SERVICE";
+    public static String CK_THREAD_GROUP= "THREAD_GROUP";
     ///// CACHE KEYS END /////
 
-    public static ThreadGroup THREAD_GROUP;
     public static ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER;
     public static ErrorAlertConsumer ERROR_ALERT_CONSUMER;
     public static Path RUNTIME_MODULE_PATH;
