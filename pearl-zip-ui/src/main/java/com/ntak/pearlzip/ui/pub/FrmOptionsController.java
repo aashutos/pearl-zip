@@ -646,6 +646,7 @@ public class FrmOptionsController {
 
         paneDropArea.setOnDragOver(e -> e.acceptTransferModes(TransferMode.COPY));
         paneDropArea.setOnDragDropped(e -> {
+            Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
             Dragboard db = e.getDragboard();
             if (db.hasFiles()) {
                 List<File> pzaxArchives =
@@ -682,6 +683,7 @@ public class FrmOptionsController {
         });
         paneDropArea.setOnMouseClicked((e) -> {
             try {
+                Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
                 if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
                     stage.setAlwaysOnTop(false);
 

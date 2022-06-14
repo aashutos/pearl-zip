@@ -11,7 +11,6 @@ import javafx.util.Pair;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -399,9 +398,9 @@ public class ZipConstants {
     public static String CK_THREAD_GROUP = "THREAD_GROUP";
     public static String CK_MESSAGE_TRACE_LOGGER = "MESSAGE_TRACE_LOGGER";
     public static String CK_ERROR_ALERT_CONSUMER = "ERROR_ALERT_CONSUMER";
+    public static String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
     ///// CACHE KEYS END /////
 
-    public static Path RUNTIME_MODULE_PATH;
     public static Set<String> RK_KEYS;
     public static Runnable POST_PZAX_COMPLETION_CALLBACK = () -> System.exit(0);
 

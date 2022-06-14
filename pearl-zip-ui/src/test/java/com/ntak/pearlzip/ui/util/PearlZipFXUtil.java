@@ -446,7 +446,8 @@ public class PearlZipFXUtil {
 
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
 
-        RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
+        Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
         POST_PZAX_COMPLETION_CALLBACK = ()->{};
         // Set up global constants
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
