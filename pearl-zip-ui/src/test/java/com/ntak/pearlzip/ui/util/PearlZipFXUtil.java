@@ -448,7 +448,7 @@ public class PearlZipFXUtil {
 
         Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
-        POST_PZAX_COMPLETION_CALLBACK = ()->{};
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)()->{});
         // Set up global constants
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),

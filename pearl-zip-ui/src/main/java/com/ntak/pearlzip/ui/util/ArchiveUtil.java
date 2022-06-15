@@ -524,7 +524,7 @@ public class ArchiveUtil {
             ModuleUtil.loadModuleFromExtensionPackage(Paths.get(f));
         } else {
             if (Stage.getWindows().size() == 0) {
-                JFXUtil.runLater(POST_PZAX_COMPLETION_CALLBACK);
+                JFXUtil.runLater(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Runnable>getAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK).get());
             }
         }
     }

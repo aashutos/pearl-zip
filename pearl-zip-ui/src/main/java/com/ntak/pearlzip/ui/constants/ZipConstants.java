@@ -400,9 +400,8 @@ public class ZipConstants {
     public static String CK_ERROR_ALERT_CONSUMER = "ERROR_ALERT_CONSUMER";
     public static String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
     public static String CK_RK_KEYS = "RK_KEYS";
+    public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
     ///// CACHE KEYS END /////
-
-    public static Runnable POST_PZAX_COMPLETION_CALLBACK = () -> System.exit(0);
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
