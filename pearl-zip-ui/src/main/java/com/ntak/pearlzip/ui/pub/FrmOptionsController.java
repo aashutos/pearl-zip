@@ -602,10 +602,12 @@ public class FrmOptionsController {
                     // Reloading providers and cached System settings into PearlZip
                     WORKING_APPLICATION_SETTINGS.keySet()
                                                 .stream()
-                                                .filter(k -> !RK_KEYS.contains(k))
+                                                .filter(k -> !InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                                  .<Set<String>>getAdditionalConfig(CK_RK_KEYS)
+                                                                                  .get()
+                                                                                  .contains(k))
                                                 .forEach(k -> System.setProperty(k.toString(),
-                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(
-                                                                                         k.toString()))
+                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(k.toString()))
                                                 );
                     new LinkedList<>(ZipState.getWriteProviders()).forEach(ZipState::addArchiveProvider);
                     new LinkedList<>(ZipState.getReadProviders()).forEach(ZipState::addArchiveProvider);

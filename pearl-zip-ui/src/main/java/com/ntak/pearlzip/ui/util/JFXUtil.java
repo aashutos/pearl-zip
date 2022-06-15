@@ -512,7 +512,7 @@ public class JFXUtil {
             props.load(Files.newBufferedReader(APPLICATION_SETTINGS_FILE));
         }
 
-        RK_KEYS = reservedKeyMap.keySet();
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, reservedKeyMap.keySet());
         props.putAll(System.getProperties());
         props.putAll(reservedKeyMap);
         System.setProperties(props);
