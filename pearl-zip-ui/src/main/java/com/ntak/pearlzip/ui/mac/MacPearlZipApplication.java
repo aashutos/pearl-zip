@@ -39,14 +39,14 @@ public class MacPearlZipApplication extends PearlZipApplication {
         ///// Create System Menu //////////////////
         //////////////////////////////////////////
 
-        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
-            ZipConstants.setAdditionalConfig(MENU_TOOLKIT,MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         MenuBar sysMenu;
-        final MenuToolkit menuToolkit = ZipConstants.<MenuToolkit>getAdditionalConfig(MENU_TOOLKIT)
+        final MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(CK_MENU_TOOLKIT)
                                                     .get();
 
         if (!ZipConstants.getAdditionalConfig(SYS_MENU).isPresent()) {
