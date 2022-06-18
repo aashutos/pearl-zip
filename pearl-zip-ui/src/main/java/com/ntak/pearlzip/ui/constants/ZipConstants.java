@@ -401,8 +401,6 @@ public class ZipConstants {
     public static String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
     public static String CK_RK_KEYS = "RK_KEYS";
     public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
-    public static String CK_MENU_TOOLKIT = "MENU_TOOLKIT";
-    public static String CK_SYS_MENU = "SYS_MENU";
     ///// CACHE KEYS END /////
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);

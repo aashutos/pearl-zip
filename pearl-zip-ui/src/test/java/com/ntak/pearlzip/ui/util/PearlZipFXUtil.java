@@ -10,6 +10,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
+import com.ntak.pearlzip.ui.mac.MacZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmAboutController;
@@ -641,11 +642,11 @@ public class PearlZipFXUtil {
     }
 
     public static void initialiseMenu() throws IOException {
-        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_MENU_TOOLKIT).isPresent()) {
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
-        MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(CK_MENU_TOOLKIT).get();
+        MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT).get();
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");

@@ -5,7 +5,6 @@ package com.ntak.pearlzip.ui.mac;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
@@ -67,13 +66,13 @@ public class MacPearlZipApplication extends PearlZipApplication {
             menuController.initData();
             sysMenu.getMenus()
                    .addAll(additionalMenu.getMenus());
-            ZipConstants.setAdditionalConfig(CORE_MENU_SIZE, sysMenu.getMenus().size());
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_CORE_MENU_SIZE, sysMenu.getMenus().size());
         } else {
             sysMenu = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuBar>getAdditionalConfig(CK_SYS_MENU)
                                   .get();
         }
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SYS_MENU, sysMenu);
-        int coreMenuSize = ZipConstants.<Integer>getAdditionalConfig(CORE_MENU_SIZE)
+        int coreMenuSize = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Integer>getAdditionalConfig(CK_CORE_MENU_SIZE)
                                        .get();
         if (sysMenu.getMenus().size() > coreMenuSize) {
             sysMenu.getMenus()
