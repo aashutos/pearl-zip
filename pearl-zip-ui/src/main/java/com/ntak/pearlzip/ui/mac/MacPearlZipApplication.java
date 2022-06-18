@@ -49,7 +49,7 @@ public class MacPearlZipApplication extends PearlZipApplication {
         final MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(CK_MENU_TOOLKIT)
                                                     .get();
 
-        if (!ZipConstants.getAdditionalConfig(SYS_MENU).isPresent()) {
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_SYS_MENU).isPresent()) {
 
             sysMenu = new MenuBar();
             sysMenu.setUseSystemMenuBar(true);
@@ -69,10 +69,10 @@ public class MacPearlZipApplication extends PearlZipApplication {
                    .addAll(additionalMenu.getMenus());
             ZipConstants.setAdditionalConfig(CORE_MENU_SIZE, sysMenu.getMenus().size());
         } else {
-            sysMenu = ZipConstants.<MenuBar>getAdditionalConfig(SYS_MENU)
+            sysMenu = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuBar>getAdditionalConfig(CK_SYS_MENU)
                                   .get();
         }
-        ZipConstants.setAdditionalConfig(SYS_MENU, sysMenu);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SYS_MENU, sysMenu);
         int coreMenuSize = ZipConstants.<Integer>getAdditionalConfig(CORE_MENU_SIZE)
                                        .get();
         if (sysMenu.getMenus().size() > coreMenuSize) {
