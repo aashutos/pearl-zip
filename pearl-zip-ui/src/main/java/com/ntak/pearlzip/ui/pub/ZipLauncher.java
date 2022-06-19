@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
@@ -22,10 +23,8 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.*;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -211,12 +210,15 @@ public class ZipLauncher {
         //////////////////////////////////////////
 
         // Loading rules...
+        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
         MANIFEST_RULES.add(new MinVersionManifestRule());
         MANIFEST_RULES.add(new MaxVersionManifestRule());
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
         MANIFEST_RULES.add(new ThemeManifestRule());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
+
 
         // Loading plugin manifests...
         Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");

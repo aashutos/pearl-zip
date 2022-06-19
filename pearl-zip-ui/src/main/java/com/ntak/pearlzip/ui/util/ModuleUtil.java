@@ -411,7 +411,7 @@ public class ModuleUtil {
     }
 
     public static void checkManifest(PluginInfo info, Path targetDir) throws Exception {
-        for (CheckManifestRule rule : MANIFEST_RULES) {
+        for (CheckManifestRule rule : InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<List<CheckManifestRule>>getAdditionalConfig(CK_MANIFEST_RULES).get()) {
             rule.processManifest(info, targetDir);
         }
     }

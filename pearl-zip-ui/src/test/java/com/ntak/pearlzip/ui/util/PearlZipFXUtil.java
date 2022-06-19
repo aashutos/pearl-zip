@@ -6,6 +6,7 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
@@ -43,10 +44,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -447,6 +446,7 @@ public class PearlZipFXUtil {
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
 
         Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
@@ -597,12 +597,14 @@ public class PearlZipFXUtil {
         }
 
         // Loading rules...
+        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
         MANIFEST_RULES.add(new MinVersionManifestRule());
         MANIFEST_RULES.add(new MaxVersionManifestRule());
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
         MANIFEST_RULES.add(new ThemeManifestRule());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
 
         // Setting Locale
         Locale.setDefault(genLocale(new Properties()));

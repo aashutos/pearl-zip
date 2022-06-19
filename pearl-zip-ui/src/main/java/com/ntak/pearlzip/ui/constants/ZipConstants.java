@@ -395,8 +395,9 @@ public class ZipConstants {
     public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
     public static String CK_LANG_PACKS = "LANG_PACKS";
     public static String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
-    public static String CK_APP_LATCH= "APP_LATCH";
-    public static String CK_LCK_CLEAR_CACHE= "LCK_CLEAR_CACHE";
+    public static String CK_APP_LATCH = "APP_LATCH";
+    public static String CK_LCK_CLEAR_CACHE = "LCK_CLEAR_CACHE";
+    public static String CK_MANIFEST_RULES = "MANIFEST_RULES";
     ///// CACHE KEYS END /////
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
