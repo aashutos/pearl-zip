@@ -377,32 +377,32 @@ public class ZipConstants {
 
 
     ///// CACHE KEYS /////
-    public static String CK_APP = "APP";
-    public static String CK_HOST_SERVICES = "HOST_SERVICES";
-    public static String CK_PARAMETERS = "PARAMETERS";
-    public static String CK_WINDOW_MENU = "WINDOW_MENU";
-    public static String CK_RECENT_FILES_MENU = "RECENT_FILES_MENU";
-    public static String CK_LOCAL_TEMP = "LOCAL_TEMP";
-    public static String CK_STORE_ROOT = "STORE_ROOT";
-    public static String CK_STORE_TEMP = "STORE_TEMP";
-    public static String CK_RECENT_FILE = "RECENT_FILE";
-    public static String CK_SETTINGS_FILE = "SETTINGS_FILE";
-    public static String CK_APPLICATION_SETTINGS_FILE = "APPLICATION_SETTINGS_FILE";
-    public static String CK_LOCAL_MANIFEST_DIR = "LOCAL_MANIFEST_DIR";
-    public static String CK_PRIMARY_EXECUTOR_SERVICE = "PRIMARY_EXECUTOR_SERVICE";
-    public static String CK_THREAD_GROUP = "THREAD_GROUP";
-    public static String CK_MESSAGE_TRACE_LOGGER = "MESSAGE_TRACE_LOGGER";
-    public static String CK_ERROR_ALERT_CONSUMER = "ERROR_ALERT_CONSUMER";
-    public static String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
-    public static String CK_RK_KEYS = "RK_KEYS";
-    public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
-    public static String CK_LANG_PACKS = "LANG_PACKS";
-    public static String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
-    public static String CK_APP_LATCH = "APP_LATCH";
-    public static String CK_LCK_CLEAR_CACHE = "LCK_CLEAR_CACHE";
-    public static String CK_MANIFEST_RULES = "MANIFEST_RULES";
-    public static String CK_PLUGINS_METADATA = "PLUGINS_METADATA";
-    public static String CK_MAX_SIZE_DRAG_OUT = "MAX_SIZE_DRAG_OUT";
+    public static final String CK_APP = "APP";
+    public static final String CK_HOST_SERVICES = "HOST_SERVICES";
+    public static final String CK_PARAMETERS = "PARAMETERS";
+    public static final String CK_WINDOW_MENU = "WINDOW_MENU";
+    public static final String CK_RECENT_FILES_MENU = "RECENT_FILES_MENU";
+    public static final String CK_LOCAL_TEMP = "LOCAL_TEMP";
+    public static final String CK_STORE_ROOT = "STORE_ROOT";
+    public static final String CK_STORE_TEMP = "STORE_TEMP";
+    public static final String CK_RECENT_FILE = "RECENT_FILE";
+    public static final String CK_SETTINGS_FILE = "SETTINGS_FILE";
+    public static final String CK_APPLICATION_SETTINGS_FILE = "APPLICATION_SETTINGS_FILE";
+    public static final String CK_LOCAL_MANIFEST_DIR = "LOCAL_MANIFEST_DIR";
+    public static final String CK_PRIMARY_EXECUTOR_SERVICE = "PRIMARY_EXECUTOR_SERVICE";
+    public static final String CK_THREAD_GROUP = "THREAD_GROUP";
+    public static final String CK_MESSAGE_TRACE_LOGGER = "MESSAGE_TRACE_LOGGER";
+    public static final String CK_ERROR_ALERT_CONSUMER = "ERROR_ALERT_CONSUMER";
+    public static final String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
+    public static final String CK_RK_KEYS = "RK_KEYS";
+    public static final String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
+    public static final String CK_LANG_PACKS = "LANG_PACKS";
+    public static final String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
+    public static final String CK_APP_LATCH = "APP_LATCH";
+    public static final String CK_LCK_CLEAR_CACHE = "LCK_CLEAR_CACHE";
+    public static final String CK_MANIFEST_RULES = "MANIFEST_RULES";
+    public static final String CK_PLUGINS_METADATA = "PLUGINS_METADATA";
+    public static final String CK_MAX_SIZE_DRAG_OUT = "MAX_SIZE_DRAG_OUT";
 
 
     ///// GENERAL PEARLZIP CONSTANTS /////

@@ -58,7 +58,7 @@ public class ModuleUtilTest {
             LoggingConstants.LOG_BUNDLE = ResourceBundle.getBundle("pearlzip",
                                                                    defaultLocale);
             LoggingConstants.CUSTOM_BUNDLE = ResourceBundle.getBundle("custom",
-                                                                   defaultLocale);
+                                                                      defaultLocale);
             LOG_BUNDLE.keySet()
                       .forEach(k -> System.out.printf("Property: (k=%s,v=%s)%n",
                                                       k,

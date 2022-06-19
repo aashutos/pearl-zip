@@ -130,11 +130,11 @@ public class ZipLauncher {
         Locale.setDefault(genLocale(props));
         Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
         LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                              Locale.getDefault());
+                                                                     System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                                     Locale.getDefault());
         CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
-                                        Locale.getDefault());
+                                                                        System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
+                                                                        Locale.getDefault());
 
         // Load License Declarations
         try {

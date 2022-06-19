@@ -33,8 +33,8 @@ import java.util.spi.ResourceBundleProvider;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
+import static com.ntak.pearlzip.archive.constants.internal.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
