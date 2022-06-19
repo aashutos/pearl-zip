@@ -553,13 +553,13 @@ public class FrmOptionsController {
         // Language Pack related functionality...
         tabLangs.setOnSelectionChanged( (ev) -> {
             try {
-                tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+                tblLang.setItems(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get()));
                 tblTheme.refresh();
             } catch(Exception e) {
 
             }
         });
-        tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+        tblLang.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
         colLang.setCellValueFactory((p) -> new SimpleStringProperty(p.getValue().getKey()));
         btnSetLang.setOnAction((e) -> {
             Locale locale = tblLang.getSelectionModel().getSelectedItem().getValue();

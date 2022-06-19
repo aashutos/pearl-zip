@@ -527,7 +527,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             final TableView<Pair<String,Locale>> tbl = this.lookup("#tblLang")
                                             .queryAs(TableView.class);
-            tbl.setItems(FXCollections.observableArrayList(LANG_PACKS));
+            tbl.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
             tbl.refresh();
 
             this.sleep(1000, MILLISECONDS);

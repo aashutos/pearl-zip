@@ -11,10 +11,12 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
+import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -651,7 +653,7 @@ public class ModuleUtil {
                                .layer();
             ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
                                                                                                     PearlZipResourceBundleProvider.class);
-            resourceBundleLoader.forEach(b -> LANG_PACKS.addAll(b.providedLanguages()));
+            resourceBundleLoader.forEach(b -> FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get().addAll(b.providedLanguages())));
             for (ResourceBundleProvider prov : resourceBundleLoader) {
                 final Set<String> diffLoggingKeys = new HashSet<>(enGBBundle.keySet());
                 if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {

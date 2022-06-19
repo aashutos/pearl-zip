@@ -6,7 +6,6 @@ package com.ntak.pearlzip.ui.constants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import javafx.util.Pair;
 
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -401,6 +400,7 @@ public class ZipConstants {
     public static String CK_RUNTIME_MODULE_PATH = "RUNTIME_MODULE_PATH";
     public static String CK_RK_KEYS = "RK_KEYS";
     public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
+    public static String CK_LANG_PACKS = "LANG_PACKS";
     ///// CACHE KEYS END /////
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
@@ -415,7 +415,6 @@ public class ZipConstants {
 
     public static long MAX_SIZE_DRAG_OUT = 250_000_000;
 
-    public static final Set<Pair<String,Locale>> LANG_PACKS = new LinkedHashSet<>();
     public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
     public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
     private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();

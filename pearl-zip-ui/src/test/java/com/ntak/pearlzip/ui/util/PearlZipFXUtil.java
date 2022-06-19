@@ -32,6 +32,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
@@ -443,6 +444,7 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
 
         Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
