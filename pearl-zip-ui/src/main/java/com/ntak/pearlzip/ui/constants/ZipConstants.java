@@ -4,12 +4,13 @@
 package com.ntak.pearlzip.ui.constants;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
-import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *  General logging, configuration keys and other shared resources for the JavaFX UI.
@@ -409,7 +410,6 @@ public class ZipConstants {
 
     public static long MAX_SIZE_DRAG_OUT = 250_000_000;
 
-    public static final List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
     public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
     private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
 
