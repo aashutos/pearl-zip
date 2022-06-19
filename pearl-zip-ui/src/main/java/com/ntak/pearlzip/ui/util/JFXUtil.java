@@ -46,10 +46,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -495,7 +492,10 @@ public class JFXUtil {
                     Files.copy(is, tmpRK, StandardCopyOption.REPLACE_EXISTING);
                 }
             } else if (!Files.exists(reservedKeys)) {
-                reservedKeys = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui", "reserved-keys");
+                reservedKeys = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                   .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                   .get()
+                                                   .getPath("modules", "com.ntak.pearlzip.ui", "reserved-keys");
                 Files.copy(reservedKeys, tmpRK, StandardCopyOption.REPLACE_EXISTING);
             }
 

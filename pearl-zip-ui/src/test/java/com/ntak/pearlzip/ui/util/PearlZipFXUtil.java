@@ -40,10 +40,8 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.URI;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -444,8 +442,9 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
 
         Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
@@ -543,9 +542,11 @@ public class PearlZipFXUtil {
                                                             .getPath()));
             } catch (Exception e) {
                 try {
-                    themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
-                                                                    theme)
-                                                           .toAbsolutePath());
+                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                                .get()
+                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
+                                                                .toAbsolutePath());
                 } catch(Exception exc) {
                     final String themePath = PearlZipFXUtil.class.getClassLoader()
                                                             .getResource(theme)

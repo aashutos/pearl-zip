@@ -7,9 +7,6 @@ import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -377,7 +374,6 @@ public class ZipConstants {
     public static final String LOG_CREATE_DIRECTORY = "logging.ntak.pearl-zip.create-directory";
     public static final String LOG_DIR_EXTRACT_COMPLETE = "logging.ntak.pearl-zip.dir-extract-complete";
 
-    public static final FileSystem JRT_FILE_SYSTEM = FileSystems.getFileSystem(URI.create("jrt:/"));
     public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
 
     ///// CACHE KEYS START /////
@@ -401,6 +397,7 @@ public class ZipConstants {
     public static String CK_RK_KEYS = "RK_KEYS";
     public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
     public static String CK_LANG_PACKS = "LANG_PACKS";
+    public static String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
     ///// CACHE KEYS END /////
 
     public static final CountDownLatch APP_LATCH = new CountDownLatch(1);

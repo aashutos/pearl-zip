@@ -5,6 +5,7 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,10 +23,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.BufferedReader;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -88,8 +86,11 @@ public class FrmLicenseOverviewController {
                             } else {
                                 // Check module file system for resource...
                                 try {
-                                    licenseUri = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.license",
-                                                                         String.format("ref/%s", fileName)).toAbsolutePath();
+                                    licenseUri = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                     .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                                     .get()
+                                                                     .getPath("modules", "com.ntak.pearlzip.license", String.format("ref/%s", fileName))
+                                                                     .toAbsolutePath();
                                 } catch(InvalidPathException ipe) {
                                     licenseUri = null;
                                 }

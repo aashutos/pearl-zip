@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -114,7 +111,10 @@ public class ZipLauncher {
                                .toString();
         final Path log4jPath = Paths.get(log4jCfg);
         if (!Files.exists(log4jPath)) {
-            Path logCfgFile = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.archive", "log4j2.xml");
+            Path logCfgFile = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                  .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                  .get()
+                                                  .getPath("modules", "com.ntak.pearlzip.archive", "log4j2.xml");
             try(InputStream is = Files.newInputStream(logCfgFile)) {
                 Files.copy(is, log4jPath);
             } catch(Exception e) {

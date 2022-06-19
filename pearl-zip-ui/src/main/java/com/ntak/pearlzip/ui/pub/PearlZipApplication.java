@@ -30,10 +30,8 @@ import javafx.util.Pair;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.URI;
+import java.nio.file.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -122,6 +120,7 @@ public abstract class PearlZipApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         try {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, this);
             InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_HOST_SERVICES, this.getHostServices());
@@ -174,8 +173,11 @@ public abstract class PearlZipApplication extends Application {
                                                    .getResource(theme)
                                                    .getPath()));
                 } catch (Exception e) {
-                    themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
-                                            theme).toAbsolutePath());
+                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                                .get()
+                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
+                                                                .toAbsolutePath());
                 }
                 themeFiles.forEach(f -> {
                                         try {
