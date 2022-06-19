@@ -10,7 +10,6 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -398,9 +397,9 @@ public class ZipConstants {
     public static String CK_POST_PZAX_COMPLETION_CALLBACK = "POST_PZAX_COMPLETION_CALLBACK";
     public static String CK_LANG_PACKS = "LANG_PACKS";
     public static String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
+    public static String CK_APP_LATCH= "APP_LATCH";
     ///// CACHE KEYS END /////
 
-    public static final CountDownLatch APP_LATCH = new CountDownLatch(1);
     public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";

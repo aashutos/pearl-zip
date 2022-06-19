@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -69,7 +70,10 @@ public class ZipLauncher {
         mainMethod.invoke(null, (Object) args);
 
         // Wait for latch unless countdown was not triggered due to race. A break check is initiated in this case.
-       while (!APP_LATCH.await(300, TimeUnit.MILLISECONDS)) {
+       while (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                   .<CountDownLatch>getAdditionalConfig(CK_APP_LATCH)
+                                   .get()
+                                   .await(300, TimeUnit.MILLISECONDS)) {
            if (JFXUtil.getMainStageInstances().size() == 0)  {
                break;
            }

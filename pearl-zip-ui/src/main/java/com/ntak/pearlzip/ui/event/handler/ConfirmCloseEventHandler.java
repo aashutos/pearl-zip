@@ -27,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -311,7 +312,10 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                 long sessionId = System.currentTimeMillis();
                 executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, true),
                                          LOGGER::error,
-                                         (s) -> {APP_LATCH.countDown();});
+                                         (s) -> InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                     .<CountDownLatch>getAdditionalConfig(CK_APP_LATCH)
+                                                                     .get()
+                                                                     .countDown());
             }
         }
     }
