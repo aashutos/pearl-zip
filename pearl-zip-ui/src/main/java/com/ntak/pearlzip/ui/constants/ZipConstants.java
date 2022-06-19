@@ -10,8 +10,6 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *  General logging, configuration keys and other shared resources for the JavaFX UI.
@@ -398,9 +396,8 @@ public class ZipConstants {
     public static String CK_LANG_PACKS = "LANG_PACKS";
     public static String CK_JRT_FILE_SYSTEM = "JRT_FILE_SYSTEM";
     public static String CK_APP_LATCH= "APP_LATCH";
+    public static String CK_LCK_CLEAR_CACHE= "LCK_CLEAR_CACHE";
     ///// CACHE KEYS END /////
-
-    public static final ReadWriteLock LCK_CLEAR_CACHE = new ReentrantReadWriteLock(true);
 
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
     public static final String CNS_PROP_HEADER = "PearlZip Application Settings File Generated @ %s";

@@ -53,6 +53,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -208,7 +209,10 @@ public class JFXUtil {
                 .get();
 
         PRIMARY_EXECUTOR_SERVICE.submit(()-> {
-            Lock readLock = LCK_CLEAR_CACHE.readLock();
+            Lock readLock = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                                .get()
+                                                .readLock();
             try {
                 latch.await();
                 ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,

@@ -44,6 +44,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
@@ -489,7 +490,10 @@ public class FrmOptionsController {
         }
 
         btnClearCache.setOnAction((e) -> {
-            Lock writeLock = LCK_CLEAR_CACHE.writeLock();
+            Lock writeLock = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                                 .get()
+                                                 .writeLock();
             if (!writeLock.tryLock()) {
                 raiseAlert(Alert.AlertType.WARNING, resolveTextKey(TITLE_CLEAR_CACHE_BLOCKED), "",
                            resolveTextKey(BODY_CLEAR_CACHE_BLOCKED), stage);
@@ -517,7 +521,11 @@ public class FrmOptionsController {
                                              (s) -> {});
                 }
             } finally {
-                LCK_CLEAR_CACHE.writeLock().unlock();
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                    .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                    .get()
+                                    .writeLock()
+                                    .unlock();
                 btnClearCache.setDisable(false);
             }
         });
