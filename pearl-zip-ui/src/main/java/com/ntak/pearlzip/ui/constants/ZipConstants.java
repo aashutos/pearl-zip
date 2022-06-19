@@ -3,20 +3,17 @@
  */
 package com.ntak.pearlzip.ui.constants;
 
-import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  General logging, configuration keys and other shared resources for the JavaFX UI.
  *  @author Aashutos Kakshepati
 */
 public class ZipConstants {
+
+    ///// PEARLZIP CONFIGURATION KEYS /////
     public static final String CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY = "configuration.ntak.pearl-zip.no-files-history";
     public static final String CNS_NTAK_PEARL_ZIP_RESIZEABLE = "configuration.ntak.pearl-zip.resizeable";
     public static final String CNS_NTAK_PEARL_ZIP_VERSION = "configuration.ntak.pearl-zip.version";
@@ -50,6 +47,8 @@ public class ZipConstants {
     public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL = "configuration.ntak.pearl-zip.show-target-folder-extract-all";
     public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
 
+
+    ///// PEARLZIP SRTING PROPERTY KEYS /////
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
     public static final String LOG_CLICKED_ROW = "logging.ntak.pearl-zip.clicked-row";
     public static final String LOG_ISSUE_EXTRACTING_FILE_FOR_COPY = "logging.ntak.pearl-zip.issue-extracting-file-for-copy";
@@ -372,9 +371,12 @@ public class ZipConstants {
     public static final String LOG_CREATE_DIRECTORY = "logging.ntak.pearl-zip.create-directory";
     public static final String LOG_DIR_EXTRACT_COMPLETE = "logging.ntak.pearl-zip.dir-extract-complete";
 
+
+    ///// PUBLIC CACHE /////
     public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
 
-    ///// CACHE KEYS START /////
+
+    ///// CACHE KEYS /////
     public static String CK_APP = "APP";
     public static String CK_HOST_SERVICES = "HOST_SERVICES";
     public static String CK_PARAMETERS = "PARAMETERS";
@@ -399,34 +401,15 @@ public class ZipConstants {
     public static String CK_APP_LATCH = "APP_LATCH";
     public static String CK_LCK_CLEAR_CACHE = "LCK_CLEAR_CACHE";
     public static String CK_MANIFEST_RULES = "MANIFEST_RULES";
-    ///// CACHE KEYS END /////
+    public static String CK_PLUGINS_METADATA = "PLUGINS_METADATA";
+    public static String CK_MAX_SIZE_DRAG_OUT = "MAX_SIZE_DRAG_OUT";
 
+
+    ///// GENERAL PEARLZIP CONSTANTS /////
     public static final String WINDOW_FOCUS_SYMBOL = " • ";
     public static final String CNS_PROP_HEADER = "PearlZip Application Settings File Generated @ %s";
 
     public static final String MANIFEST_FILE_NAME = "MF";
     public static final String KEY_MANIFEST_DELETED= "remove-pattern";
     public static final Set<String> CORE_THEMES = Set.of("modena", "modena-dark");
-
-    public static long MAX_SIZE_DRAG_OUT = 250_000_000;
-
-    public static final Map<String, PluginInfo> PLUGINS_METADATA = new ConcurrentHashMap<>();
-    private static final Map<String,Object> ADDITIONAL_CONFIG = new ConcurrentHashMap<>();
-
-    public static <T> Optional<T> getAdditionalConfig(String key) {
-        if (Objects.nonNull(key)) {
-            try {
-                T value = (T) ADDITIONAL_CONFIG.get(key);
-                return Optional.ofNullable(value);
-            } catch (Exception e) {
-            }
-        }
-        return Optional.empty();
-    }
-
-    public static <T> void setAdditionalConfig(String key, T value) {
-        if (Objects.nonNull(key) && Objects.nonNull(value)) {
-            ADDITIONAL_CONFIG.put(key, value);
-        }
-    }
 }

@@ -25,10 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.file.*;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
@@ -82,6 +79,8 @@ public class ZipLauncher {
     }
 
     public static void initialize() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<String,PluginInfo>());
+
         // Load bootstrap properties
         Properties props = initialiseBootstrapProperties();
 
@@ -234,6 +233,7 @@ public class ZipLauncher {
                               .endsWith(".MF"))
              .forEach(m -> {
             try {
+                Map<String, PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String, PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA).get();
                 Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
                 if (optInfo.isPresent()) {
                     PluginInfo info = optInfo.get();

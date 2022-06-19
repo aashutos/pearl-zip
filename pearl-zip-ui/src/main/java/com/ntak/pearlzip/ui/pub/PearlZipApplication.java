@@ -205,7 +205,7 @@ public abstract class PearlZipApplication extends Application {
             // Initialise drag out constants...
             try {
                 long maxSize = Long.parseLong(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MAX_SIZE_DRAG_OUT));
-                MAX_SIZE_DRAG_OUT = maxSize;
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MAX_SIZE_DRAG_OUT, maxSize);
             } catch (Exception e) {
 
             }

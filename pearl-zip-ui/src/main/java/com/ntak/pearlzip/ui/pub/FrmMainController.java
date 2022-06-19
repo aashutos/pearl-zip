@@ -164,6 +164,7 @@ public class FrmMainController {
                     if (!info.isFolder()) {
                         final Path path = tempDir.resolve(Paths.get(info.getFileName())
                                                                   .getFileName());
+                        long MAX_SIZE_DRAG_OUT = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Long>getAdditionalConfig(CK_MAX_SIZE_DRAG_OUT).get();
                         if (info.getRawSize() > MAX_SIZE_DRAG_OUT) {
                             // TITLE: Warning: Drag out functionality not supported for file
                             // HEADER: File too big

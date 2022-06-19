@@ -48,6 +48,8 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  */
 public class ModuleUtil {
 
+    private static Map<String, PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String, PluginInfo> >getAdditionalConfig(CK_PLUGINS_METADATA).get();
+
     /**
      *  Loads services that come as default bundled with the application.
      */

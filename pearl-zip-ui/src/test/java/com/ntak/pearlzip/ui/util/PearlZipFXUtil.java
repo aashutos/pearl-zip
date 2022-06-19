@@ -447,6 +447,7 @@ public class PearlZipFXUtil {
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<>());
 
         Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
@@ -506,6 +507,9 @@ public class PearlZipFXUtil {
                      Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
                      if (optInfo.isPresent()) {
                          PluginInfo info = optInfo.get();
+                         Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                                       .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
+                                                                                       .get();
                          synchronized(PLUGINS_METADATA) {
                              PLUGINS_METADATA.put(info.getName(), info);
                          }

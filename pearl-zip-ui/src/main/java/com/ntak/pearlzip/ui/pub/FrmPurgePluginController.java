@@ -4,7 +4,7 @@
 
 package com.ntak.pearlzip.ui.pub;
 
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.ModuleUtil;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -38,8 +39,12 @@ public class FrmPurgePluginController {
 
     @FXML
     public void initialize() {
+        Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                      .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
+                                                                      .get();
+
         synchronized(PLUGINS_METADATA) {
-            tblManifests.setItems(FXCollections.observableArrayList(ZipConstants.PLUGINS_METADATA.keySet()));
+            tblManifests.setItems(FXCollections.observableArrayList(PLUGINS_METADATA.keySet()));
             tblManifests.refresh();
             tblManifests.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             colName.setCellValueFactory(s -> new SimpleStringProperty(s.getValue()));
@@ -78,7 +83,7 @@ public class FrmPurgePluginController {
             } catch(IOException ioException) {
             } finally {
                 synchronized(PLUGINS_METADATA) {
-                    tblManifests.setItems(FXCollections.observableArrayList(ZipConstants.PLUGINS_METADATA.keySet()));
+                    tblManifests.setItems(FXCollections.observableArrayList(PLUGINS_METADATA.keySet()));
                     tblManifests.refresh();
                 }
 
