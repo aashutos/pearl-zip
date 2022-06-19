@@ -128,7 +128,7 @@ public abstract class PearlZipApplication extends Application {
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
             InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_HOST_SERVICES, this.getHostServices());
             InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PARAMETERS, this.getParameters());
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)()->{});
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)() -> System.exit(0));
 
             CountDownLatch readyLatch = new CountDownLatch(1);
 
