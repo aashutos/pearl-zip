@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
@@ -43,6 +44,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
@@ -371,6 +373,9 @@ public class FrmOptionsController {
     @FXML
     public void initData(Stage stage) {
         ///// Load settings file /////
+        Path SETTINGS_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_SETTINGS_FILE).get();
+
         synchronized(CURRENT_SETTINGS) {
             try(InputStream settingsIStream = Files.newInputStream(SETTINGS_FILE)) {
                 CURRENT_SETTINGS.load(settingsIStream);
@@ -485,7 +490,10 @@ public class FrmOptionsController {
         }
 
         btnClearCache.setOnAction((e) -> {
-            Lock writeLock = LCK_CLEAR_CACHE.writeLock();
+            Lock writeLock = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                                 .get()
+                                                 .writeLock();
             if (!writeLock.tryLock()) {
                 raiseAlert(Alert.AlertType.WARNING, resolveTextKey(TITLE_CLEAR_CACHE_BLOCKED), "",
                            resolveTextKey(BODY_CLEAR_CACHE_BLOCKED), stage);
@@ -513,13 +521,20 @@ public class FrmOptionsController {
                                              (s) -> {});
                 }
             } finally {
-                LCK_CLEAR_CACHE.writeLock().unlock();
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                    .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                    .get()
+                                    .writeLock()
+                                    .unlock();
                 btnClearCache.setDisable(false);
             }
         });
 
         // Theme related functionality
-        final Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
+        final Path themesPath = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                              .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                              .get()
+                                                              .toAbsolutePath()
                                               .toString(), "themes");
         tabTheme.setOnSelectionChanged( (ev) -> {
              try {
@@ -546,13 +561,13 @@ public class FrmOptionsController {
         // Language Pack related functionality...
         tabLangs.setOnSelectionChanged( (ev) -> {
             try {
-                tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+                tblLang.setItems(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get()));
                 tblTheme.refresh();
             } catch(Exception e) {
 
             }
         });
-        tblLang.setItems(FXCollections.observableArrayList(LANG_PACKS));
+        tblLang.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
         colLang.setCellValueFactory((p) -> new SimpleStringProperty(p.getValue().getKey()));
         btnSetLang.setOnAction((e) -> {
             Locale locale = tblLang.getSelectionModel().getSelectedItem().getValue();
@@ -584,6 +599,10 @@ public class FrmOptionsController {
             }
 
             synchronized(WORKING_APPLICATION_SETTINGS) {
+                Path APPLICATION_SETTINGS_FILE =
+                        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                                .get();
                 try(OutputStream settingsOutputStream = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
                     WORKING_APPLICATION_SETTINGS.store(settingsOutputStream,
                                                        String.format(CNS_PROP_HEADER,
@@ -591,10 +610,12 @@ public class FrmOptionsController {
                     // Reloading providers and cached System settings into PearlZip
                     WORKING_APPLICATION_SETTINGS.keySet()
                                                 .stream()
-                                                .filter(k -> !RK_KEYS.contains(k))
+                                                .filter(k -> !InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                                  .<Set<String>>getAdditionalConfig(CK_RK_KEYS)
+                                                                                  .get()
+                                                                                  .contains(k))
                                                 .forEach(k -> System.setProperty(k.toString(),
-                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(
-                                                                                         k.toString()))
+                                                                                 WORKING_APPLICATION_SETTINGS.getProperty(k.toString()))
                                                 );
                     new LinkedList<>(ZipState.getWriteProviders()).forEach(ZipState::addArchiveProvider);
                     new LinkedList<>(ZipState.getReadProviders()).forEach(ZipState::addArchiveProvider);
@@ -602,7 +623,10 @@ public class FrmOptionsController {
                     // Load custom menus from plugins
                     Stage aboutStage = genFrmAbout();
                     List<javafx.scene.control.Menu> customMenus = loadMenusFromPlugins();
-                    APP.createSystemMenu(aboutStage, customMenus);
+                    InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                        .<PearlZipApplication>getAdditionalConfig(CK_APP)
+                                        .get()
+                                        .createSystemMenu(aboutStage, customMenus);
                 } catch(IOException exc) {
                 }  finally {
                     JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));
@@ -632,6 +656,7 @@ public class FrmOptionsController {
 
         paneDropArea.setOnDragOver(e -> e.acceptTransferModes(TransferMode.COPY));
         paneDropArea.setOnDragDropped(e -> {
+            Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
             Dragboard db = e.getDragboard();
             if (db.hasFiles()) {
                 List<File> pzaxArchives =
@@ -668,6 +693,7 @@ public class FrmOptionsController {
         });
         paneDropArea.setOnMouseClicked((e) -> {
             try {
+                Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
                 if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
                     stage.setAlwaysOnTop(false);
 

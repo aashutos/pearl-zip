@@ -1,12 +1,11 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.mac;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
@@ -39,17 +38,17 @@ public class MacPearlZipApplication extends PearlZipApplication {
         ///// Create System Menu //////////////////
         //////////////////////////////////////////
 
-        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
-            ZipConstants.setAdditionalConfig(MENU_TOOLKIT,MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         MenuBar sysMenu;
-        final MenuToolkit menuToolkit = ZipConstants.<MenuToolkit>getAdditionalConfig(MENU_TOOLKIT)
+        final MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(CK_MENU_TOOLKIT)
                                                     .get();
 
-        if (!ZipConstants.getAdditionalConfig(SYS_MENU).isPresent()) {
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_SYS_MENU).isPresent()) {
 
             sysMenu = new MenuBar();
             sysMenu.setUseSystemMenuBar(true);
@@ -67,13 +66,13 @@ public class MacPearlZipApplication extends PearlZipApplication {
             menuController.initData();
             sysMenu.getMenus()
                    .addAll(additionalMenu.getMenus());
-            ZipConstants.setAdditionalConfig(CORE_MENU_SIZE, sysMenu.getMenus().size());
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_CORE_MENU_SIZE, sysMenu.getMenus().size());
         } else {
-            sysMenu = ZipConstants.<MenuBar>getAdditionalConfig(SYS_MENU)
+            sysMenu = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuBar>getAdditionalConfig(CK_SYS_MENU)
                                   .get();
         }
-        ZipConstants.setAdditionalConfig(SYS_MENU, sysMenu);
-        int coreMenuSize = ZipConstants.<Integer>getAdditionalConfig(CORE_MENU_SIZE)
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SYS_MENU, sysMenu);
+        int coreMenuSize = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Integer>getAdditionalConfig(CK_CORE_MENU_SIZE)
                                        .get();
         if (sysMenu.getMenus().size() > coreMenuSize) {
             sysMenu.getMenus()
@@ -86,13 +85,14 @@ public class MacPearlZipApplication extends PearlZipApplication {
             // Add before Window and Help menus
             sysMenu.getMenus().add(sysMenu.getMenus().size()-2, menu);
         }
-        ResourceConstants.WINDOW_MENU =
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_WINDOW_MENU,
                 sysMenu.getMenus()
                        .stream()
                        .filter(m -> m.getText()
                                      .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
                        .findFirst()
-                       .get();
+                       .get()
+        );
 
         // Use the menu sysMenu for all stages including new ones
         if (menuToolkit.systemUsesDarkMode()) {

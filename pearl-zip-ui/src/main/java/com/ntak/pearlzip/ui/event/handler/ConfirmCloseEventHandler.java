@@ -1,19 +1,17 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -29,13 +27,13 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.*;
@@ -77,9 +75,11 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
 
             final Path archivePath = Paths.get(fxArchiveInfo.getArchivePath());
             if (fxArchiveInfo.getArchivePath()
-                             .startsWith(STORE_TEMP.toString()) && !fxArchiveInfo.getCloseBypass()
-                                                                                 .get() && Files.exists(
-                    archivePath)) {
+                             .startsWith(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                             .<Path>getAdditionalConfig(CK_STORE_TEMP).get().toString())
+                                         && !fxArchiveInfo.getCloseBypass()
+                                                          .get()
+                                         && Files.exists(archivePath)) {
                 // If a nested file from a parent archive an option is given to update it
                 final String archiveFilePath = fxArchiveInfo.getArchivePath();
                 final String parentFilePath = fxArchiveInfo.getParentPath();
@@ -287,6 +287,8 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
         } finally {
             if (!isKeptOpen) {
                 // Remove window entry
+                Menu WINDOW_MENU =
+                        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
                 synchronized(WINDOW_MENU) {
                     Optional<MenuItem> itemToRemove =
                             WINDOW_MENU.getItems()
@@ -310,7 +312,10 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                 long sessionId = System.currentTimeMillis();
                 executeBackgroundProcess(sessionId, stage, new ClearCacheRunnable(sessionId, true),
                                          LOGGER::error,
-                                         (s) -> {APP_LATCH.countDown();});
+                                         (s) -> InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                     .<CountDownLatch>getAdditionalConfig(CK_APP_LATCH)
+                                                                     .get()
+                                                                     .countDown());
             }
         }
     }

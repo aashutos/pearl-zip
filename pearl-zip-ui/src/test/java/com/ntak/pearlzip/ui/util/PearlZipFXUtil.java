@@ -6,10 +6,12 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
+import com.ntak.pearlzip.ui.mac.MacZipConstants;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmAboutController;
@@ -31,6 +33,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
@@ -38,14 +41,11 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.URI;
+import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -59,9 +59,9 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.mac.MacZipConstants.MENU_TOOLKIT;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -442,17 +442,28 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
-        APP = Mockito.mock(PearlZipApplication.class);
-        RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
-        POST_PZAX_COMPLETION_CALLBACK = ()->{};
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<>());
+
+        Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)()->{});
         // Set up global constants
-        ZipConstants.PRIMARY_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
-        ZipConstants.RECENT_FILE = Paths.get(System.getProperty("user.home"), ".pz", "rf");
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),
+                                                                                  ".pz", "rf"));
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
 
-        APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
-        RK_KEYS = new HashSet<>();
+        Path APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
+                                                                            APPLICATION_SETTINGS_FILE);
+        Set<String> RK_KEYS = new HashSet<>();
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, RK_KEYS);
         RK_KEYS.add("configuration.ntak.pearl-zip.app-name");
         RK_KEYS.add("configuration.ntak.pearl-zip.version");
         RK_KEYS.add("configuration.ntak.pearl-zip.copyright");
@@ -463,20 +474,25 @@ public class PearlZipFXUtil {
         initialiseApplicationSettings();
 
         // Set local directories...
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        final Path STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
         System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        ZipConstants.LOCAL_TEMP =
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP,
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()));
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp");
+                                  .orElse(STORE_ROOT.toString()))
+        );
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                            Paths.get(STORE_ROOT.toAbsolutePath()
+                                                      .toString(), "temp")
+        );
 
         // Loading plugin manifests...
-        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_MANIFEST_DIR, LOCAL_MANIFEST_DIR);
         if (!Files.exists(LOCAL_MANIFEST_DIR)) {
             Files.createDirectories(LOCAL_MANIFEST_DIR);
         }
@@ -491,6 +507,9 @@ public class PearlZipFXUtil {
                      Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
                      if (optInfo.isPresent()) {
                          PluginInfo info = optInfo.get();
+                         Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                                       .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
+                                                                                       .get();
                          synchronized(PLUGINS_METADATA) {
                              PLUGINS_METADATA.put(info.getName(), info);
                          }
@@ -499,7 +518,9 @@ public class PearlZipFXUtil {
                  }
              });
 
-        SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "settings.properties");
+        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
+                                                                                       "settings.properties").toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
         if (!Files.exists(SETTINGS_FILE)) {
             Files.createFile(SETTINGS_FILE);
         }
@@ -514,8 +535,6 @@ public class PearlZipFXUtil {
         }
 
         // Themes
-        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                              .toString(), "themes");
 
         // Copy over and overwrite core themes...
         for (String theme : CORE_THEMES) {
@@ -529,9 +548,11 @@ public class PearlZipFXUtil {
                                                             .getPath()));
             } catch (Exception e) {
                 try {
-                    themeFiles = Files.list(JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui",
-                                                                    theme)
-                                                           .toAbsolutePath());
+                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                                .get()
+                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
+                                                                .toAbsolutePath());
                 } catch(Exception exc) {
                     final String themePath = PearlZipFXUtil.class.getClassLoader()
                                                             .getResource(theme)
@@ -580,12 +601,14 @@ public class PearlZipFXUtil {
         }
 
         // Loading rules...
+        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
         MANIFEST_RULES.add(new MinVersionManifestRule());
         MANIFEST_RULES.add(new MaxVersionManifestRule());
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
         MANIFEST_RULES.add(new ThemeManifestRule());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
 
         // Setting Locale
         Locale.setDefault(genLocale(new Properties()));
@@ -630,11 +653,11 @@ public class PearlZipFXUtil {
     }
 
     public static void initialiseMenu() throws IOException {
-        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
-            ZipConstants.setAdditionalConfig(MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
-        MenuToolkit menuToolkit = (MenuToolkit)ZipConstants.getAdditionalConfig(MENU_TOOLKIT).get();
+        MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(MacZipConstants.CK_MENU_TOOLKIT).get();
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
@@ -672,12 +695,14 @@ public class PearlZipFXUtil {
         menuToolkit.setGlobalMenuBar(sysMenu);
 
         // Set Windows menu variable...
-        WINDOW_MENU = sysMenu.getMenus()
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_WINDOW_MENU,
+                      sysMenu.getMenus()
                              .stream()
                              .filter(m -> m.getText()
                                            .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
                              .findFirst()
-                             .get();
+                             .get()
+        );
     }
 
     private static FXArchiveInfo initFxArchiveInfo(Path archive) throws IOException {
@@ -721,6 +746,10 @@ public class PearlZipFXUtil {
     }
 
     public static boolean simWindowSelect(FxRobot robot, Path archive) {
+        Menu WINDOW_MENU = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                               .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                               .get();
+
         int index =
                 WINDOW_MENU.getItems()
                            .stream()

@@ -7,14 +7,16 @@ import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.*;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
+import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,8 +33,8 @@ import java.util.spi.ResourceBundleProvider;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
+import static com.ntak.pearlzip.archive.constants.internal.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
@@ -45,6 +47,8 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  *  Utility methods within this class are utilised by PearlZip to load Archive Service implementations.
  */
 public class ModuleUtil {
+
+    private static Map<String, PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String, PluginInfo> >getAdditionalConfig(CK_PLUGINS_METADATA).get();
 
     /**
      *  Loads services that come as default bundled with the application.
@@ -158,6 +162,10 @@ public class ModuleUtil {
                               .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
                                                                 .get()));
         } catch(Exception e) {
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                            .get();
             System.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "true");
             try(OutputStream bw = Files.newOutputStream(APPLICATION_SETTINGS_FILE)) {
@@ -186,10 +194,20 @@ public class ModuleUtil {
      * </ol>
      */
     public static void loadModuleFromExtensionPackage(Path pzaxArchive) {
+        final Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                    .get();
+        final Path LOCAL_MANIFEST_DIR = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                            .<Path>getAdditionalConfig(CK_LOCAL_MANIFEST_DIR)
+                                                            .get();
+
         // pzax package checks
         final long startTime = System.currentTimeMillis();
-        Path tempDir = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath()
-                                                        .toString(),
+        Path tempDir = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                         .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
+                                         .get()
+                                         .toAbsolutePath()
+                                         .toString(),
                                  String.format("pz%d", startTime));
         Path tempArchive = Paths.get(tempDir.toAbsolutePath()
                                             .toString(),
@@ -389,13 +407,13 @@ public class ModuleUtil {
         } finally {
             deleteDirectory(tempDir, (b) -> false);
             if (Stage.getWindows().size() == 0) {
-                JFXUtil.runLater(POST_PZAX_COMPLETION_CALLBACK);
+                JFXUtil.runLater(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Runnable>getAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK).get());
             }
         }
     }
 
     public static void checkManifest(PluginInfo info, Path targetDir) throws Exception {
-        for (CheckManifestRule rule : MANIFEST_RULES) {
+        for (CheckManifestRule rule : InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<List<CheckManifestRule>>getAdditionalConfig(CK_MANIFEST_RULES).get()) {
             rule.processManifest(info, targetDir);
         }
     }
@@ -432,6 +450,13 @@ public class ModuleUtil {
     }
 
     public static void purgeLibraries(String moduleDirectory, Set<String> names) throws IOException {
+        final Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                    .get();
+        final Path LOCAL_MANIFEST_DIR = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_LOCAL_MANIFEST_DIR)
+                .get();
+
         // Remove libraries...
         synchronized(PLUGINS_METADATA) {
             PLUGINS_METADATA.values()
@@ -479,6 +504,13 @@ public class ModuleUtil {
     }
 
     public static void purgeAllLibraries() throws IOException {
+        final Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                    .get();
+        final Path LOCAL_MANIFEST_DIR = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_LOCAL_MANIFEST_DIR)
+                .get();
+
         Files.list(Path.of(STORE_ROOT.toAbsolutePath()
                                      .toString(), "providers"))
              .forEach(ModuleUtil::safeDeletePath);
@@ -623,7 +655,7 @@ public class ModuleUtil {
                                .layer();
             ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
                                                                                                     PearlZipResourceBundleProvider.class);
-            resourceBundleLoader.forEach(b -> LANG_PACKS.addAll(b.providedLanguages()));
+            resourceBundleLoader.forEach(b -> FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get().addAll(b.providedLanguages())));
             for (ResourceBundleProvider prov : resourceBundleLoader) {
                 final Set<String> diffLoggingKeys = new HashSet<>(enGBBundle.keySet());
                 if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
@@ -654,6 +686,10 @@ public class ModuleUtil {
             WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_LANG, "en");
             WORKING_APPLICATION_SETTINGS.setProperty(ConfigurationConstants.CNS_LOCALE_COUNTRY, "GB");
             WORKING_APPLICATION_SETTINGS.remove(ConfigurationConstants.CNS_LOCALE_VARIANT);
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                            .get();
             try (OutputStream wr = Files.newOutputStream(APPLICATION_SETTINGS_FILE, StandardOpenOption.WRITE)){
                 WORKING_APPLICATION_SETTINGS.store(wr, String.format(CNS_PROP_HEADER,
                                                                      LocalDateTime.now()));

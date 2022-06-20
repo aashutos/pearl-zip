@@ -4,12 +4,12 @@
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.*;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
 import com.ntak.pearlzip.ui.pub.FrmProgressController;
+import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -193,6 +193,8 @@ public class ArchiveUtil {
     }
 
     public static void addToRecentFile(File file) {
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
         final int size = Math.min(NO_FILES_HISTORY, 15);
         String[] files = new String[size];
         try {
@@ -216,14 +218,21 @@ public class ArchiveUtil {
                 }
             }
 
-            synchronized(ResourceConstants.RECENT_FILES_MENU) {
-                JFXUtil.runLater(()->refreshRecentFileMenu(ResourceConstants.RECENT_FILES_MENU));
+            synchronized(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                             .getAdditionalConfig(CK_RECENT_FILES_MENU)
+                                             .get()
+            ) {
+                JFXUtil.runLater(()->refreshRecentFileMenu(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                   .<Menu>getAdditionalConfig(CK_RECENT_FILES_MENU)
+                                                                   .get()));
             }
         } catch(IOException e) {
         }
     }
 
     public static void refreshRecentFileMenu(Menu mnuOpenRecent) {
+        Path RECENT_FILE =
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RECENT_FILE).get();
         Stage stage = (Stage)Stage.getWindows().stream().filter(Window::isFocused).findFirst().orElse(new Stage());
         mnuOpenRecent.getItems().clear();
         try (Scanner scanner = new Scanner(Files.newInputStream(RECENT_FILE))) {
@@ -433,9 +442,11 @@ public class ArchiveUtil {
                 fxArchiveInfo.getReadService()
                              .extractFile(sessionId, destPath, fxArchiveInfo.getArchivePath(),
                                           clickedRow);
-                ZipConstants.APP.getHostServices()
-                                .showDocument(destPath.toUri()
-                                                      .toString());
+                InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                    .<HostServices>getAdditionalConfig(CK_HOST_SERVICES)
+                                    .get()
+                                    .showDocument(destPath.toUri()
+                                                          .toString());
             } catch (Exception e) {
                 // TITLE: Error: Issue opening file
                 // HEADER: Could not open the selected file externally
@@ -483,6 +494,10 @@ public class ArchiveUtil {
 
     public static void initialiseApplicationSettings() {
         synchronized(WORKING_APPLICATION_SETTINGS) {
+            Path APPLICATION_SETTINGS_FILE =
+                    InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                        .<Path>getAdditionalConfig(CK_APPLICATION_SETTINGS_FILE)
+                                        .get();
             try(InputStream settingsIStream = Files.newInputStream(APPLICATION_SETTINGS_FILE)) {
                 WORKING_APPLICATION_SETTINGS.clear();
                 WORKING_APPLICATION_SETTINGS.load(settingsIStream);
@@ -509,7 +524,7 @@ public class ArchiveUtil {
             ModuleUtil.loadModuleFromExtensionPackage(Paths.get(f));
         } else {
             if (Stage.getWindows().size() == 0) {
-                JFXUtil.runLater(POST_PZAX_COMPLETION_CALLBACK);
+                JFXUtil.runLater(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Runnable>getAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK).get());
             }
         }
     }

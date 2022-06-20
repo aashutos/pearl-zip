@@ -1,6 +1,7 @@
 /*
  * Copyright © 2022 92AK
  */
+
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.LicenseService;
@@ -9,10 +10,6 @@ import com.ntak.pearlzip.archive.pub.LicenseService;
  *  General UI/front-end JavaFX code for the Pearl Zip application.
  */
 module com.ntak.pearlzip.ui {
-    exports com.ntak.pearlzip.ui.cell;
-    exports com.ntak.pearlzip.ui.pub;
-    exports com.ntak.pearlzip.ui.util;
-    opens com.ntak.pearlzip.ui.util;
 
     // UI dependencies
     requires java.desktop;
@@ -27,13 +24,6 @@ module com.ntak.pearlzip.ui {
     // PearlZip dependencies
     requires com.ntak.pearlzip.archive;
 
-    opens com.ntak.pearlzip.ui.pub;
-    exports com.ntak.pearlzip.ui.constants;
-    opens com.ntak.pearlzip.ui.model;
-    exports com.ntak.pearlzip.ui.mac;
-    opens com.ntak.pearlzip.ui.mac;
-    exports com.ntak.pearlzip.ui.model;
-
     // Logging dependencies
     requires org.apache.logging.log4j;
     requires org.apache.logging.log4j.core;
@@ -45,4 +35,17 @@ module com.ntak.pearlzip.ui {
     uses ArchiveReadService;
     uses LicenseService;
     uses com.ntak.pearlzip.archive.pub.PearlZipResourceBundleProvider;
+
+    // Module Interfaces
+    exports com.ntak.pearlzip.ui.cell;
+    exports com.ntak.pearlzip.ui.constants;
+    exports com.ntak.pearlzip.ui.mac;
+    exports com.ntak.pearlzip.ui.model;
+    exports com.ntak.pearlzip.ui.pub;
+    exports com.ntak.pearlzip.ui.util;
+
+    opens com.ntak.pearlzip.ui.pub;
+    opens com.ntak.pearlzip.ui.util;
+    opens com.ntak.pearlzip.ui.model;
+    opens com.ntak.pearlzip.ui.mac;
 }

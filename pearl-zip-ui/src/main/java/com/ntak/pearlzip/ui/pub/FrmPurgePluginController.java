@@ -4,7 +4,8 @@
 
 package com.ntak.pearlzip.ui.pub;
 
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.ModuleUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
@@ -37,8 +39,12 @@ public class FrmPurgePluginController {
 
     @FXML
     public void initialize() {
+        Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                                      .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
+                                                                      .get();
+
         synchronized(PLUGINS_METADATA) {
-            tblManifests.setItems(FXCollections.observableArrayList(ZipConstants.PLUGINS_METADATA.keySet()));
+            tblManifests.setItems(FXCollections.observableArrayList(PLUGINS_METADATA.keySet()));
             tblManifests.refresh();
             tblManifests.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             colName.setCellValueFactory(s -> new SimpleStringProperty(s.getValue()));
@@ -65,15 +71,19 @@ public class FrmPurgePluginController {
                                       ButtonType.YES,
                                       ButtonType.NO);
                 if (response.isPresent() && response.get().equals(ButtonType.YES)) {
-                    final String moduleDirectory = Path.of(STORE_ROOT.toAbsolutePath()
-                                                                   .toString(), "providers")
+                    final String moduleDirectory = Path.of(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                                               .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                                               .get()
+                                                                               .toAbsolutePath()
+                                                                               .toString(),
+                                                           "providers")
                                                        .toString();
                     ModuleUtil.purgeLibraries(moduleDirectory, new HashSet<>(selectedManifests));
                 }
             } catch(IOException ioException) {
             } finally {
                 synchronized(PLUGINS_METADATA) {
-                    tblManifests.setItems(FXCollections.observableArrayList(ZipConstants.PLUGINS_METADATA.keySet()));
+                    tblManifests.setItems(FXCollections.observableArrayList(PLUGINS_METADATA.keySet()));
                     tblManifests.refresh();
                 }
 

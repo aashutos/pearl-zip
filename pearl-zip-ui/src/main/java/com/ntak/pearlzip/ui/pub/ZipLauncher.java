@@ -4,13 +4,15 @@
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.rules.*;
 import com.ntak.pearlzip.ui.util.*;
+import javafx.util.Pair;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
@@ -21,17 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.nio.file.*;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
@@ -72,7 +67,10 @@ public class ZipLauncher {
         mainMethod.invoke(null, (Object) args);
 
         // Wait for latch unless countdown was not triggered due to race. A break check is initiated in this case.
-       while (!APP_LATCH.await(300, TimeUnit.MILLISECONDS)) {
+       while (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                   .<CountDownLatch>getAdditionalConfig(CK_APP_LATCH)
+                                   .get()
+                                   .await(300, TimeUnit.MILLISECONDS)) {
            if (JFXUtil.getMainStageInstances().size() == 0)  {
                break;
            }
@@ -82,15 +80,21 @@ public class ZipLauncher {
     }
 
     public static void initialize() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<String,PluginInfo>());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
+
         // Load bootstrap properties
         Properties props = initialiseBootstrapProperties();
 
         ////////////////////////////////////////////
         ///// Settings File Load ///////////////////
         ////////////////////////////////////////////
-
-        SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                .get();
+        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
                                                      "settings.properties").toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
         if (!Files.exists(SETTINGS_FILE)) {
             Files.createFile(SETTINGS_FILE);
         }
@@ -104,14 +108,17 @@ public class ZipLauncher {
         //////////////////////////////////////////
 
         // Create root store
-        Files.createDirectories(ZipConstants.STORE_ROOT);
+        Files.createDirectories(STORE_ROOT);
 
         // Log4j configuration - handle fixed parameters when creating application image
         String log4jCfg = Paths.get(STORE_ROOT.toString(), "log4j2.xml")
                                .toString();
         final Path log4jPath = Paths.get(log4jCfg);
         if (!Files.exists(log4jPath)) {
-            Path logCfgFile = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.archive", "log4j2.xml");
+            Path logCfgFile = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                  .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                  .get()
+                                                  .getPath("modules", "com.ntak.pearlzip.archive", "log4j2.xml");
             try(InputStream is = Files.newInputStream(logCfgFile)) {
                 Files.copy(is, log4jPath);
             } catch(Exception e) {
@@ -123,12 +130,13 @@ public class ZipLauncher {
 
         // Setting Locale
         Locale.setDefault(genLocale(props));
+        Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
         LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                              Locale.getDefault());
+                                                                     System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                                     Locale.getDefault());
         CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
-                                        Locale.getDefault());
+                                                                        System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
+                                                                        Locale.getDefault());
 
         // Load License Declarations
         try {
@@ -203,15 +211,19 @@ public class ZipLauncher {
         //////////////////////////////////////////
 
         // Loading rules...
+        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
         MANIFEST_RULES.add(new MinVersionManifestRule());
         MANIFEST_RULES.add(new MaxVersionManifestRule());
         MANIFEST_RULES.add(new LicenseManifestRule());
         MANIFEST_RULES.add(new CheckLibManifestRule());
         MANIFEST_RULES.add(new RemovePatternManifestRule());
         MANIFEST_RULES.add(new ThemeManifestRule());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
+
 
         // Loading plugin manifests...
-        LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_MANIFEST_DIR, LOCAL_MANIFEST_DIR);
         if (!Files.exists(LOCAL_MANIFEST_DIR)) {
             Files.createDirectories(LOCAL_MANIFEST_DIR);
         }
@@ -223,6 +235,7 @@ public class ZipLauncher {
                               .endsWith(".MF"))
              .forEach(m -> {
             try {
+                Map<String, PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String, PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA).get();
                 Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
                 if (optInfo.isPresent()) {
                     PluginInfo info = optInfo.get();
@@ -258,17 +271,15 @@ public class ZipLauncher {
             } catch(Exception e) {
 
             }
-            PRIMARY_EXECUTOR_SERVICE =
-                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(
-                            CNS_THREAD_POOL_SIZE,
-                            "4")), 1),
-                                                     MetricThreadFactory.create(profile));
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE,
+                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(CNS_THREAD_POOL_SIZE,"4")), 1),
+                                                     MetricThreadFactory.create(profile))
+            );
         } else {
-            PRIMARY_EXECUTOR_SERVICE =
-                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(
-                            CNS_THREAD_POOL_SIZE,
-                            "4")), 1),
-                                                     MetricThreadFactory.create(MetricProfile.getDefaultProfile()));
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE,
+                    Executors.newScheduledThreadPool(Math.max(Integer.parseInt(System.getProperty(CNS_THREAD_POOL_SIZE,"4")), 1),
+                                                     MetricThreadFactory.create(MetricProfile.getDefaultProfile()))
+            );
         }
     }
 }

@@ -10,6 +10,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
@@ -45,15 +46,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -76,11 +76,13 @@ import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 public class JFXUtil {
     private static final Logger LOGGER = LoggerContext.getContext().getLogger(JFXUtil.class);
 
+    // NOTE: External
     public static Optional<ButtonType> raiseAlert(Alert.AlertType type, String title, String header, String body,
             Window stage) {
         return raiseAlert(type, title, header, body, null, stage);
     }
 
+    // NOTE: External
     public static Optional<ButtonType> raiseAlert(Alert.AlertType type, String title, String header, String body,
             Exception exception, Window stage, ButtonType... buttons) {
         Alert alert = new Alert(type, body, buttons);
@@ -111,17 +113,20 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static void changeButtonPicText(ButtonBase button, String imgResource, String labelText) {
         ((ImageView)button.getGraphic()).setImage(new Image(String.valueOf(JFXUtil.class.getClassLoader().getResource(imgResource))));
         button.setText(labelText);
     }
 
+    // NOTE: Internal
     public static void highlightCellIfMatch(TableCell cell, FileInfo row, FileInfo ref, BackgroundFill backgroundColor) {
         if (row.getFileName().equals(ref.getFileName())) {
             cell.setBackground(new Background(backgroundColor));
         }
     }
 
+    // NOTE: External
     public static Optional<Stage> getActiveStage() {
         return (Stage.getWindows()
                      .stream()
@@ -130,6 +135,7 @@ public class JFXUtil {
                 .findFirst();
     }
 
+    // NOTE: External
     public static List<Stage> getMainStageInstances() {
         return Stage.getWindows()
                     .stream()
@@ -143,6 +149,7 @@ public class JFXUtil {
                     .collect(Collectors.toList());
     }
 
+    // NOTE: External
     public static Optional<Stage> getMainStageByArchivePath(String archivePath) {
         return getMainStageInstances()
                 .stream()
@@ -151,6 +158,7 @@ public class JFXUtil {
                 .findFirst();
     }
 
+    // NOTE: External
     public static void refreshFileView(TableView<FileInfo> fileInfoTableView, FXArchiveInfo fxArchiveInfo, int depth,
             String prefix) {
         fxArchiveInfo.refresh();
@@ -166,6 +174,7 @@ public class JFXUtil {
         fileInfoTableView.refresh();
     }
 
+    // NOTE: External
     public static Predicate<FileInfo> isFileInArchiveLevel(FXArchiveInfo fxArchiveInfo) {
         return f -> {
             final boolean sameDepth = f.getLevel() == fxArchiveInfo.getDepth()
@@ -185,17 +194,25 @@ public class JFXUtil {
         };
     }
 
+    // NOTE: External
     public static void executeBackgroundProcess(long sessionId, Stage parent, CaughtRunnable process,
             Consumer<Stage> callback) {
         executeBackgroundProcess(sessionId, parent, process, (e)->{}, callback);
     }
 
+    // NOTE: External
     public static void executeBackgroundProcess(long sessionId, Stage parent, CaughtRunnable process,
             Consumer<Throwable> handler, Consumer<Stage> callback) {
         CountDownLatch latch = new CountDownLatch(1);
+        ExecutorService PRIMARY_EXECUTOR_SERVICE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<ExecutorService>getAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE)
+                .get();
 
         PRIMARY_EXECUTOR_SERVICE.submit(()-> {
-            Lock readLock = LCK_CLEAR_CACHE.readLock();
+            Lock readLock = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                .<ReadWriteLock>getAdditionalConfig(CK_LCK_CLEAR_CACHE)
+                                                .get()
+                                                .readLock();
             try {
                 latch.await();
                 ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
@@ -233,6 +250,7 @@ public class JFXUtil {
         launchProgress(sessionId, parent, latch, callback);
     }
 
+    // NOTE: Internal
     public static void loadPreOpenDialog(Stage stage, Node root) {
         AnchorPane pane = new AnchorPane(root);
         Scene scene = new Scene(pane);
@@ -244,6 +262,7 @@ public class JFXUtil {
         stage.showAndWait();
     }
 
+    // NOTE: External
     public static Optional<FXArchiveInfo> lookupArchiveInfo(String archiveName) {
         return Optional.of((FXArchiveInfo) Stage.getWindows()
                                                 .stream()
@@ -264,6 +283,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static FrmLicenseDetailsController loadLicenseDetails(String licensePath, String content,
             boolean withAcceptDecline) throws IOException {
         Stage licDetailsStage = new Stage();
@@ -290,6 +310,7 @@ public class JFXUtil {
         return controller;
     }
 
+    // NOTE: Internal
     public static void checkWebEngineScrollToBottom(WebEngine engine, Consumer<Boolean> callback) {
         int scrollY = (Integer) engine.executeScript("window.scrollY");
         int innerHeight = (Integer) engine.executeScript("window.innerHeight");
@@ -299,6 +320,7 @@ public class JFXUtil {
         callback.accept(isScrollBottom);
     }
 
+    // NOTE: Internal
     public static <S> Optional<TableCell<S,?>> getTableCellForColumnRow(TableView<S> table, int rowIndex,
             String columnName) {
         Integer columnIndex = table.getColumns()
@@ -318,6 +340,7 @@ public class JFXUtil {
         return Optional.empty();
     }
 
+    // NOTE: Internal
     public static void showNotifications() {
         try {
             Stage notificationStage = new Stage();
@@ -337,6 +360,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static boolean checkNewVersionAvailable() {
         List<NotificationEntry> entries = getNotifications("PearlZip Version");
         Optional<NotificationEntry> optVersion = entries.stream()
@@ -376,6 +400,7 @@ public class JFXUtil {
         return false;
     }
 
+    // NOTE: Internal
     public static List<NotificationEntry> getNotifications(String... filters) {
         List<NotificationEntry> entries = new CopyOnWriteArrayList<>();
 
@@ -423,22 +448,32 @@ public class JFXUtil {
         return entries;
     }
 
+    // NOTE: Internal
     public static Properties initialiseBootstrapProperties() throws IOException {
         Properties props = new Properties();
         props.load(MacPearlZipApplication.class.getClassLoader()
                                                .getResourceAsStream("application.properties"));
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT, String.format("%s/.pz",
-                                                                                             System.getProperty(
-                                                                                                     "user.home"))));
-        ZipConstants.LOCAL_TEMP =
-                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()));
-        APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
+        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
+                                                        String.format("%s/.pz",
+                                                                      System.getProperty("user.home"))));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT
+                );
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .setAdditionalConfig(CK_LOCAL_TEMP,
+                                    Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                                      .orElse(STORE_ROOT.toString())
+                                    )
+        );
+        Path APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
+                                                                            APPLICATION_SETTINGS_FILE);
         initialiseApplicationSettings();
 
         String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
-        ZipConstants.RUNTIME_MODULE_PATH =
+        Path RUNTIME_MODULE_PATH =
                 Paths.get(System.getProperty(CNS_NTAK_PEARL_ZIP_MODULE_PATH, defaultModulePath)).toAbsolutePath();
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
 
         // Overwrite with external properties file
         // Reserved properties are kept as per internal key definition
@@ -461,7 +496,10 @@ public class JFXUtil {
                     Files.copy(is, tmpRK, StandardCopyOption.REPLACE_EXISTING);
                 }
             } else if (!Files.exists(reservedKeys)) {
-                reservedKeys = JRT_FILE_SYSTEM.getPath("modules", "com.ntak.pearlzip.ui", "reserved-keys");
+                reservedKeys = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                   .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                   .get()
+                                                   .getPath("modules", "com.ntak.pearlzip.ui", "reserved-keys");
                 Files.copy(reservedKeys, tmpRK, StandardCopyOption.REPLACE_EXISTING);
             }
 
@@ -478,7 +516,7 @@ public class JFXUtil {
             props.load(Files.newBufferedReader(APPLICATION_SETTINGS_FILE));
         }
 
-        RK_KEYS = reservedKeyMap.keySet();
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, reservedKeyMap.keySet());
         props.putAll(System.getProperties());
         props.putAll(reservedKeyMap);
         System.setProperties(props);
@@ -486,6 +524,7 @@ public class JFXUtil {
         return props;
     }
 
+    // NOTE: External
     public static void toastMessage(JFXSnackbar toast, String message) {
         try {
             toast.enqueue(new JFXSnackbar.SnackbarEvent(new TextField(message),
@@ -499,6 +538,7 @@ public class JFXUtil {
         }
     }
 
+    // NOTE: Internal
     public static void setSafeModeTitles(boolean isSafeMode, Stage stage) {
             String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
             if (isSafeMode) {
@@ -512,6 +552,7 @@ public class JFXUtil {
             }
         }
 
+    // NOTE: Internal
     public static void initialiseTheme(Path themesPath, String themeName) {
         String themePath = String.format(PATTERN_CSS_THEME_PATH,
                                          themesPath.toAbsolutePath(),
@@ -526,5 +567,52 @@ public class JFXUtil {
         }
         Application.setUserAgentStylesheet(themePath);
         System.setProperty(CNS_THEME_NAME, themeName);
+    }
+
+    // NOTE: External
+    public static Optional<String> getActiveWindowFromMenu() {
+        Menu WINDOW_MENU =
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
+        synchronized(WINDOW_MENU) {
+            return WINDOW_MENU
+                    .getItems()
+                    .stream()
+                    .filter(f -> f.getText()
+                                  .contains(WINDOW_FOCUS_SYMBOL)
+                    )
+                    .map(f -> f.getText()
+                               .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, ""))
+                    .findFirst();
+        }
+    }
+
+    // NOTE: External
+    public static List<String> getWindowsFromMenu() {
+        Menu WINDOW_MENU =
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
+        synchronized(WINDOW_MENU) {
+            return WINDOW_MENU.getItems()
+                              .stream()
+                              .map(m -> m.getText()
+                                         .replace(ZipConstants.WINDOW_FOCUS_SYMBOL, "")
+                              )
+                    .collect(Collectors.toList());
+        }
+    }
+
+    // NOTE: External
+    // Untested functionality...
+    public static List<String> getRecentFilesFromMenu() {
+        final Menu RECENT_FILES_MENU = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Menu>getAdditionalConfig(CK_RECENT_FILES_MENU)
+                .get();
+        synchronized(RECENT_FILES_MENU) {
+            return RECENT_FILES_MENU
+                    .getItems()
+                    .stream()
+                    .sequential()
+                    .map(m -> DSV.split(m.getText())[1].trim())
+                    .collect(Collectors.toList());
+        }
     }
 }

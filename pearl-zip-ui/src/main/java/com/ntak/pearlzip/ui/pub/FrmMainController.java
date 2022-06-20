@@ -6,6 +6,7 @@ package com.ntak.pearlzip.ui.pub;
 import com.jfoenix.controls.JFXSnackbar;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.cell.*;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.event.handler.*;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
-import static com.ntak.pearlzip.ui.constants.ResourceConstants.WINDOW_MENU;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
@@ -164,6 +164,7 @@ public class FrmMainController {
                     if (!info.isFolder()) {
                         final Path path = tempDir.resolve(Paths.get(info.getFileName())
                                                                   .getFileName());
+                        long MAX_SIZE_DRAG_OUT = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Long>getAdditionalConfig(CK_MAX_SIZE_DRAG_OUT).get();
                         if (info.getRawSize() > MAX_SIZE_DRAG_OUT) {
                             // TITLE: Warning: Drag out functionality not supported for file
                             // HEADER: File too big
@@ -317,6 +318,10 @@ public class FrmMainController {
                  .addListener((ObservableValue<? extends Boolean> observable,
                                       Boolean oldValue,
                                       Boolean newValue) -> {
+                     final Menu WINDOW_MENU =
+                             InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                 .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                                 .get();
                      final Optional<MenuItem> optMenuItem = WINDOW_MENU.getItems()
                                                                        .stream()
                                                                        .filter(m -> m.getText()

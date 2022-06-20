@@ -9,7 +9,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
@@ -49,6 +49,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class OptionsTestFX extends AbstractPearlZipTestFX {
     private Path tempOSDir;
     private Path tempPZDir;
+    private Path STORE_ROOT;
+    private Path STORE_TEMP;
 
     /*
      *  Test cases:
@@ -70,17 +72,20 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
-        ZipConstants.STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
         System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
         System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
                                          "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        ZipConstants.LOCAL_TEMP =
+        Path LOCAL_TEMP =
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
-        ZipConstants.STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
+        STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
                                                       .toString(), "temp");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP, STORE_TEMP);
 
         Files.list(STORE_TEMP)
              .filter(Files::isRegularFile)
@@ -522,7 +527,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             final TableView<Pair<String,Locale>> tbl = this.lookup("#tblLang")
                                             .queryAs(TableView.class);
-            tbl.setItems(FXCollections.observableArrayList(LANG_PACKS));
+            tbl.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
             tbl.refresh();
 
             this.sleep(1000, MILLISECONDS);

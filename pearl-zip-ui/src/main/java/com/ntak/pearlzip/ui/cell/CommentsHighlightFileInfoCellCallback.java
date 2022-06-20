@@ -1,12 +1,12 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.cell;
 
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
@@ -26,8 +26,7 @@ import java.util.Objects;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.BODY_ADD_COMMENT_NOT_SUPPORTED;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.TITLE_ADD_COMMENT_NOT_SUPPORTED;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 
 /**
  *  Implementation of cell renderer for the Comments field.
@@ -63,8 +62,12 @@ public class CommentsHighlightFileInfoCellCallback extends AbstractHighlightFile
 
                 long sessionId = System.currentTimeMillis();
                 if (Objects.nonNull(writeService) && Objects.nonNull(readService)) {
-                    Path tempFile = Paths.get(ZipConstants.STORE_TEMP.toAbsolutePath()
-                                                                     .toString(),
+                    Path tempFile =
+                            Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                          .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                          .get()
+                                                          .toAbsolutePath()
+                                                          .toString(),
                                               String.format("pz%s", sessionId),
                                               info.getFileName()
                     );

@@ -11,10 +11,7 @@ import com.ntak.testfx.FormUtil;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +22,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_LOCAL_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
+    private Path LOCAL_TEMP;
 
     /*
      *  Test cases:
@@ -39,12 +38,19 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
      *  + Extract all files - non existent archive
      */
 
+    @BeforeEach
+    public void setUp() {
+        LOCAL_TEMP = ZipConstants.GLOBAL_INTERNAL_CACHE
+                .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
+                .get();
+    }
+
     @AfterEach
     public void tearDown() throws IOException {
-        clearDirectory(Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath()
+        clearDirectory(Paths.get(LOCAL_TEMP.toAbsolutePath()
                                                         .toString(), "output"));
-        Files.deleteIfExists(Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt"));
-        Files.deleteIfExists(Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "first-file"));
+        Files.deleteIfExists(Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt"));
+        Files.deleteIfExists(Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "first-file"));
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +74,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "first-file").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "first-file");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "first-file");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -93,7 +99,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "1151.txt").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -118,7 +124,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "first-file").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -143,7 +149,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "1151.txt").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -166,7 +172,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         PearlZipFXUtil.simTraversalArchive(this, archivePath.toString(), "#fileContentsView", (r)->{}, "lala", "1151.txt");
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -191,7 +197,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "1151.txt").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -216,7 +222,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                                "1151.txt").get();
 
         // Extract to destination
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "1151.txt");
         Files.deleteIfExists(targetFilePath);
         PearlZipFXUtil.simExtractFile(this, targetFilePath);
 
@@ -274,7 +280,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                       "first-folder").get();
 
         // Extract to destination
-        Path targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+        Path targetFolderPath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), String.format("pz%d", System.currentTimeMillis()));
         clearDirectory(targetFolderPath);
         Files.createDirectories(targetFolderPath);
         PearlZipFXUtil.simExtractFile(this, targetFolderPath);
@@ -305,7 +311,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                      "a", "b", "c").get();
 
         // Extract to destination
-        Path targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+        Path targetFolderPath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(),  String.format("pz%d", System.currentTimeMillis()));
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +339,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
                                                      "a").get();
 
         // Extract to destination
-        targetFolderPath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString());
+        targetFolderPath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(),  String.format("pz%d", System.currentTimeMillis()));
         clearDirectory(targetFolderPath);
         Files.createDirectories(targetFolderPath);
         PearlZipFXUtil.simExtractFile(this, targetFolderPath);
@@ -365,7 +371,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -392,7 +398,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -419,7 +425,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -446,7 +452,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -473,7 +479,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -500,7 +506,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
@@ -527,7 +533,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
         Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
         // Store contents
-        Path targetFilePath = Paths.get(ZipConstants.LOCAL_TEMP.toAbsolutePath().toString(), "output");
+        Path targetFilePath = Paths.get(LOCAL_TEMP.toAbsolutePath().toString(), "output");
         clearDirectory(targetFilePath);
         Files.createDirectories(targetFilePath);
         TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);

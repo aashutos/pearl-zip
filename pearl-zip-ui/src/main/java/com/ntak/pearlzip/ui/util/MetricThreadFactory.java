@@ -1,9 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
-import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_DEFAULT;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_THREAD_GROUP;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.LOG_THREAD_EXECUTION_ISSUE;
 
 /**
@@ -28,7 +29,7 @@ public class MetricThreadFactory implements ThreadFactory {
     protected MetricThreadFactory(MetricProfile profile, String threadGroupName) {
         this.profile = profile;
         this.threadGroup = new ThreadGroup(Optional.ofNullable(threadGroupName).orElse(KEY_DEFAULT));
-        ZipConstants.THREAD_GROUP = this.threadGroup;
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_THREAD_GROUP, this.threadGroup);
     }
 
     public static ThreadFactory create(MetricProfile profile) {
