@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -15,7 +15,7 @@ import javafx.scene.control.TableView;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.LBL_BUTTON_COPY;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.LBL_BUTTON_MOVE;
-import static com.ntak.pearlzip.ui.util.JFXUtil.changeButtonPicText;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.changeButtonPicText;
 
 /**
  *  Event Handler for Cancel Migration functionality.

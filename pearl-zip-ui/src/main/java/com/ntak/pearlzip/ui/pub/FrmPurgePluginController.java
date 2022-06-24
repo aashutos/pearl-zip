@@ -6,7 +6,7 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import com.ntak.pearlzip.ui.util.ModuleUtil;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;

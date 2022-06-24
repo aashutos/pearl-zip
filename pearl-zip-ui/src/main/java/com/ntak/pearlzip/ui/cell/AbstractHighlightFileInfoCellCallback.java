@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.cell;
 
@@ -11,7 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DEFAULT_HIGHLIGHT;
-import static com.ntak.pearlzip.ui.util.JFXUtil.highlightCellIfMatch;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.highlightCellIfMatch;
 
 /**
  *  Abstract root class used by the file list to render the cells in a row entry.

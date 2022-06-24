@@ -1,7 +1,7 @@
 /*
  * Copyright © 2022 92AK
  */
-package com.ntak.pearlzip.ui.util;
+package com.ntak.pearlzip.ui.util.internal;
 
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
+import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -39,8 +40,8 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.deleteDirectory;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory;
-import static com.ntak.pearlzip.ui.util.JFXUtil.loadLicenseDetails;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadLicenseDetails;
 import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**

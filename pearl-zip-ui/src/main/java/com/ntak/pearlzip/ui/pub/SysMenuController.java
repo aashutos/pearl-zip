@@ -10,8 +10,8 @@ import com.ntak.pearlzip.ui.event.handler.BtnNewSingleFileEventHandler;
 import com.ntak.pearlzip.ui.event.handler.BtnOpenEventHandler;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -34,8 +34,9 @@ import java.nio.file.Paths;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
-import static com.ntak.pearlzip.ui.util.JFXUtil.*;
+import static com.ntak.pearlzip.ui.util.JFXUtil.getActiveStage;
+import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.*;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
@@ -164,7 +165,7 @@ public class SysMenuController {
                        null);
         }}));
 
-        mnuNotifications.setOnAction((e)-> JFXUtil.runLater(JFXUtil::showNotifications));
-        mnuNewVersion.setOnAction((e)->checkNewVersionAvailable());
+        mnuNotifications.setOnAction((e)-> JFXUtil.runLater(com.ntak.pearlzip.ui.util.internal.JFXUtil::showNotifications));
+        mnuNewVersion.setOnAction((e)-> com.ntak.pearlzip.ui.util.internal.JFXUtil.checkNewVersionAvailable());
     }
 }

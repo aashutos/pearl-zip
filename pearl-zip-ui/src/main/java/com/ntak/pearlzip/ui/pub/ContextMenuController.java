@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -20,8 +20,8 @@ import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.openExternally;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.openExternally;
 
 /**
  *  Controller for the Context menu.

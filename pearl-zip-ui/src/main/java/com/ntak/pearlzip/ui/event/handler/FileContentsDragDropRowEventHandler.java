@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -9,9 +9,9 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -33,8 +33,8 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.PROGRESS;
 import static com.ntak.pearlzip.archive.pub.ArchiveService.DEFAULT_BUS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.handleDirectory;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.handleDirectory;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 /**

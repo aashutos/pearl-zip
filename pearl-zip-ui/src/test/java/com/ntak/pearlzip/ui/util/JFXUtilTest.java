@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -101,7 +101,7 @@ public class JFXUtilTest {
     @Test
     @DisplayName("Test: Set image and text for a button successfully")
     public void testChangeButtonPicText_WithValidImageAndText_Success() {
-        JFXUtil.changeButtonPicText(button, "add.png", "Test Button");
+        com.ntak.pearlzip.ui.util.internal.JFXUtil.changeButtonPicText(button, "add.png", "Test Button");
         Assertions.assertNotNull(button.getGraphic(), "Graphic was not assigned");
         Assertions.assertNotNull(((ImageView)button.getGraphic()).getImage(), "Image was not assigned");
         Assertions.assertTrue(((ImageView)button.getGraphic()).getImage().getUrl().matches(".*add\\.png"), "Image " +

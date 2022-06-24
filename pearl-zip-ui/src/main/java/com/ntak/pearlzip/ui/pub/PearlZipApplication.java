@@ -11,10 +11,10 @@ import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -47,8 +47,8 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.mac.MacZipConstants.*;
 import static com.ntak.pearlzip.ui.pub.ZipLauncher.OS_FILES;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.addToRecentFile;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.addToRecentFile;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchMainStage;
 
 /**
  * Loads the main UI screen for the Zip Application.
@@ -91,7 +91,7 @@ public abstract class PearlZipApplication extends Application {
                                                                                                 fxArchiveInfo.getArchiveInfo())).isPresent()) {
                                                    Stage preOpenStage = new Stage();
                                                    Node root = optNode.get().getContent();
-                                                   JFXUtil.loadPreOpenDialog(preOpenStage, root);
+                                                   com.ntak.pearlzip.ui.util.internal.JFXUtil.loadPreOpenDialog(preOpenStage, root);
 
                                                    Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
 
@@ -199,7 +199,7 @@ public abstract class PearlZipApplication extends Application {
 
             // Initialise theme...
             String themeName = System.getProperty(CNS_THEME_NAME, "modena");
-            JFXUtil.initialiseTheme(themesPath, themeName);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.initialiseTheme(themesPath, themeName);
 
             // Initialise drag out constants...
             try {
@@ -230,7 +230,7 @@ public abstract class PearlZipApplication extends Application {
             try {
                 if (OS_FILES.size() == 0 && Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION,
                                                                                               "true"))) {
-                    JFXUtil.runLater(JFXUtil::showNotifications);
+                    JFXUtil.runLater(com.ntak.pearlzip.ui.util.internal.JFXUtil::showNotifications);
                 }
             } catch(Exception e) {
 
@@ -306,7 +306,7 @@ public abstract class PearlZipApplication extends Application {
                 Stage preOpenStage = new Stage();
                 Node root = optFXForm.get()
                                      .getContent();
-                JFXUtil.loadPreOpenDialog(preOpenStage, root);
+                com.ntak.pearlzip.ui.util.internal.JFXUtil.loadPreOpenDialog(preOpenStage, root);
 
                 Pair<AtomicBoolean,String> result = (Pair<AtomicBoolean,String>) root.getUserData();
 

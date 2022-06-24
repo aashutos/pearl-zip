@@ -9,10 +9,10 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.ModuleUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -58,9 +58,10 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.mac.MacPearlZipApplication.loadMenusFromPlugins;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.initialiseApplicationSettings;
-import static com.ntak.pearlzip.ui.util.JFXUtil.*;
-import static com.ntak.pearlzip.ui.util.ModuleUtil.loadModuleFromExtensionPackage;
+import static com.ntak.pearlzip.ui.util.JFXUtil.executeBackgroundProcess;
+import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.initialiseApplicationSettings;
+import static com.ntak.pearlzip.ui.util.internal.ModuleUtil.loadModuleFromExtensionPackage;
 
 /**
  * Controller for the Options dialog.
@@ -401,7 +402,7 @@ public class FrmOptionsController {
                                                      .getFocusedIndex();
             for (int i = 0; i < tblProviders.getItems().size(); i++) {
                 final int curIdx = i;
-                JFXUtil.getTableCellForColumnRow(tblProviders, i, "Priority").ifPresent(
+                com.ntak.pearlzip.ui.util.internal.JFXUtil.getTableCellForColumnRow(tblProviders, i, "Priority").ifPresent(
                         (tabCell) -> {
                             String colour = curIdx == focusedIndex ? "white":"black";
                             tabCell.getGraphic().setStyle(String.format(PATTERN_TEXTFIELD_TABLE_CELL_STYLE,
@@ -554,7 +555,7 @@ public class FrmOptionsController {
 
         btnSetTheme.setOnAction((e)-> {
             String name = tblTheme.getSelectionModel().getSelectedItem();
-            initialiseTheme(themesPath, name);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.initialiseTheme(themesPath, name);
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_THEME_NAME, name);
         });
 
@@ -629,7 +630,7 @@ public class FrmOptionsController {
                                         .createSystemMenu(aboutStage, customMenus);
                 } catch(IOException exc) {
                 }  finally {
-                    JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE,"false")), s));
+                    JFXUtil.getMainStageInstances().forEach(s -> com.ntak.pearlzip.ui.util.internal.JFXUtil.setSafeModeTitles(Boolean.parseBoolean(WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "false")), s));
                 }
             }
         });
@@ -650,8 +651,8 @@ public class FrmOptionsController {
             }
 
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            JFXUtil.getMainStageInstances().forEach(s -> JFXUtil.setSafeModeTitles(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "false")),
-                                                                                       s));
+            JFXUtil.getMainStageInstances().forEach(s -> com.ntak.pearlzip.ui.util.internal.JFXUtil.setSafeModeTitles(Boolean.parseBoolean(System.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE, "false")),
+                                                                                                                      s));
         });
 
         paneDropArea.setOnDragOver(e -> e.acceptTransferModes(TransferMode.COPY));

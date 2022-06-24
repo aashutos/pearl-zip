@@ -5,8 +5,8 @@ package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.input.MouseEvent;
@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.genNewArchivePath;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.genNewArchivePath;
 
 /**
  *  Event Handler for Create Archive functionality.

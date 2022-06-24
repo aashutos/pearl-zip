@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -7,9 +7,9 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AlertException;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -80,7 +80,7 @@ public class BtnAddFileEventHandler implements CheckEventHandler<ActionEvent> {
         String prefix = fxArchiveInfo.getPrefix();
 
         JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
-                                         ()-> ArchiveUtil.addFile(sessionId, fxArchiveInfo, rawFile, fileName),
+                                         ()-> com.ntak.pearlzip.ui.util.ArchiveUtil.addFile(sessionId, fxArchiveInfo, rawFile, fileName),
                                          (s)-> JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
         );
     }

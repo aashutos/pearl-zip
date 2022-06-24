@@ -7,7 +7,6 @@ import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -105,7 +104,7 @@ public class FrmLicenseOverviewController {
                                   .map(l -> info.licenseFile().endsWith("txt") ? String.format("%s<br/>", l) : l)
                                   .forEach(sb::append);
                             }
-                            JFXUtil.loadLicenseDetails(info.licenseFile(), sb.toString(), false);
+                            com.ntak.pearlzip.ui.util.internal.JFXUtil.loadLicenseDetails(info.licenseFile(), sb.toString(), false);
                         }
                     }
                 } catch (Exception exc) {

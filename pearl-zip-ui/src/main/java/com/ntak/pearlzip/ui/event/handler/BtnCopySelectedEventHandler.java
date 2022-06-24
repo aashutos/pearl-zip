@@ -8,9 +8,9 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AlertException;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -30,9 +30,8 @@ import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.COMPLETED;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
-import static com.ntak.pearlzip.ui.util.JFXUtil.changeButtonPicText;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.changeButtonPicText;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
@@ -121,7 +120,7 @@ public class BtnCopySelectedEventHandler implements CheckEventHandler<ActionEven
                                          .getFileName();
                     Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
                     Path tempFile = Paths.get(tempDir.toString(), fileName.toString());
-                    Path tempArchive = createBackupArchive(fxArchiveInfo, tempDir);
+                    Path tempArchive = com.ntak.pearlzip.ui.util.ArchiveUtil.createBackupArchive(fxArchiveInfo, tempDir);
                     Files.copy(Paths.get(fxArchiveInfo.getArchivePath()), tempArchive, REPLACE_EXISTING);
 
                     boolean success = archiveReadService.extractFile(sessionId, tempFile,
@@ -182,8 +181,8 @@ public class BtnCopySelectedEventHandler implements CheckEventHandler<ActionEven
                                                                                                                    .size());
 
                                                               if (!successCopy) {
-                                                                  restoreBackupArchive(tempArchive,
-                                                                                       Paths.get(fxArchiveInfo.getArchivePath()));
+                                                                  com.ntak.pearlzip.ui.util.ArchiveUtil.restoreBackupArchive(tempArchive,
+                                                                                                                             Paths.get(fxArchiveInfo.getArchivePath()));
 
                                                                   // LOG: Issue adding file %s to archive %s
                                                                   LOGGER.error(resolveTextKey(
@@ -198,7 +197,7 @@ public class BtnCopySelectedEventHandler implements CheckEventHandler<ActionEven
                                                               }
 
                                                               Files.deleteIfExists(tempFile);
-                                                              removeBackupArchive(tempArchive);
+                                                              com.ntak.pearlzip.ui.util.ArchiveUtil.removeBackupArchive(tempArchive);
                                                           },
                                                      (e) -> {
                                                          // LOG: Issue occurred on pasting migration item (root item: %s). Migration has been cancelled.

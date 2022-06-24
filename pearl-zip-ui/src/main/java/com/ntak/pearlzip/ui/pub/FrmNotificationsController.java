@@ -38,7 +38,7 @@ public class FrmNotificationsController {
         AtomicReference<List<NotificationEntry>> entries = new AtomicReference<>();
         PRIMARY_EXECUTOR_SERVICE.submit(()->
           {
-            entries.set(JFXUtil.getNotifications("PearlZip Alert", "PearlZip Information Message"));
+            entries.set(com.ntak.pearlzip.ui.util.internal.JFXUtil.getNotifications("PearlZip Alert", "PearlZip Information Message"));
             JFXUtil.runLater(()->{
                 tblNotifications.getItems().addAll(entries.get());
                 tblNotifications.setItems(new SortedList<>(tblNotifications.getItems(),
