@@ -40,10 +40,10 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 import static com.ntak.pearlzip.ui.util.JFXUtil.isFileInArchiveLevel;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.checkPreOpenDialog;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchMainStage;
 
 /**
  *  Event Handler for processing archive file-entry click events.

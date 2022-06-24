@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import javafx.scene.control.Alert;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -242,5 +243,9 @@ public class ArchiveUtil {
                        null
             );
         }
+    }
+
+    public static Stage launchMainStage(FXArchiveInfo fxArchiveInfo) {
+        return com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchMainStage(new Stage(), fxArchiveInfo);
     }
 }

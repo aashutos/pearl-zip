@@ -36,7 +36,8 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.getActiveStage;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.*;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.addToRecentFile;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.genNewArchivePath;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
@@ -114,7 +115,7 @@ public class SysMenuController {
                                                                      ZipState.getReadArchiveServiceForFile(absolutePath).get(),
                                                                      ZipState.getWriteArchiveServiceForFile(absolutePath).orElse(null)
                     );
-                    launchMainStage(newArchiveInfo);
+                    com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage(newArchiveInfo);
                     addToRecentFile(newArchive);
 
                     fxArchiveInfo.getCloseBypass().set(true);

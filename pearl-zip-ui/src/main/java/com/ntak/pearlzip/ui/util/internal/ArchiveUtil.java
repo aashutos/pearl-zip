@@ -224,7 +224,7 @@ public class ArchiveUtil {
                                                         writeService,
                                                         archiveInfo,
                                                         null);
-        com.ntak.pearlzip.ui.util.JFXUtil.runLater(() -> launchMainStage(fxArchiveInfo));
+        com.ntak.pearlzip.ui.util.JFXUtil.runLater(() -> com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage(fxArchiveInfo));
         addToRecentFile(archive);
     }
 
@@ -244,7 +244,7 @@ public class ArchiveUtil {
 
             checkPreOpenDialog(readService, newFxArchiveInfo.getArchiveInfo());
 
-            com.ntak.pearlzip.ui.util.JFXUtil.runLater(() -> launchMainStage(newFxArchiveInfo));
+            com.ntak.pearlzip.ui.util.JFXUtil.runLater(() -> com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage(newFxArchiveInfo));
             addToRecentFile(file);
 
             return true;
@@ -282,10 +282,6 @@ public class ArchiveUtil {
                                                      result.getValue()));
             }
         }
-    }
-
-    public static Stage launchMainStage(FXArchiveInfo fxArchiveInfo) {
-        return launchMainStage(new Stage(), fxArchiveInfo);
     }
 
     public static Stage launchMainStage(Stage stage, FXArchiveInfo fxArchiveInfo) {
