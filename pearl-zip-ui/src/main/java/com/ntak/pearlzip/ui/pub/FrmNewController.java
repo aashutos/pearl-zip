@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.constants.ArchiveConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.profile.component.GeneralComponent;
 import com.ntak.pearlzip.ui.event.handler.BtnCreateEventHandler;
 import com.ntak.pearlzip.ui.model.ZipState;
 import javafx.collections.FXCollections;
@@ -18,10 +19,7 @@ import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,7 +51,10 @@ public class FrmNewController {
         Set<String> supportedWriteFormats = new HashSet<>(ZipState.supportedWriteArchives());
 
         for (ArchiveService service : ZipState.getWriteProviders()) {
-            supportedWriteFormats.removeAll(service.getAliasFormats());
+            supportedWriteFormats.removeAll(service.getArchiveServiceProfile()
+                                                   .getComponent(GeneralComponent.class)
+                                                   .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                   .getAliasFormats());
         }
 
         comboArchiveFormat.setItems(FXCollections.observableArrayList(supportedWriteFormats));

@@ -3,6 +3,9 @@
  */
 package com.ntak.pearlzip.archive.pub.profile.component;
 
+import com.ntak.pearlzip.archive.pub.ArchiveService;
+import com.ntak.pearlzip.archive.pub.ArchiveServiceProfileComponent;
+
 import java.util.Collections;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -13,7 +16,7 @@ import java.util.Set;
  *
  *  @author Aashutos Kakshepati
  */
-public class GeneralComponent {
+public class GeneralComponent implements ArchiveServiceProfileComponent {
     private final Set<String> aliasFormats;
     private final Set<String> compressorArchives;
     private final ResourceBundle resourceBundle;
@@ -33,6 +36,14 @@ public class GeneralComponent {
         );
     }
 
+    /**
+     *   Declares a set of file extensions, which are alias of core formats. This list of formats will not be used in
+     *   the creation of archives. It is anticipated that this field will contain shortened convenience extensions in
+     *   which long explicit extensions would be preferable (e.g. tar.gz would be preferred to tgz). The shortened
+     *   format can still be read and modified subject to the underlying {@link ArchiveService} implementation.
+     *
+     *   @return Set&lt;String&gt; - Set of alias file extensions
+     */
     public Set<String> getAliasFormats() {
         return aliasFormats;
     }

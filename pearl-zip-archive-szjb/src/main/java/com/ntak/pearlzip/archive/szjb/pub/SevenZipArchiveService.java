@@ -326,11 +326,6 @@ public class SevenZipArchiveService implements ArchiveReadService {
     }
 
     @Override
-    public Set<String> getCompressorArchives() {
-        return Set.of("gz", "xz", "bz2", "tgz");
-    }
-
-    @Override
     public ArchiveServiceProfile getArchiveServiceProfile() {
         return PROFILE;
     }

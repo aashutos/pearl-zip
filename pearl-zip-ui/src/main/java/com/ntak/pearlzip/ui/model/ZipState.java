@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.profile.component.GeneralComponent;
 import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
 import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import javafx.scene.control.ContextMenu;
@@ -166,7 +167,10 @@ public class ZipState {
                 .collect(Collectors.toCollection(HashSet::new));
 
         for (ArchiveService service : getWriteProviders()) {
-            supportedWriteFormats.removeAll(service.getAliasFormats());
+            supportedWriteFormats.removeAll(service.getArchiveServiceProfile()
+                                                   .getComponent(GeneralComponent.class)
+                                                   .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                   .getAliasFormats());
         }
 
         return supportedWriteFormats;
