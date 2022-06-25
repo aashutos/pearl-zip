@@ -11,7 +11,6 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -181,7 +180,7 @@ public class FileContentsDragDropRowEventHandler implements CheckEventHandler<Dr
 
     @Override
     public void check(DragEvent event) throws AlertException {
-        ArchiveUtil.checkArchiveExists(fxArchiveInfo);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(fxArchiveInfo);
 
         if (Objects.isNull(fxArchiveInfo.getWriteService())) {
             // LOG: Warning: Add functionality not supported for archive %s

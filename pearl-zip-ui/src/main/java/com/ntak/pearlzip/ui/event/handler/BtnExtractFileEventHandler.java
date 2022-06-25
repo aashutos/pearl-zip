@@ -8,9 +8,9 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AlertException;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.CheckEventHandler;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
@@ -75,7 +75,7 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
 
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                                  () -> ArchiveUtil.extractDirectory(sessionId, targetDir, fxArchiveInfo,
-                                                                                 selectedFile),
+                                                                                    selectedFile),
                                                  (s)->{
                                                      if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
                                                          InternalContextCache.GLOBAL_CONFIGURATION_CACHE
@@ -113,7 +113,7 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
 
     @Override
     public void check(ActionEvent event) throws AlertException {
-        ArchiveUtil.checkArchiveExists(fxArchiveInfo);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(fxArchiveInfo);
 
         if (Objects.isNull(fxArchiveInfo.getReadService())) {
             // LOG: Extract functionality not supported for archive %s

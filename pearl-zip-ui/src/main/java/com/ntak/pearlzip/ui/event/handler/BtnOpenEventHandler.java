@@ -4,8 +4,8 @@
 package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;

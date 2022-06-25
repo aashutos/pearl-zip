@@ -387,7 +387,7 @@ public class ArchiveUtilTest {
 
         archiveInfo.setArchivePath(archive.toAbsolutePath().toString());
 
-        ArchiveUtil.newArchive(1L, archiveInfo, archive.toFile());
+        com.ntak.pearlzip.ui.util.ArchiveUtil.newArchive(1L, archiveInfo, archive.toFile());
         verify(mockArchiveWriteService, times(1)).createArchive(anyLong(), any(ArchiveInfo.class));
     }
 
@@ -444,7 +444,7 @@ public class ArchiveUtilTest {
     public void testCheckArchiveExists_Success() throws AlertException {
         when(mockArchiveInfo.getArchivePath()).thenReturn(Paths.get("src", "test", "resources", "test.zip")
                                                                .toString());
-        ArchiveUtil.checkArchiveExists(mockArchiveInfo);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(mockArchiveInfo);
     }
 
     @Test
@@ -452,7 +452,7 @@ public class ArchiveUtilTest {
     public void testCheckArchiveExists_Fail() {
         when(mockArchiveInfo.getArchivePath()).thenReturn(Paths.get("src", "test", "resources", "test-non-existent.zip")
                                                                .toString());
-        Assertions.assertThrows(AlertException.class, ()->ArchiveUtil.checkArchiveExists(mockArchiveInfo));
+        Assertions.assertThrows(AlertException.class, ()-> com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(mockArchiveInfo));
     }
 
     @Test

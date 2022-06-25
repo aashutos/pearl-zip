@@ -14,7 +14,6 @@ import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.ContextMenuController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -40,10 +39,10 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 import static com.ntak.pearlzip.ui.util.JFXUtil.isFileInArchiveLevel;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.checkPreOpenDialog;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchMainStage;
 
 /**
  *  Event Handler for processing archive file-entry click events.
@@ -217,8 +216,8 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                         btnUp.setVisible(true);
                     }
                 } else { // Open file externally?
-                    ArchiveUtil.openExternally(sessionId, thisStage,
-                                               fxArchiveInfo, clickedRow);
+                    com.ntak.pearlzip.ui.util.ArchiveUtil.openExternally(sessionId, thisStage,
+                                                                         fxArchiveInfo, clickedRow);
                 }
 
                 // LOG: Current directory: /%s

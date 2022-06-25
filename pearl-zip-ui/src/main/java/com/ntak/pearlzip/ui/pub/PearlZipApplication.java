@@ -47,8 +47,8 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.mac.MacZipConstants.*;
 import static com.ntak.pearlzip.ui.pub.ZipLauncher.OS_FILES;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.addToRecentFile;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchMainStage;
 
 /**
  * Loads the main UI screen for the Zip Application.

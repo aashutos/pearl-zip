@@ -38,7 +38,7 @@ import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.LOCK_POLL_TIMEOUT;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.launchProgress;
+import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchProgress;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 /**
