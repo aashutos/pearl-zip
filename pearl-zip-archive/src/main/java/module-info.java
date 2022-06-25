@@ -17,6 +17,7 @@ module com.ntak.pearlzip.archive {
     exports com.ntak.pearlzip.archive.constants.internal to com.ntak.pearlzip.ui;
     exports com.ntak.pearlzip.archive.pub;
     exports com.ntak.pearlzip.archive.model;
+    exports com.ntak.pearlzip.archive.pub.profile.component;
 
     ////////////////////
     ///// Requires /////
