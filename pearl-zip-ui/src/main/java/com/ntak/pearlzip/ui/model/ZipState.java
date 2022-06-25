@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import javafx.scene.control.ContextMenu;
 import org.apache.logging.log4j.util.Strings;
 
@@ -63,11 +64,14 @@ public class ZipState {
                                                  .filter(Strings::isNotBlank)
                                                  .collect(Collectors.toSet())
         );
-        if (service instanceof  ArchiveWriteService) {
-            addArchiveToMap(ARCHIVE_WRITE_MAP, ((ArchiveWriteService) service).supportedWriteFormats()
-                                                                              .stream()
-                                                                              .filter(Strings::isNotBlank)
-                                                                              .collect(Collectors.toList()),
+        if (service instanceof  ArchiveWriteService writeService) {
+            addArchiveToMap(ARCHIVE_WRITE_MAP, writeService.getArchiveServiceProfile()
+                                                           .getComponent(WriteServiceComponent.class)
+                                                           .orElse(new WriteServiceComponent(Collections.emptySet(), Collections.emptyMap()))
+                                                           .getSupportedFormats()
+                                                           .stream()
+                                                           .filter(Strings::isNotBlank)
+                                                           .collect(Collectors.toList()),
                             (ArchiveWriteService) service);
 
             WRITE_PROVIDERS.removeIf(s -> s.getClass()

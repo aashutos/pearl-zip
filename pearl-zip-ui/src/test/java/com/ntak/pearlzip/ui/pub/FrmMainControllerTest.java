@@ -94,6 +94,7 @@ public class FrmMainControllerTest {
 
             // Initialise common stubbing
             when(mockReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
+            when(mockWriteService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
             when(mockReadService.getCompressorArchives()).thenCallRealMethod();
             when(mockWriteService.getCompressorArchives()).thenCallRealMethod();
             when(mockArchiveInfo.getReadService()).thenReturn(mockReadService);

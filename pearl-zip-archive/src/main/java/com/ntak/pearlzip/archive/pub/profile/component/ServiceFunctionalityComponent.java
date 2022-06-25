@@ -22,6 +22,12 @@ public class ServiceFunctionalityComponent implements ArchiveServiceProfileCompo
         this.functionalitySpecs = Collections.unmodifiableMap(functionalitySpecs);
     }
 
+    /**
+     *   Lists out explicitly all archive formats that can be used by the implementation of the archive service.
+     *
+     *   @return List&lt;String&gt; - List of archive extensions that can be created and modified by the archive
+     *   service implementation
+     */
     public Set<String> getSupportedFormats() {
         return supportedFormats;
     }

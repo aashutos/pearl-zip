@@ -3,8 +3,6 @@
  */
 package com.ntak.pearlzip.archive.pub;
 
-import java.util.List;
-
 /**
  *  Interface defining functionality associated with the writing of archives.
  *  @author Aashutos Kakshepati
@@ -73,13 +71,4 @@ public interface ArchiveWriteService extends ArchiveService {
      *   @return boolean - returns true if file is successfully deleted
      */
     boolean deleteFile(long sessionId, ArchiveInfo archiveInfo, FileInfo file);
-
-    /**
-     *   Lists out explicitly all archive formats that can be written to by the implementation of the archive service.
-     *
-     *   @return List&lt;String&gt; - List of archive extensions that can be created and modified by the archive
-     *   service implementation
-     */
-    @Deprecated(forRemoval = true)
-    List<String> supportedWriteFormats();
 }

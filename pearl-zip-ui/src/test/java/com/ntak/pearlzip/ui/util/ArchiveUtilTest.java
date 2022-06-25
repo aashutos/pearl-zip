@@ -124,7 +124,6 @@ public class ArchiveUtilTest {
             mockMainController = Mockito.mock(FrmMainController.class);
 
             mockArchiveWriteService = Mockito.mock(ArchiveWriteService.class);
-            when(mockArchiveWriteService.supportedWriteFormats()).thenReturn(List.of("zip"));
 
             when(mockArchiveInfo.getArchivePath()).thenReturn(Paths.get("src", "test", "resources", "test.zip")
                                                                    .toString());

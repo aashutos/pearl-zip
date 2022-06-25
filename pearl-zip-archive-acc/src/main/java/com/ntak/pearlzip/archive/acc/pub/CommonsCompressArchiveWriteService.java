@@ -35,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import static com.ntak.pearlzip.archive.acc.constants.CommonsCompressConstants.PROFILE;
@@ -496,11 +495,6 @@ public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
         }
 
         return false;
-    }
-
-    @Override
-    public List<String> supportedWriteFormats() {
-        return Arrays.asList("zip", "jar", "gz", "xz", "bz2", "tar", "tgz");
     }
 
     @Override
