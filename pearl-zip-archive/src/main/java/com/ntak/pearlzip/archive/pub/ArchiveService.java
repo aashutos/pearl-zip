@@ -4,7 +4,6 @@
 package com.ntak.pearlzip.archive.pub;
 
 import javafx.scene.Node;
-import javafx.util.Pair;
 
 import java.util.*;
 
@@ -120,18 +119,6 @@ public interface ArchiveService {
     default Set<String> getAliasFormats() { return Set.of("tgz"); }
 
     /**
-     *   Generates a tab for the archive implementation in the Options dialog to provide some global settings for the
-     *   underlying implementation as required. The object returned consists of a Pair with a String key representing
-     *   the tab title text on the Options dialog and a Node as the root JavaFX object that will be found under the
-     *   JavaFX Tab object.
-     *
-     *   @return Optional&lt;Pair&lt;String,Node&gt;&gt; - The representation of the Options tab for the archive
-     *   service implementation
-     */
-    @Deprecated(forRemoval = true)
-    default Optional<Pair<String,Node>> getOptionsPane() { return Optional.empty(); }
-
-    /**
      *   Provides a ResourceBundle containing the logging keys for the underlying archive service implementation.
      *
      *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
@@ -139,6 +126,8 @@ public interface ArchiveService {
      */
     @Deprecated(forRemoval = true)
     default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
+
+    ArchiveServiceProfile getArchiveServiceProfile();
 
     default Optional<FXForm> getFXFormByIdentifier(String name, Object... parameters) { return Optional.empty();}
 
