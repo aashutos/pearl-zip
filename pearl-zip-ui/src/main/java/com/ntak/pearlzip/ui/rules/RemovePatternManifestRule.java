@@ -6,7 +6,7 @@ package com.ntak.pearlzip.ui.rules;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import com.ntak.pearlzip.ui.util.ModuleUtil;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;

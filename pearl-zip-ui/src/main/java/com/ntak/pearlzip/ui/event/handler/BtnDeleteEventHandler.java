@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -33,7 +33,6 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.LBL_PROGRESS_
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.PROGRESS;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
@@ -70,7 +69,7 @@ public class BtnDeleteEventHandler implements CheckEventHandler<MouseEvent> {
                     try {
                         fxArchiveInfo.getMigrationInfo().initMigration(FXMigrationInfo.MigrationType.DELETE, fileToDelete);
                         Path tempDir = Files.createTempDirectory(TMP_DIR_PREFIX);
-                        tempArchive.set(createBackupArchive(fxArchiveInfo, tempDir));
+                        tempArchive.set(com.ntak.pearlzip.ui.util.ArchiveUtil.createBackupArchive(fxArchiveInfo, tempDir));
                         boolean success = writeService.deleteFile(sessionId, fxArchiveInfo.getArchiveInfo(),
                                                                   fileToDelete);
 
@@ -90,11 +89,11 @@ public class BtnDeleteEventHandler implements CheckEventHandler<MouseEvent> {
                             ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId, PROGRESS,
                                                                                 resolveTextKey(LBL_PROGRESS_LOADING),
                                                                                 INDETERMINATE_PROGRESS, 1));
-                            restoreBackupArchive(tempArchive.get(), Paths.get(fxArchiveInfo.getArchivePath()));
+                            com.ntak.pearlzip.ui.util.ArchiveUtil.restoreBackupArchive(tempArchive.get(), Paths.get(fxArchiveInfo.getArchivePath()));
                         }
                     } finally {
                         fxArchiveInfo.getMigrationInfo().clear();
-                        removeBackupArchive(tempArchive.get());
+                        com.ntak.pearlzip.ui.util.ArchiveUtil.removeBackupArchive(tempArchive.get());
                     }
                },
                                              (s)->{

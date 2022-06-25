@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.EventHandler;
@@ -35,8 +36,8 @@ import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FIL
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.TMP_DIR_PREFIX;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.*;
 import static com.ntak.pearlzip.ui.util.JFXUtil.*;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.addToRecentFile;
 
 /**
  *  Event Handler functionality, which confirms the save of temporary archives on closure.
@@ -143,7 +144,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                                                                                                  .getArchiveFormat()
                                                                                                  .toLowerCase())) {
                                                              // Back up archive...
-                                                             parentTempArchive.set(createBackupArchive(
+                                                             parentTempArchive.set(ArchiveUtil.createBackupArchive(
                                                                      lookupArchiveInfo(this.fxArchiveInfo.getParentPath()).get(),
                                                                      Files.createTempDirectory(
                                                                              TMP_DIR_PREFIX)));
@@ -160,7 +161,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                                                              }
                                                          } else {
                                                              // Non-compressor archive
-                                                             parentTempArchive.set(createBackupArchive(
+                                                             parentTempArchive.set(ArchiveUtil.createBackupArchive(
                                                                      lookupArchiveInfo(this.fxArchiveInfo.getParentPath()).get(),
                                                                      Files.createTempDirectory(
                                                                              TMP_DIR_PREFIX)));
@@ -279,7 +280,7 @@ public class ConfirmCloseEventHandler implements EventHandler<WindowEvent> {
                         }
                     }
                 }
-                removeBackupArchive(archivePath);
+                ArchiveUtil.removeBackupArchive(archivePath);
             }
         } catch(IOException e) {
             // Issue with IO Process when saving down archive %s

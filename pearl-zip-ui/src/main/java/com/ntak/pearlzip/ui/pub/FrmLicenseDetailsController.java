@@ -1,9 +1,9 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
-import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.internal.JFXUtil;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -37,8 +37,8 @@ public class FrmLicenseDetailsController {
     public void initData(Stage stage, String data, boolean withAcceptDecline) {
         webLicense.getEngine()
                   .setJavaScriptEnabled(true);
-        webLicense.setOnMouseReleased(e -> JFXUtil.checkWebEngineScrollToBottom(webLicense.getEngine(),
-                                                                                (b) -> btnAccept.setDisable(!b)));
+        webLicense.setOnMouseReleased(e -> com.ntak.pearlzip.ui.util.internal.JFXUtil.checkWebEngineScrollToBottom(webLicense.getEngine(),
+                                                                                                                   (b) -> btnAccept.setDisable(!b)));
 
         webLicense.setOnScroll(e -> JFXUtil.checkWebEngineScrollToBottom(webLicense.getEngine(),
                                                                          (b) -> btnAccept.setDisable(!b)));

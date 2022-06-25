@@ -5,7 +5,6 @@ package com.ntak.pearlzip.ui.event.handler;
 
 import com.ntak.pearlzip.archive.pub.ArchiveInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -80,7 +79,7 @@ public class BtnCreateEventHandler implements EventHandler<MouseEvent> {
                     File archive = newArchive;
                     long sessionId = System.currentTimeMillis();
                     JFXUtil.executeBackgroundProcess(sessionId, stage,
-                                                     () -> ArchiveUtil.newArchive(sessionId, archiveInfo, archive),
+                                                     () -> com.ntak.pearlzip.ui.util.ArchiveUtil.newArchive(sessionId, archiveInfo, archive),
                                                      (s)->{
                                                               stage.fireEvent(new WindowEvent(stage,
                                                                                              WindowEvent.WINDOW_CLOSE_REQUEST));

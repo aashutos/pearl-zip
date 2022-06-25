@@ -13,7 +13,6 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.ContextMenuController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
-import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -40,10 +39,10 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.model.ZipState.CONTEXT_MENU_INSTANCES;
 import static com.ntak.pearlzip.ui.model.ZipState.ROW_TRIGGER;
-import static com.ntak.pearlzip.ui.util.ArchiveUtil.checkPreOpenDialog;
 import static com.ntak.pearlzip.ui.util.ArchiveUtil.launchMainStage;
 import static com.ntak.pearlzip.ui.util.JFXUtil.isFileInArchiveLevel;
 import static com.ntak.pearlzip.ui.util.JFXUtil.raiseAlert;
+import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.checkPreOpenDialog;
 
 /**
  *  Event Handler for processing archive file-entry click events.
@@ -79,7 +78,7 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                                                          .getFocusedIndex();
                 for (int i = 0; i < fileContentsView.getItems().size(); i++) {
                     int curIdx = i;
-                    JFXUtil.getTableCellForColumnRow(fileContentsView, i, "Comments").ifPresent(
+                    com.ntak.pearlzip.ui.util.internal.JFXUtil.getTableCellForColumnRow(fileContentsView, i, "Comments").ifPresent(
                             (tabCell) -> {
                                 String colour = curIdx == focusedIndex ? "white":"black";
                                 tabCell.getGraphic().setStyle(String.format(PATTERN_TEXTFIELD_TABLE_CELL_STYLE,
@@ -217,8 +216,8 @@ public class FileInfoRowEventHandler implements  EventHandler<MouseEvent> {
                         btnUp.setVisible(true);
                     }
                 } else { // Open file externally?
-                    ArchiveUtil.openExternally(sessionId, thisStage,
-                                               fxArchiveInfo, clickedRow);
+                    com.ntak.pearlzip.ui.util.ArchiveUtil.openExternally(sessionId, thisStage,
+                                                                         fxArchiveInfo, clickedRow);
                 }
 
                 // LOG: Current directory: /%s

@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
+import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -164,14 +165,14 @@ public class ArchiveUtilTest {
     @Test
     @DisplayName("Test: Extract to directory with no directory will not execute")
     public void testExtractToDirectory_NullDirectory_Nothing() {
-        ArchiveUtil.extractToDirectory(1L, mockArchiveInfo, null);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory(1L, mockArchiveInfo, null);
         verify(mockArchiveInfo, never()).getFiles();
     }
 
     @Test
     @DisplayName("Test: Extract to directory with non-existent directory will not execute")
     public void testExtractToDirectory_NonExistentDirectory_Nothing() {
-        ArchiveUtil.extractToDirectory(2L, mockArchiveInfo, Paths.get("non-existent-path").toFile());
+        com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory(2L, mockArchiveInfo, Paths.get("non-existent-path").toFile());
         verify(mockArchiveInfo, never()).getFiles();
     }
 
@@ -179,7 +180,7 @@ public class ArchiveUtilTest {
     @DisplayName("Test: Extract to directory with valid directory will execute")
     public void testExtractToDirectory_ValidDirectory_Success() {
         when(mockArchiveInfo.getArchiveInfo()).thenReturn(new ArchiveInfo());
-        ArchiveUtil.extractToDirectory(2L, mockArchiveInfo, tempDirectory.toFile());
+        com.ntak.pearlzip.ui.util.ArchiveUtil.extractToDirectory(2L, mockArchiveInfo, tempDirectory.toFile());
         verify(mockArchiveInfo, times(1)).getFiles();
         verify(mockArchiveReadService,
                times((int)mockArchiveInfo.getFiles().stream().filter(f->!f.isFolder()).count())).extractFile(anyLong(),
@@ -192,7 +193,7 @@ public class ArchiveUtilTest {
     @DisplayName("Test: Back up existing archive successfully")
     public void testBackUpArchiver_ExistingArchive_Success() throws IOException {
         Path archive = Path.of(mockArchiveInfo.getArchivePath());
-        Path backup = ArchiveUtil.createBackupArchive(mockArchiveInfo, tempDirectory);
+        Path backup = com.ntak.pearlzip.ui.util.ArchiveUtil.createBackupArchive(mockArchiveInfo, tempDirectory);
 
         Assertions.assertTrue(Files.exists(archive), "Archive does not exist");
         Assertions.assertTrue(Files.exists(backup), "Back up does not exist");
@@ -386,7 +387,7 @@ public class ArchiveUtilTest {
 
         archiveInfo.setArchivePath(archive.toAbsolutePath().toString());
 
-        ArchiveUtil.newArchive(1L, archiveInfo, archive.toFile());
+        com.ntak.pearlzip.ui.util.ArchiveUtil.newArchive(1L, archiveInfo, archive.toFile());
         verify(mockArchiveWriteService, times(1)).createArchive(anyLong(), any(ArchiveInfo.class));
     }
 
@@ -416,7 +417,7 @@ public class ArchiveUtilTest {
         }
 
         // Restore back up...
-        ArchiveUtil.restoreBackupArchive(backupArchive, targetLocation);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.restoreBackupArchive(backupArchive, targetLocation);
 
         // Recalculate hash of file...
         try (InputStream archiveStream = Files.newInputStream(targetLocation)) {
@@ -443,7 +444,7 @@ public class ArchiveUtilTest {
     public void testCheckArchiveExists_Success() throws AlertException {
         when(mockArchiveInfo.getArchivePath()).thenReturn(Paths.get("src", "test", "resources", "test.zip")
                                                                .toString());
-        ArchiveUtil.checkArchiveExists(mockArchiveInfo);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(mockArchiveInfo);
     }
 
     @Test
@@ -451,7 +452,7 @@ public class ArchiveUtilTest {
     public void testCheckArchiveExists_Fail() {
         when(mockArchiveInfo.getArchivePath()).thenReturn(Paths.get("src", "test", "resources", "test-non-existent.zip")
                                                                .toString());
-        Assertions.assertThrows(AlertException.class, ()->ArchiveUtil.checkArchiveExists(mockArchiveInfo));
+        Assertions.assertThrows(AlertException.class, ()-> com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(mockArchiveInfo));
     }
 
     @Test
@@ -461,7 +462,7 @@ public class ArchiveUtilTest {
         Path tempArchive = Paths.get(tempDir.toAbsolutePath().toString(), "temp-archive.zip");
         Files.createFile(tempArchive);
 
-        ArchiveUtil.removeBackupArchive(tempArchive);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.removeBackupArchive(tempArchive);
 
         Assertions.assertTrue(Files.notExists(tempArchive), "Temporary archive unexpectedly exists");
         Assertions.assertTrue(Files.notExists(tempDir), "Temporary directory unexpectedly exists");

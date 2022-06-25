@@ -75,7 +75,7 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
 
                 JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
                                                  () -> ArchiveUtil.extractDirectory(sessionId, targetDir, fxArchiveInfo,
-                                                                                 selectedFile),
+                                                                                    selectedFile),
                                                  (s)->{
                                                      if (Boolean.parseBoolean(CURRENT_SETTINGS.getProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED,"true"))) {
                                                          InternalContextCache.GLOBAL_CONFIGURATION_CACHE
@@ -113,7 +113,7 @@ public class BtnExtractFileEventHandler implements CheckEventHandler<ActionEvent
 
     @Override
     public void check(ActionEvent event) throws AlertException {
-        ArchiveUtil.checkArchiveExists(fxArchiveInfo);
+        com.ntak.pearlzip.ui.util.ArchiveUtil.checkArchiveExists(fxArchiveInfo);
 
         if (Objects.isNull(fxArchiveInfo.getReadService())) {
             // LOG: Extract functionality not supported for archive %s

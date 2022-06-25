@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.event.handler;
 
@@ -80,7 +80,7 @@ public class BtnAddFileEventHandler implements CheckEventHandler<ActionEvent> {
         String prefix = fxArchiveInfo.getPrefix();
 
         JFXUtil.executeBackgroundProcess(sessionId, (Stage) fileContentsView.getScene().getWindow(),
-                                         ()-> ArchiveUtil.addFile(sessionId, fxArchiveInfo, rawFile, fileName),
+                                         ()-> com.ntak.pearlzip.ui.util.ArchiveUtil.addFile(sessionId, fxArchiveInfo, rawFile, fileName),
                                          (s)-> JFXUtil.refreshFileView(fileContentsView, fxArchiveInfo, depth, prefix)
         );
     }

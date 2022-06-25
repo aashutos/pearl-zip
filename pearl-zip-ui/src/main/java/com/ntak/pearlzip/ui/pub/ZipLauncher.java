@@ -11,7 +11,11 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.rules.*;
-import com.ntak.pearlzip.ui.util.*;
+import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.MetricProfile;
+import com.ntak.pearlzip.ui.util.MetricProfileFactory;
+import com.ntak.pearlzip.ui.util.MetricThreadFactory;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import javafx.util.Pair;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -35,7 +39,7 @@ import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.JFXUtil.initialiseBootstrapProperties;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.initialiseBootstrapProperties;
 
 /**
  *  Loads the main UI screen for the Zip Application.
@@ -132,8 +136,8 @@ public class ZipLauncher {
         Locale.setDefault(genLocale(props));
         Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
         LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                                     System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                                                     Locale.getDefault());
+                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                    Locale.getDefault());
         CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
                                                                         System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
                                                                         Locale.getDefault());

@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.rules.*;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
