@@ -1,11 +1,14 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
+import com.ntak.pearlzip.archive.pub.ArchiveServiceProfile;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.JFXUtil;
@@ -21,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -55,6 +59,7 @@ public class FrmMainControllerTest {
     private static ArchiveWriteService mockWriteService;
     private static FXArchiveInfo mockArchiveInfo;
     private static List<FileInfo> files;
+    private static ArchiveServiceProfile archiveServiceProfile = new ArchiveServiceProfile("test-provider");
 
     /*
         Test cases:
@@ -79,14 +84,16 @@ public class FrmMainControllerTest {
 
             controller = new FrmMainController();
 
+            archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip","gz"), Collections.emptyMap()));
+            archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip","gz"), Collections.emptyMap()));
+
             // Initialise mocks
             mockReadService = Mockito.mock(ArchiveReadService.class);
             mockWriteService = Mockito.mock(ArchiveWriteService.class);
             mockArchiveInfo = Mockito.mock(FXArchiveInfo.class);
 
             // Initialise common stubbing
-            when(mockReadService.supportedReadFormats()).thenReturn(List.of("zip","gz"));
-            when(mockWriteService.supportedWriteFormats()).thenReturn(List.of("zip","gz"));
+            when(mockReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
             when(mockReadService.getCompressorArchives()).thenCallRealMethod();
             when(mockWriteService.getCompressorArchives()).thenCallRealMethod();
             when(mockArchiveInfo.getReadService()).thenReturn(mockReadService);

@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
@@ -303,11 +304,13 @@ public class FrmOptionsController {
                                                                                                         ""));
                     }
 
-                    if (pair.getValue() instanceof ArchiveReadService) {
-                        return new SimpleStringProperty(((ArchiveReadService) pair.getValue()).supportedReadFormats()
-                                                                                              .toString()
-                                                                                              .replaceAll("(\\[|\\])",
-                                                                                                          ""));
+                    if (pair.getValue() instanceof ArchiveReadService readService) {
+                        return new SimpleStringProperty(readService.getArchiveServiceProfile()
+                                                                   .getComponent(ReadServiceComponent.class)
+                                                                   .orElse(new ReadServiceComponent(Collections.emptySet(), Collections.emptyMap()))
+                                                                   .getSupportedFormats()
+                                                                   .toString()
+                                                                   .replaceAll("(\\[|\\])", ""));
                     }
                 }
             } catch(Exception e) {

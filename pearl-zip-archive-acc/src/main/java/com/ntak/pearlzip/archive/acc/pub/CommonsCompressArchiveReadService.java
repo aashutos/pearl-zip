@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.acc.pub;
 
@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.acc.constants.CommonsCompressConstants.PROFILE;
 import static com.ntak.pearlzip.archive.acc.util.CommonsCompressUtil.getArchiveFormat;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_NTAK_PEARL_ZIP_ICON_FOLDER;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
@@ -194,7 +195,7 @@ public class CommonsCompressArchiveReadService implements ArchiveReadService {
     }
 
     @Override
-    public List<String> supportedReadFormats() {
-        return Collections.singletonList("tar");
+    public ArchiveServiceProfile getArchiveServiceProfile() {
+        return PROFILE;
     }
 }

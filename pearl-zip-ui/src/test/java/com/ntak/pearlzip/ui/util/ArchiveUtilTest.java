@@ -3,10 +3,9 @@
  */
 package com.ntak.pearlzip.ui.util;
 
-import com.ntak.pearlzip.archive.pub.ArchiveInfo;
-import com.ntak.pearlzip.archive.pub.ArchiveReadService;
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.*;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -33,10 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -63,6 +59,7 @@ public class ArchiveUtilTest {
     private static TableView<FileInfo> tableView;
     private static Scene scene;
     private static Path RECENT_FILE;
+    private static ArchiveServiceProfile archiveServiceProfile = new ArchiveServiceProfile("test-provider");
 
     /*
         Test cases:
@@ -112,6 +109,10 @@ public class ArchiveUtilTest {
             latch.await();
             menuRecent = new Menu();
 
+            archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip"), Collections.emptyMap()));
+            archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip"), Collections.emptyMap()));
+
+
             digest = MessageDigest.getInstance("SHA-256");
             tempDirectory = Files.createTempDirectory("pz");
             RECENT_FILE = Paths.get(tempDirectory.toAbsolutePath()
@@ -121,8 +122,6 @@ public class ArchiveUtilTest {
             mockArchiveInfo = Mockito.mock(FXArchiveInfo.class);
             mockArchiveReadService = Mockito.mock(ArchiveReadService.class);
             mockMainController = Mockito.mock(FrmMainController.class);
-
-            when(mockArchiveReadService.supportedReadFormats()).thenReturn(List.of("zip"));
 
             mockArchiveWriteService = Mockito.mock(ArchiveWriteService.class);
             when(mockArchiveWriteService.supportedWriteFormats()).thenReturn(List.of("zip"));
@@ -147,6 +146,8 @@ public class ArchiveUtilTest {
             when(mockArchiveInfo.getController()).thenReturn(Optional.of(mockMainController));
             when(mockMainController.getFileContentsView()).thenReturn(tableView);
 
+            when(mockArchiveWriteService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
+            when(mockArchiveReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
             ZipState.addArchiveProvider(mockArchiveWriteService);
             ZipState.addArchiveProvider(mockArchiveReadService);
         }

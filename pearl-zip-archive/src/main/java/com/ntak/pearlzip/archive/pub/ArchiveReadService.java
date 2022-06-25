@@ -78,12 +78,4 @@ public interface ArchiveReadService extends ArchiveService {
      *   @return boolean - returns true if the archive is valid
      */
     boolean testArchive(long sessionId, String archivePath);
-
-    /**
-     *   Lists out explicitly all archive formats that can be read by the implementation of the archive service.
-     *
-     *   @return List&lt;String&gt; - List of unique archive formats supported
-     */
-    @Deprecated(forRemoval = true)
-    List<String> supportedReadFormats();
 }

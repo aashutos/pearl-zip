@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.szjb.pub;
 
@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_NTAK_PEARL_ZIP_ICON_FOLDER;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
+import static com.ntak.pearlzip.archive.szjb.constants.SevenZipConstants.PROFILE;
 import static com.ntak.pearlzip.archive.szjb.constants.SevenZipLoggingConstants.LOG_EXCEPTION_ON_EXTRACTION;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 
@@ -325,12 +326,12 @@ public class SevenZipArchiveService implements ArchiveReadService {
     }
 
     @Override
-    public List<String> supportedReadFormats() {
-        return Arrays.asList("zip", "gz", "bz2", "xz", "7z", "jar", "rar", "iso", "cab", "tgz");
+    public Set<String> getCompressorArchives() {
+        return Set.of("gz", "xz", "bz2", "tgz");
     }
 
     @Override
-    public Set<String> getCompressorArchives() {
-        return Set.of("gz", "xz", "bz2", "tgz");
+    public ArchiveServiceProfile getArchiveServiceProfile() {
+        return PROFILE;
     }
 }
