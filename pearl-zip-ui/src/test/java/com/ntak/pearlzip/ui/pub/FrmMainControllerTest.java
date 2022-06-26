@@ -7,6 +7,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveServiceProfile;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.profile.component.GeneralComponent;
 import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
 import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
@@ -84,6 +85,7 @@ public class FrmMainControllerTest {
 
             controller = new FrmMainController();
 
+            archiveServiceProfile.addComponent(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null));
             archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip","gz"), Collections.emptyMap()));
             archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip","gz"), Collections.emptyMap()));
 
@@ -95,8 +97,6 @@ public class FrmMainControllerTest {
             // Initialise common stubbing
             when(mockReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
             when(mockWriteService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
-            when(mockReadService.getCompressorArchives()).thenCallRealMethod();
-            when(mockWriteService.getCompressorArchives()).thenCallRealMethod();
             when(mockArchiveInfo.getReadService()).thenReturn(mockReadService);
 
             // Initialisation of field values

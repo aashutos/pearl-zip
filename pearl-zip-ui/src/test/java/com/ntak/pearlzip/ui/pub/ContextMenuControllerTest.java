@@ -94,7 +94,6 @@ public class ContextMenuControllerTest {
             when(mockArchiveInfo.getController()).thenReturn(Optional.empty());
             when(mockArchiveInfo.getMigrationInfo()).thenReturn(migrationInfo);
             when(mockArchiveReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
-            when(mockArchiveReadService.getCompressorArchives()).thenCallRealMethod();
             ZipState.addArchiveProvider(mockArchiveReadService);
 
             // Initialisation of fields in controller...

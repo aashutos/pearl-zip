@@ -60,7 +60,10 @@ public class ZipState {
     }
 
     public static void addArchiveProvider(ArchiveService service) {
-        COMPRESSOR_ARCHIVE_FORMATS.addAll(service.getCompressorArchives()
+        COMPRESSOR_ARCHIVE_FORMATS.addAll(service.getArchiveServiceProfile()
+                                                 .getComponent(GeneralComponent.class)
+                                                 .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz"), null))
+                                                 .getCompressorArchives()
                                                  .stream()
                                                  .filter(Strings::isNotBlank)
                                                  .collect(Collectors.toSet())

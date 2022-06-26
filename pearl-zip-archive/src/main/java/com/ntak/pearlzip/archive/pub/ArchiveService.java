@@ -8,7 +8,6 @@ import javafx.scene.Node;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_COM_BUS_FACTORY;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_ARCHIVE_SERVICE_COM_BUS_INIT_ERROR;
@@ -95,19 +94,6 @@ public interface ArchiveService {
                 ),
                 "true")
         );
-    }
-
-    /**
-     *  Returns a Set of archive formats, which PearlZip identifies as being a compressor archive i.e. an archive
-     *  system that can only compress a single file and does not provide any extra functionality such as encryption.
-     *  All formats are aggregated together as a unique set. Hence, any additional formats can be specified by the
-     *  implementation to augment.
-     *
-     *  @return Set&lt;String&gt; - List of compressor archives to be identified by PearlZip
-     */
-    @Deprecated(forRemoval = true)
-    default Set<String> getCompressorArchives() {
-        return Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz");
     }
 
     ArchiveServiceProfile getArchiveServiceProfile();

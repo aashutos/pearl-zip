@@ -48,9 +48,23 @@ public class GeneralComponent implements ArchiveServiceProfileComponent {
         return aliasFormats;
     }
 
+    /**
+     *  Returns a Set of archive formats, which PearlZip identifies as being a compressor archive i.e. an archive
+     *  system that can only compress a single file and does not provide any extra functionality such as encryption.
+     *  All formats are aggregated together as a unique set. Hence, any additional formats can be specified by the
+     *  implementation to augment.
+     *
+     *  @return Set&lt;String&gt; - List of compressor archives to be identified by PearlZip
+     */
     public Set<String> getCompressorArchives() {
         return compressorArchives;
     }
 
+    /**
+     *   Provides a ResourceBundle containing the logging keys for the underlying archive service implementation.
+     *
+     *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
+     *   or empty if not required
+     */
     public Optional<ResourceBundle> getResourceBundle() { return Optional.ofNullable(resourceBundle); }
 }

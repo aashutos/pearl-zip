@@ -82,11 +82,9 @@ public class ZipStateTest {
         archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip","rar","tar","cab","iso"), Collections.emptyMap()));
 
         when(mockWriteService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
-        when(mockWriteService.getCompressorArchives()).thenCallRealMethod();
 
         mockReadService = Mockito.mock(ArchiveReadService.class);
         when(mockReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
-        when(mockReadService.getCompressorArchives()).thenCallRealMethod();
     }
 
     @Test
