@@ -27,12 +27,20 @@ public class GeneralComponent implements ArchiveServiceProfileComponent {
         this.resourceBundle = resourceBundle;
     }
 
+    /**
+     *   Specifies whether an Archive Service is enabled for use by PearlZip. By default, every achive service
+     *   implementation is enabled. The Archive Implementation can be disabled by adding a property to the bootstrap
+     *   configuration:
+     *   <br/><br/>
+     *   {@code configuration.ntak.pearl-zip.provider.priority.enabled.[Canonical name of Archive
+     *   Service
+     *   implementation]=false}
+     *
+     *   @return boolean - returns true if the implementation is enabled and to be used by PearlZip
+     */
     public boolean isEnabled() {
         return Boolean.parseBoolean(System.getProperty(
-                String.format("configuration.ntak.pearl-zip.provider.priority.enabled.%s",
-                              getClass().getCanonicalName()
-                ),
-                "true")
+                String.format("configuration.ntak.pearl-zip.provider.priority.enabled.%s", getClass().getCanonicalName()), "true")
         );
     }
 
