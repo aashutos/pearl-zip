@@ -5,7 +5,10 @@ package com.ntak.pearlzip.archive.pub;
 
 import javafx.scene.Node;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_COM_BUS_FACTORY;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_ARCHIVE_SERVICE_COM_BUS_INIT_ERROR;
@@ -106,16 +109,6 @@ public interface ArchiveService {
     default Set<String> getCompressorArchives() {
         return Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz");
     }
-
-
-    /**
-     *   Provides a ResourceBundle containing the logging keys for the underlying archive service implementation.
-     *
-     *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
-     *   or empty if not required
-     */
-    @Deprecated(forRemoval = true)
-    default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
 
     ArchiveServiceProfile getArchiveServiceProfile();
 
