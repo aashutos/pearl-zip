@@ -4,9 +4,10 @@
 package com.ntak.pearlzip.archive.pub;
 
 import javafx.scene.Node;
-import javafx.util.Pair;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_COM_BUS_FACTORY;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_ARCHIVE_SERVICE_COM_BUS_INIT_ERROR;
@@ -74,71 +75,7 @@ public interface ArchiveService {
         return archiveInfo;
     }
 
-    /**
-     *   Specifies whether an Archive Service is enabled for use by PearlZip. By default, every achive service
-     *   implementation is enabled. The Archive Implementation can be disabled by adding a property to the bootstrap
-     *   configuration:
-     *   <br/><br/>
-     *   {@code configuration.ntak.pearl-zip.provider.priority.enabled.[Canonical name of Archive
-     *   Service
-     *   implementation]=false}
-     *
-     *   @return boolean - returns true if the implementation is enabled and to be used by PearlZip
-     */
-    @Deprecated(forRemoval = true)
-    default boolean isEnabled() {
-        return Boolean.parseBoolean(System.getProperty(
-                String.format("configuration.ntak.pearl-zip.provider.priority.enabled.%s",
-                               getClass().getCanonicalName()
-                ),
-                "true")
-        );
-    }
-
-    /**
-     *  Returns a Set of archive formats, which PearlZip identifies as being a compressor archive i.e. an archive
-     *  system that can only compress a single file and does not provide any extra functionality such as encryption.
-     *  All formats are aggregated together as a unique set. Hence, any additional formats can be specified by the
-     *  implementation to augment.
-     *
-     *  @return Set&lt;String&gt; - List of compressor archives to be identified by PearlZip
-     */
-    @Deprecated(forRemoval = true)
-    default Set<String> getCompressorArchives() {
-        return Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz");
-    }
-
-    /**
-     *   Declares a set of file extensions, which are alias of core formats. This list of formats will not be used in
-     *   the creation of archives. It is anticipated that this field will contain shortened convenience extensions in
-     *   which long explicit extensions would be preferable (e.g. tar.gz would be preferred to tgz). The shortened
-     *   format can still be read and modified subject to the underlying {@link ArchiveService} implementation.
-     *
-     *   @return Set&lt;String&gt; - Set of alias file extensions
-     */
-    @Deprecated(forRemoval = true)
-    default Set<String> getAliasFormats() { return Set.of("tgz"); }
-
-    /**
-     *   Generates a tab for the archive implementation in the Options dialog to provide some global settings for the
-     *   underlying implementation as required. The object returned consists of a Pair with a String key representing
-     *   the tab title text on the Options dialog and a Node as the root JavaFX object that will be found under the
-     *   JavaFX Tab object.
-     *
-     *   @return Optional&lt;Pair&lt;String,Node&gt;&gt; - The representation of the Options tab for the archive
-     *   service implementation
-     */
-    @Deprecated(forRemoval = true)
-    default Optional<Pair<String,Node>> getOptionsPane() { return Optional.empty(); }
-
-    /**
-     *   Provides a ResourceBundle containing the logging keys for the underlying archive service implementation.
-     *
-     *   @return Optional&lt;ResourceBundle&gt; - Returns the ResourceBundle of logging keys for the implementation
-     *   or empty if not required
-     */
-    @Deprecated(forRemoval = true)
-    default Optional<ResourceBundle> getResourceBundle() { return Optional.empty(); }
+    ArchiveServiceProfile getArchiveServiceProfile();
 
     default Optional<FXForm> getFXFormByIdentifier(String name, Object... parameters) { return Optional.empty();}
 

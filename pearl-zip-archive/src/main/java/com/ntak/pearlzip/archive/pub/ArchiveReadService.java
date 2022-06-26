@@ -3,11 +3,8 @@
  */
 package com.ntak.pearlzip.archive.pub;
 
-import javafx.scene.Node;
-
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 /**
  *  Interface defining functionality associated with the reading of archives.
@@ -81,24 +78,4 @@ public interface ArchiveReadService extends ArchiveService {
      *   @return boolean - returns true if the archive is valid
      */
     boolean testArchive(long sessionId, String archivePath);
-
-    /**
-     *   Given the archive information passed in, the implementation can use this method to determine whether a
-     *   dialog needs to be presented to the user prior to opening the archive in order to provide suitable options
-     *   and archive-specific configuration e.g. decryption passwords.
-     *
-     *   @param archiveInfo
-     *   @return Optional&lt;Node&gt; - The JavaFX Node representing the form to show prior to opening the archive or
-     *   Empty if none is available.
-     */
-    @Deprecated(forRemoval = true)
-    default Optional<Node> getOpenArchiveOptionsPane(ArchiveInfo archiveInfo) { return Optional.empty(); }
-
-    /**
-     *   Lists out explicitly all archive formats that can be read by the implementation of the archive service.
-     *
-     *   @return List&lt;String&gt; - List of unique archive formats supported
-     */
-    @Deprecated(forRemoval = true)
-    List<String> supportedReadFormats();
 }

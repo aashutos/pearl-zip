@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2022 92AK
  */
 package com.ntak.pearlzip.archive.acc.pub;
 
@@ -35,9 +35,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
+import static com.ntak.pearlzip.archive.acc.constants.CommonsCompressConstants.PROFILE;
 import static com.ntak.pearlzip.archive.acc.constants.CommonsCompressLoggingConstants.*;
 import static com.ntak.pearlzip.archive.acc.util.CommonsCompressUtil.getArchiveFormat;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.KEY_FILE_PATH;
@@ -51,7 +51,8 @@ import static org.apache.commons.compress.compressors.CompressorStreamFactory.BZ
 /**
  *   Implementation of an Archive Write Service, which utilises the Apache Commons Compress library underneath for
  *   various formats.
- *  @author Aashutos Kakshepati
+ *
+ *   @author Aashutos Kakshepati
  */
 public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
 
@@ -497,7 +498,7 @@ public class CommonsCompressArchiveWriteService implements ArchiveWriteService {
     }
 
     @Override
-    public List<String> supportedWriteFormats() {
-        return Arrays.asList("zip", "jar", "gz", "xz", "bz2", "tar", "tgz");
+    public ArchiveServiceProfile getArchiveServiceProfile() {
+        return PROFILE;
     }
 }

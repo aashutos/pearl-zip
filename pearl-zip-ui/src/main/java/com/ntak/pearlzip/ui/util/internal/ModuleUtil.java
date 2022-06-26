@@ -6,7 +6,11 @@ package com.ntak.pearlzip.ui.util.internal;
 import com.ntak.pearlzip.archive.constants.ConfigurationConstants;
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.model.PluginInfo;
-import com.ntak.pearlzip.archive.pub.*;
+import com.ntak.pearlzip.archive.pub.ArchiveReadService;
+import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.CheckManifestRule;
+import com.ntak.pearlzip.archive.pub.PearlZipResourceBundleProvider;
+import com.ntak.pearlzip.archive.pub.profile.component.GeneralComponent;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -71,24 +75,54 @@ public class ModuleUtil {
         // Load Archive Services
         serviceReadLoader.stream()
                          .map(ServiceLoader.Provider::get)
-                         .filter(ArchiveService::isEnabled)
+                         .filter(s -> s.getArchiveServiceProfile()
+                                       .getComponent(GeneralComponent.class)
+                                       .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                       .isEnabled()
+                         )
                          .forEach(ZipState::addArchiveProvider);
 
         serviceWriteLoader.stream()
                           .map(ServiceLoader.Provider::get)
-                          .filter(ArchiveService::isEnabled)
+                          .filter(s -> s.getArchiveServiceProfile()
+                                        .getComponent(GeneralComponent.class)
+                                        .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                        .isEnabled()
+                          )
                           .forEach(ZipState::addArchiveProvider);
 
         // Adding resource bundles
         serviceReadLoader.stream()
                          .map(ServiceLoader.Provider::get)
-                         .filter(s -> s.isEnabled() && s.getResourceBundle().isPresent())
-                         .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle().get()));
+                         .filter(s -> s.getArchiveServiceProfile()
+                                       .getComponent(GeneralComponent.class)
+                                       .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                       .isEnabled() && s.getArchiveServiceProfile()
+                                                        .getComponent(GeneralComponent.class)
+                                                        .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                        .getResourceBundle()
+                                                        .isPresent())
+                         .forEach(s -> PLUGIN_BUNDLES.add(s.getArchiveServiceProfile()
+                                                           .getComponent(GeneralComponent.class)
+                                                           .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                           .getResourceBundle()
+                                                           .get()));
 
         serviceWriteLoader.stream()
                           .map(ServiceLoader.Provider::get)
-                          .filter(s -> s.isEnabled() && s.getResourceBundle().isPresent())
-                          .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle().get()));
+                          .filter(s -> s.getArchiveServiceProfile()
+                                        .getComponent(GeneralComponent.class)
+                                        .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                        .isEnabled() && s.getArchiveServiceProfile()
+                                                         .getComponent(GeneralComponent.class)
+                                                         .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                         .getResourceBundle()
+                                                         .isPresent())
+                          .forEach(s -> PLUGIN_BUNDLES.add(s.getArchiveServiceProfile()
+                                                            .getComponent(GeneralComponent.class)
+                                                            .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                            .getResourceBundle()
+                                                            .get()));
     }
 
     /**
@@ -140,27 +174,51 @@ public class ModuleUtil {
             // Load Archive Services
             serviceReadLoader.stream()
                              .map(ServiceLoader.Provider::get)
-                             .filter(ArchiveService::isEnabled)
+                             .filter(s -> s.getArchiveServiceProfile()
+                                           .getComponent(GeneralComponent.class)
+                                           .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                           .isEnabled())
                              .forEach(ZipState::addArchiveProvider);
 
             serviceWriteLoader.stream()
                               .map(ServiceLoader.Provider::get)
-                              .filter(ArchiveService::isEnabled)
+                              .filter(s -> s.getArchiveServiceProfile()
+                                            .getComponent(GeneralComponent.class)
+                                            .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                            .isEnabled())
                               .forEach(ZipState::addArchiveProvider);
 
             // Adding resource bundles
             serviceReadLoader.stream()
                              .map(ServiceLoader.Provider::get)
-                             .filter(s -> s.isEnabled() && s.getResourceBundle()
+                             .filter(s -> s.getArchiveServiceProfile()
+                                           .getComponent(GeneralComponent.class)
+                                           .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                           .isEnabled() && s.getArchiveServiceProfile()
+                                                            .getComponent(GeneralComponent.class)
+                                                            .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                            .getResourceBundle()
                                                             .isPresent())
-                             .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
+                             .forEach(s -> PLUGIN_BUNDLES.add(s.getArchiveServiceProfile()
+                                                               .getComponent(GeneralComponent.class)
+                                                               .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                               .getResourceBundle()
                                                                .get()));
 
             serviceWriteLoader.stream()
                               .map(ServiceLoader.Provider::get)
-                              .filter(s -> s.isEnabled() && s.getResourceBundle()
+                              .filter(s -> s.getArchiveServiceProfile()
+                                            .getComponent(GeneralComponent.class)
+                                            .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "tgz"), null))
+                                            .isEnabled() && s.getArchiveServiceProfile()
+                                                             .getComponent(GeneralComponent.class)
+                                                             .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                             .getResourceBundle()
                                                              .isPresent())
-                              .forEach(s -> PLUGIN_BUNDLES.add(s.getResourceBundle()
+                              .forEach(s -> PLUGIN_BUNDLES.add(s.getArchiveServiceProfile()
+                                                                .getComponent(GeneralComponent.class)
+                                                                .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                                .getResourceBundle()
                                                                 .get()));
         } catch(Exception e) {
             Path APPLICATION_SETTINGS_FILE =

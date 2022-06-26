@@ -7,6 +7,9 @@ import com.ntak.pearlzip.archive.model.LicenseInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.profile.component.GeneralComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import javafx.scene.control.ContextMenu;
 import org.apache.logging.log4j.util.Strings;
 
@@ -57,16 +60,22 @@ public class ZipState {
     }
 
     public static void addArchiveProvider(ArchiveService service) {
-        COMPRESSOR_ARCHIVE_FORMATS.addAll(service.getCompressorArchives()
+        COMPRESSOR_ARCHIVE_FORMATS.addAll(service.getArchiveServiceProfile()
+                                                 .getComponent(GeneralComponent.class)
+                                                 .orElse(new GeneralComponent(Set.of("tgz"), Set.of("gz", "xz", "bz2", "lz", "lz4", "lzma", "z", "sz"), null))
+                                                 .getCompressorArchives()
                                                  .stream()
                                                  .filter(Strings::isNotBlank)
                                                  .collect(Collectors.toSet())
         );
-        if (service instanceof  ArchiveWriteService) {
-            addArchiveToMap(ARCHIVE_WRITE_MAP, ((ArchiveWriteService) service).supportedWriteFormats()
-                                                                              .stream()
-                                                                              .filter(Strings::isNotBlank)
-                                                                              .collect(Collectors.toList()),
+        if (service instanceof  ArchiveWriteService writeService) {
+            addArchiveToMap(ARCHIVE_WRITE_MAP, writeService.getArchiveServiceProfile()
+                                                           .getComponent(WriteServiceComponent.class)
+                                                           .orElse(new WriteServiceComponent(Collections.emptySet(), Collections.emptyMap()))
+                                                           .getSupportedFormats()
+                                                           .stream()
+                                                           .filter(Strings::isNotBlank)
+                                                           .collect(Collectors.toList()),
                             (ArchiveWriteService) service);
 
             WRITE_PROVIDERS.removeIf(s -> s.getClass()
@@ -75,11 +84,14 @@ public class ZipState {
                                                           .getCanonicalName()));
             WRITE_PROVIDERS.add((ArchiveWriteService) service);
         }
-        if (service instanceof ArchiveReadService) {
-            addArchiveToMap(ARCHIVE_READ_MAP, ((ArchiveReadService) service).supportedReadFormats()
-                                                                            .stream()
-                                                                            .filter(Strings::isNotBlank)
-                                                                            .collect(Collectors.toList()),
+        if (service instanceof ArchiveReadService readService) {
+            addArchiveToMap(ARCHIVE_READ_MAP, readService.getArchiveServiceProfile()
+                                                         .getComponent(ReadServiceComponent.class)
+                                                         .orElse(new ReadServiceComponent(Collections.emptySet(), Collections.emptyMap()))
+                                                         .getSupportedFormats()
+                                                         .stream()
+                                                         .filter(Strings::isNotBlank)
+                                                         .collect(Collectors.toList()),
                             (ArchiveReadService) service);
 
             READ_PROVIDERS.removeIf(s -> s.getClass()
@@ -152,23 +164,24 @@ public class ZipState {
     }
 
     public static HashSet<String> getSupportedCompressorWriteFormats() {
-        HashSet<String> supportedWriteFormats = new HashSet<>(getCompressorArchives()
-                              .stream()
-                              .filter(f-> supportedWriteArchives().contains(f))
-                              .collect(Collectors.toList())
-        );
+        HashSet<String> supportedWriteFormats = getCompressorArchives()
+                .stream()
+                .filter(f -> supportedWriteArchives().contains(f))
+                .collect(Collectors.toCollection(HashSet::new));
 
         for (ArchiveService service : getWriteProviders()) {
-            supportedWriteFormats.removeAll(service.getAliasFormats());
+            supportedWriteFormats.removeAll(service.getArchiveServiceProfile()
+                                                   .getComponent(GeneralComponent.class)
+                                                   .orElse(new GeneralComponent(Collections.emptySet(), Collections.emptySet(), null))
+                                                   .getAliasFormats());
         }
 
         return supportedWriteFormats;
     }
 
     public static HashSet<String> getRawSupportedCompressorWriteFormats() {
-        return new HashSet<>(getCompressorArchives().stream()
-                                                    .filter(f-> supportedWriteArchives().contains(f))
-                                                    .collect(Collectors.toList())
-        );
+        return getCompressorArchives().stream()
+                                      .filter(f -> supportedWriteArchives().contains(f))
+                                      .collect(Collectors.toCollection(HashSet::new));
     }
 }

@@ -4,18 +4,16 @@
 package com.ntak.pearlzip.ui.model;
 
 import com.ntak.pearlzip.archive.model.LicenseInfo;
-import com.ntak.pearlzip.archive.pub.ArchiveInfo;
-import com.ntak.pearlzip.archive.pub.ArchiveReadService;
-import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.*;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CNS_PROVIDER_PRIORITY_ROOT_KEY;
@@ -24,7 +22,18 @@ import static org.mockito.Mockito.when;
 public class ZipStateTest {
     private LicenseInfo licenseInfo = new LicenseInfo("module", "1.0.0", "license", "license-text.txt", "http://license.org");
     private static ArchiveWriteService mockWriteService;
+    private static ArchiveServiceProfile archiveServiceProfile = new ArchiveServiceProfile("test-provider");
     private static final ArchiveWriteService priorityWriteService = new ArchiveWriteService() {
+        private static final ArchiveServiceProfile archiveServiceProfile = new ArchiveServiceProfile("test-provider");
+
+        static {
+            archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip"), Collections.emptyMap()));
+        }
+        @Override
+        public ArchiveServiceProfile getArchiveServiceProfile() {
+            return archiveServiceProfile;
+        }
+
         @Override
         public void createArchive(long sessionId, String archivePath, FileInfo... files) {
 
@@ -54,11 +63,6 @@ public class ZipStateTest {
         public boolean deleteFile(long sessionId, ArchiveInfo archiveInfo, FileInfo file) {
             return false;
         }
-
-        @Override
-        public List<String> supportedWriteFormats() {
-            return List.of("zip");
-        }
     };
     private static ArchiveReadService mockReadService;
 
@@ -74,13 +78,13 @@ public class ZipStateTest {
     @BeforeAll
     public static void setUpOnce() {
         mockWriteService = Mockito.mock(ArchiveWriteService.class);
-        when(mockWriteService.supportedWriteFormats()).thenReturn(new ArrayList<>(List.of("zip", "rar", "tar")));
-        when(mockWriteService.getCompressorArchives()).thenCallRealMethod();
+        archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip", "rar", "tar"), Collections.emptyMap()));
+        archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip","rar","tar","cab","iso"), Collections.emptyMap()));
+
+        when(mockWriteService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
 
         mockReadService = Mockito.mock(ArchiveReadService.class);
-        when(mockReadService.supportedReadFormats()).thenReturn(new ArrayList<>(List.of("zip","rar","tar","cab",
-                                                                                        "iso")));
-        when(mockReadService.getCompressorArchives()).thenCallRealMethod();
+        when(mockReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
     }
 
     @Test

@@ -5,7 +5,10 @@ package com.ntak.pearlzip.ui.pub;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
+import com.ntak.pearlzip.archive.pub.ArchiveServiceProfile;
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
+import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
@@ -43,6 +46,7 @@ public class ContextMenuControllerTest {
     private static FXArchiveInfo mockArchiveInfo;
     private static FrmMainController mockMainController;
     private static ArchiveReadService mockArchiveReadService;
+    private static ArchiveServiceProfile archiveServiceProfile = new ArchiveServiceProfile("test-provider");
 
     private static CountDownLatch latch = new CountDownLatch(1);
 
@@ -78,17 +82,19 @@ public class ContextMenuControllerTest {
             row = new TableRow<>();
             row.setItem(fileInfo);
 
+            archiveServiceProfile.addComponent(new WriteServiceComponent(Set.of("zip", "rar", "tar"), Collections.emptyMap()));
+            archiveServiceProfile.addComponent(new ReadServiceComponent(Set.of("zip", "rar", "tar", "cab", "iso"), Collections.emptyMap()));
+
             // Initialise mocks...
             mockArchiveInfo = Mockito.mock(FXArchiveInfo.class);
             mockMainController = Mockito.mock(FrmMainController.class);
             mockArchiveReadService = Mockito.spy(ArchiveReadService.class);
-            ZipState.addArchiveProvider(mockArchiveReadService);
 
             // initialise stubs...
             when(mockArchiveInfo.getController()).thenReturn(Optional.empty());
             when(mockArchiveInfo.getMigrationInfo()).thenReturn(migrationInfo);
-            when(mockArchiveReadService.getCompressorArchives()).thenCallRealMethod();
-            when(mockArchiveReadService.supportedReadFormats()).thenReturn(List.of("zip", "tar.gz"));
+            when(mockArchiveReadService.getArchiveServiceProfile()).thenReturn(archiveServiceProfile);
+            ZipState.addArchiveProvider(mockArchiveReadService);
 
             // Initialisation of fields in controller...
             final Field fCtxMenu = ContextMenuController.class.getDeclaredField("ctxMenu");
