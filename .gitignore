@@ -47,3 +47,4 @@ build/
 /pearl-zip-deploy-common/src/main/resources/settings.properties
 /pearl-zip-assembly-osx/src/main/resources/settings.properties
 /pearl-zip-archive/scripts/settings.properties
+/pearl-zip-ui/scripts/settings.properties
