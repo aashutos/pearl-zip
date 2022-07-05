@@ -16,15 +16,7 @@ cd ../../..
 echo "Current directory: $(pwd)"
 
 # Setting up the properties file...
-while read line; do
-  if [ $(echo "$line" | grep "=" | wc -l) == 1 ]
-  then
-    echo "Setting environment variable: $(echo $line | cut -d= -f1)..."
-    key=$(echo $line | cut -d= -f1)
-    value=$(echo $line | cut -d= -f2-)
-    declare P_$key="$value"
-  fi
-done < ./src/main/resources/settings.properties
+source ../scripts/init-settings.sh "./src/main/resources/settings.properties"
 
 # Does rsync exist on the environment
 if [ "$(which rsync | echo $?)" -ne 0 ]

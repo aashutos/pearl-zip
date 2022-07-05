@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2021 92AK
+# Copyright © 2022 92AK
 #
 
 # DESCRIPTION: Slips text from file at specified anchor point in the source file.

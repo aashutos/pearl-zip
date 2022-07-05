@@ -21,7 +21,6 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <jdk.location>/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home/</jdk.location>
         <project.use-build-dir>true</project.use-build-dir>
     </properties>
 

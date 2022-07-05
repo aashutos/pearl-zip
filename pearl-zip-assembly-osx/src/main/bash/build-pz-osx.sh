@@ -4,15 +4,15 @@
 # Copyright © 2022 92AK
 #
 
-while read line; do
-  if [ $(echo "$line" | grep = | wc -l) == 1 ]
-  then
-    echo "Setting environment variable: $line"
-    key=$(echo $line | cut -d= -f1)
-    value=$(echo $line | cut -d= -f2-)
-    declare P_$key="$value"
-  fi
-done < ./src/main/resources/settings.properties
+####################################################################################
+# 1. READ SETTINGS INTO ENVIRONMENT VARIABLES
+####################################################################################
+
+source ../scripts/init-settings.sh "./src/main/resources/settings.properties"
+
+####################################################################################
+# 2. PERFORM DEPENDENCY CHECKS
+####################################################################################
 
 echo "Checking Maven and Java are installed"
 JAVA_ROOT="${JAVA_HOME:+$JAVA_HOME/bin/}"
@@ -41,6 +41,10 @@ then
   exit 1
 fi
 
+####################################################################################
+# 3. PRE-BUILD CLEAN UP
+####################################################################################
+
 rootDir=$(pwd)
 echo "Root directory: $(pwd)"
 
@@ -52,6 +56,10 @@ rm -rf $rootDir/work
 rm -rf $rootDir/pz-runtime
 rm -rf $rootDir/target/${LOCALE}/PearlZip.app
 rm -rf $rootDir/build/${LOCALE}/PearlZip.app
+
+####################################################################################
+# 4. GENERATE DEPENDENCIES AND AUTO-MODULARISATION
+####################################################################################
 
 echo "Generating Dependencies..."
 mvn dependency:build-classpath -X -Dmdep.outputFile=$rootDir/deps.lst -f ../pearl-zip-ui/pom.xml
@@ -99,6 +107,10 @@ cp $rootDir/src/main/resources/lib/org.apache.logging.log4j.core/log4j-core-2.17
 cp $rootDir/src/main/resources/lib/org.apache.commons.compress/commons-compress-1.21.jar mods/
 cp $rootDir/src/main/resources/lib/com.sun.jna/jna-5.6.0.jar mods/
 
+####################################################################################
+# 5. CREATE JAVA IMAGE
+####################################################################################
+
 echo "Create shared archive..."
 ${JAVA_ROOT}java -Xshare:off -Djava.awt.headless=true -XX:+UseZGC -XX:DumpLoadedClassList=pz-class.lst --module-path="$(ls mods | xargs -I{} echo mods/{} | tr '\n' ':'):mods/pearl-zip-ui-$VERSION.jar" -m com.ntak.pearlzip.ui/com.ntak.pearlzip.ui.pub.ZipLauncher &
 pid=$!
@@ -130,6 +142,11 @@ echo "Generate App Image"
 mkdir -p target/${LOCALE}
 
 ${JAVA_ROOT}jpackage --dest target/${LOCALE} --type app-image --app-version $MAC_APP_VERSION --copyright "© copyright 2021 92AK" --description "A JavaFX front-end wrapper for some common archive formats" --name PearlZip --vendor 92AK --verbose --java-options "-XX:SharedArchiveFile=pz-shared.jsa" --java-options "-XX:+UseZGC" --java-options "--add-opens nsmenufx/de.jangassen.platform.mac=com.ntak.pearlzip.ui" --java-options "--add-opens nsmenufx/de.jangassen.platform=com.ntak.pearlzip.ui" --java-options "-Dlog4j2.formatMsgNoLookups=true" --icon "$rootDir/src/main/resources/pz-icon.icns" --mac-package-identifier com.ntak.pearl-zip --mac-package-identifier PearlZip  --module-path $rootDir/mods/ -m com.ntak.pearlzip.ui/com.ntak.pearlzip.ui.pub.ZipLauncher --file-associations $rootDir/src/main/resources/file-associations/fa-xz.properties --file-associations $rootDir/src/main/resources/file-associations/fa-bz2.properties --file-associations $rootDir/src/main/resources/file-associations/fa-pzax.properties --file-associations $rootDir/src/main/resources/file-associations/fa-zip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-gzip.properties --file-associations $rootDir/src/main/resources/file-associations/fa-tar.properties --file-associations $rootDir/src/main/resources/file-associations/fa-jar.properties --runtime-image $rootDir/pz-runtime
+
+####################################################################################
+# 6. CUSTOMISATIONS TO JAVA IMAGE
+####################################################################################
+
 for f in $(ls $rootDir/src/main/resources/file-associations/Icons)
 do
  echo "Adding icon $f..."
@@ -139,13 +156,18 @@ do
  echo "Adding configuration for extension $ext..."
  printf "    <key>CFBundleTypeIconFile</key>\n    <string>pz-${ext}-icon.icns</string>\n			<key>CFBundleTypeExtensions</key>\n			<array>\n				<string>${ext}</string>\n			</array>\n" > ${ext}.xml
  cat ${ext}.xml
- $rootDir/src/main/bash/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "${ext}.xml" 1
+ ../scripts/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "${ext}.xml" 1
  mv "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist"
  rm ${ext}.xml
 
- $rootDir/src/main/bash/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "$rootDir/src/main/resources/file-associations/fa-${ext}.cfg" 0
+ ../scripts/slip.sh "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "<string>PearlZip.${ext}" "$rootDir/src/main/resources/file-associations/fa-${ext}.cfg" 0
  mv "$rootDir/target/${LOCALE}/PearlZip.app/Contents/tmp-${ext}.plist" "$rootDir/target/${LOCALE}/PearlZip.app/Contents/Info.plist"
 done
+
+####################################################################################
+# 7. GENERATING INSTALLER PACKAGE
+####################################################################################
+
 mkdir -p components
 echo "Generating changelog"
 # Retrieve Change Log for release
@@ -170,6 +192,10 @@ productbuild  --distribution "./src/main/resources/Distribution.xml"  \
               --package-path "./target/${LOCALE}/" \
               --resources "components" \
               "./target/${LOCALE}/PearlZip-Installer-${LOCALE}-${VERSION}.pkg"
+
+####################################################################################
+# 8. POST-BUILD CLEAN UP
+####################################################################################
 
 if [ "$USE_BUILD_DIR" == 'true' ]
 then
