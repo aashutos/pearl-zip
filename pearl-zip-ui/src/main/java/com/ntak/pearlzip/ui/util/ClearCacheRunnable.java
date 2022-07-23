@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -109,8 +110,7 @@ public class ClearCacheRunnable implements CaughtRunnable {
             // LOG: Temporary directories to be deleted: %s
             LOGGER.debug(resolveTextKey(LOG_TEMP_DIRS_TO_DELETE,
                                         tempDirectories));
-            tempDirectories.stream()
-                           .forEach(p -> ArchiveUtil.deleteDirectory(p,
+            tempDirectories.forEach(p -> ArchiveUtil.deleteDirectory(p,
                                                                      (f)->openFiles.contains(f.toAbsolutePath().toString())));
         } else {
             ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
@@ -129,6 +129,16 @@ public class ClearCacheRunnable implements CaughtRunnable {
                                                                         LBL_CLEAR_UP_RECENTS),
                                                                 INDETERMINATE_PROGRESS, 1));
             Files.deleteIfExists(RECENT_FILE);
+
+            // Clearing DB caches...
+            ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
+                                                                PROGRESS,
+                                                                resolveTextKey(LBL_CLEAR_UP_DB_CACHE),
+                                                                INDETERMINATE_PROGRESS,
+                                                                1));
+            ArchiveUtil.deleteDirectory(GLOBAL_INTERNAL_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                             .get()
+                                                             .resolve(Paths.get("db-cache")), (p)->false);
         }
     }
 }

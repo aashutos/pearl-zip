@@ -1,0 +1,17 @@
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<NamedQuery>
+    <id>notification-query</id>
+    <query>SELECT ID, TOPIC, MESSAGE, CREATIONTIMESTAMP FROM PUBLIC.PearlZipNotifications WHERE TOPIC IN (:topics)</query>
+    <outputColumns>
+        <column>id</column>
+        <column>topic</column>
+        <column>message</column>
+        <column>creationtimestamp</column>
+    </outputColumns>
+    <inputParameters>
+        <parameter>:topics</parameter>
+    </inputParameters>
+</NamedQuery>

@@ -31,7 +31,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -39,7 +42,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
@@ -169,32 +171,8 @@ public abstract class PearlZipApplication extends Application {
             for (String theme : CORE_THEMES) {
                 Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
                                                         .toString(), "themes", theme);
-                Files.createDirectories(defThemePath);
-                Stream<Path> themeFiles;
-                try {
-                    themeFiles = Files.list(Paths.get(getClass().getClassLoader()
-                                                   .getResource(theme)
-                                                   .getPath()));
-                } catch (Exception e) {
-                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
-                                                                .get()
-                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
-                                                                .toAbsolutePath());
-                }
-                themeFiles.forEach(f -> {
-                                        try {
-                                            Files.copy(f,
-                                                       Paths.get(defThemePath.toAbsolutePath()
-                                                                             .toString(),
-                                                                 f.getFileName()
-                                                                  .toString()
-                                                       ),
-                                                       StandardCopyOption.REPLACE_EXISTING);
-                                        } catch(IOException e) {
-                                        }
-                 }
-                );
+                String moduleName = "com.ntak.pearlzip.ui";
+                com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defThemePath, moduleName, theme);
             }
 
             // Initialise theme...

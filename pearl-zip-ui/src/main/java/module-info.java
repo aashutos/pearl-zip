@@ -29,6 +29,10 @@ module com.ntak.pearlzip.ui {
     requires org.apache.logging.log4j.core;
 
     requires eventbus;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.dataformat.xml;
+    requires com.fasterxml.jackson.core;
+    requires jakarta.xml.bind;
 
     // SPI Definition
     uses ArchiveWriteService;
@@ -43,6 +47,7 @@ module com.ntak.pearlzip.ui {
     exports com.ntak.pearlzip.ui.model;
     exports com.ntak.pearlzip.ui.pub;
     exports com.ntak.pearlzip.ui.util;
+    exports com.ntak.pearlzip.ui.util.internal to com.fasterxml.jackson.databind;
 
     opens com.ntak.pearlzip.ui.pub;
     opens com.ntak.pearlzip.ui.util;

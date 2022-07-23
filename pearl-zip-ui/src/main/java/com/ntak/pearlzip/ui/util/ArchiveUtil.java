@@ -9,6 +9,7 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
 import com.ntak.pearlzip.ui.pub.FrmProgressController;
+import com.ntak.pearlzip.ui.pub.ZipLauncher;
 import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,10 +25,8 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -35,6 +34,8 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
@@ -552,4 +553,94 @@ public class ArchiveUtil {
         }
     }
 
+
+    /**
+     *  Utility method, which tries to retrieve a file stream using the given methods:
+     *
+     *  <ol>
+     *      <li>ClassLoader retrieval</li>
+     *      <li>Module based retrieval</li>
+     *      <li>JRT Module based retrieval</li>
+     *      <li>JAR extraction based retrieval</li>
+     *  </ol>
+     *
+     *  Ideally used in try-with-resource constructs.
+     *
+     *  @param moduleName
+     *  @param resourcePath
+     *
+     *  @return InputStream : Opened input stream for resource or null if unsuccessful
+     */
+    public static InputStream retrieveResourceStream(String moduleName, String resourcePath) {
+        InputStream resource = null;
+
+        // 1. Try standard resource retrieval...
+        try {
+            if ((resource = ArchiveUtil.class.getClassLoader()
+                                             .getResourceAsStream(resourcePath)) != null) {
+                return resource;
+            }
+        } catch (Exception e) {
+        }
+
+        // 2. Try Module Layer resource retrieval...
+        try {
+            if ((resource = ModuleLayer.boot()
+                                       .findModule(moduleName)
+                                       .get()
+                                       .getResourceAsStream(resourcePath)) != null) {
+                return resource;
+            }
+        } catch (Exception e) {
+        }
+
+        // 3. Try JRT resource retrieval...
+        try {
+            if ((resource = Files.newInputStream(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                         .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                         .get()
+                                                         .getPath("modules", "com.ntak.pearlzip.ui", "queries")
+                                                         .toAbsolutePath())) != null) {
+                return resource;
+            }
+        } catch (Exception e) {
+        }
+
+        // 4. Try jar extraction based retrieval...
+        try {
+            final String srcResPath = ZipLauncher.class.getClassLoader()
+                                                      .getResource(resourcePath)
+                                                      .getPath();
+            Path jarArchive =
+                    Paths.get(srcResPath.substring(0, srcResPath.indexOf('!'))
+                                       .replaceAll("file:",""));
+
+            Path tempDir = Files.createTempDirectory("pz");
+            resource = Files.newInputStream(tempDir.resolve(resourcePath));
+
+            try (JarFile jar = new JarFile(jarArchive.toFile())) {
+
+                for (JarEntry entry : jar.stream()
+                                         .filter(e -> e.getName().startsWith(resourcePath))
+                                         .sorted(Comparator.comparingInt(a -> a.getName().length()))
+                                         .toList()
+                ) {
+                    if (entry.isDirectory()) {
+                        Path entryDest = tempDir.resolve(entry.getName());
+
+                        if (entry.isDirectory()) {
+                            Files.createDirectory(entryDest);
+                            continue;
+                        }
+
+                        Files.copy(jar.getInputStream(entry), entryDest);
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+        }
+
+        return resource;
+    }
 }
