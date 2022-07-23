@@ -343,7 +343,7 @@ public class JFXUtil {
                                                 .getPath("modules", moduleName, resource)
                                                 .toAbsolutePath());
             } catch(Exception exc) {
-                final String resPath = ZipLauncher.class.getClassLoader()
+                final String resPath = JFXUtil.class.getClassLoader()
                                                              .getResource(resource)
                                                              .getPath();
                 Path jarArchive =
