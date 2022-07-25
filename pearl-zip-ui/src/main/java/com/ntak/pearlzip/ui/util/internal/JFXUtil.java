@@ -5,12 +5,12 @@ package com.ntak.pearlzip.ui.util.internal;
 
 import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
 import com.ntak.pearlzip.ui.util.NotificationEntry;
+import com.ntak.pearlzip.ui.util.QueryExecutor;
 import com.ntak.pearlzip.ui.util.VersionComparator;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -41,14 +41,15 @@ import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.*;
-import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.getStackTraceFromException;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -157,7 +158,7 @@ public class JFXUtil {
     }
 
     public static boolean checkNewVersionAvailable() {
-        List<NotificationEntry> entries = getNotifications("PearlZip Version");
+        List<NotificationEntry> entries = getNotifications("version-check", true, "PearlZip Version");
         Optional<NotificationEntry> optVersion = entries.stream()
                                                         .max(Comparator.comparingInt(NotificationEntry::id));
         if (optVersion.isPresent()) {
@@ -195,50 +196,30 @@ public class JFXUtil {
         return false;
     }
 
-    public static List<NotificationEntry> getNotifications(String... filters) {
+    public static List<NotificationEntry> getNotifications(boolean isRefreshForced, String... filters) {
+        return getNotifications("get-notifications", isRefreshForced, filters);
+    }
+
+    public static List<NotificationEntry> getNotifications(String purpose, boolean isRefreshForced, String... filters) {
         List<NotificationEntry> entries = new CopyOnWriteArrayList<>();
 
-        try (Connection conn = DriverManager.getConnection(
-                System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD))) {
-            if (conn != null) {
-                PreparedStatement ps = conn.prepareStatement(
-                  String.format(
-                          """
-                   SELECT ID, TOPIC, MESSAGE, CREATIONTIMESTAMP
-                   FROM PUBLIC.PearlZipNotifications
-                   WHERE TOPIC IN (%s)
-                   """,
-                          Arrays.stream(filters)
-                                .map(v -> "?")
-                                .collect(Collectors.joining(", ")))
-                );
-
-                for (int i = 0; i < filters.length; i++) {
-                    ps.setString(i+1, filters[i]);
-                }
-
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    entries.add(new NotificationEntry(rs.getInt("ID"),
-                                                      rs.getString("TOPIC"),
-                                                      rs.getString("MESSAGE"),
-                                                      rs.getTimestamp("CREATIONTIMESTAMP").toLocalDateTime()
-                      )
-                    );
-                }
+        try {
+            QueryExecutor executor = new QueryExecutor.QueryExecutorBuilder()
+                    .withCacheIdentifier(purpose)
+                    .withQueryByIdentifier("notification-query")
+                    .withRefreshForced(isRefreshForced)
+                    .withParameter("topics", List.of(filters), (p) -> String.join("','", (List<String>)p))
+                    .build();
+            executor.execute();
+            Optional<QueryResult> optRes;
+            if ((optRes = executor.getQueryResult()).isPresent()) {
+                QueryResult result = optRes.get();
+                return result.mapResult((r,i) -> new NotificationEntry(r.getInt(i,"id"), r.getString(i,"topic").orElse(""), r.getString(i,"message").orElse(""), r.getTimestamp(i,"creationtimestamp", "yyyy-MM-dd HH:mm:ss.SSSSSS").orElse(null)));
             }
-        } catch (SQLException e) {
-            // LOG: SQL Exception occurred upon trying to retrieve notifications. SQL State: %s\nStack trace:\n%s
-            LOGGER.error(resolveTextKey(LOG_NOTIFICATIONS_SQL_ISSUE,
-                                                                          e.getSQLState(),
-                                                                          LoggingUtil.getStackTraceFromException(e)));
         } catch (Exception e) {
             // LOG: Exception raised upon trying to retrieve notifications.\nStack trace:\n%s
-            LOGGER.error(resolveTextKey(LOG_NOTIFICATIONS_ISSUE,
-                                                                          LoggingUtil.getStackTraceFromException(e))
-            );
+            LOGGER.error(resolveTextKey(LOG_NOTIFICATIONS_ISSUE), getStackTraceFromException(e));
         }
-
         return entries;
     }
 
@@ -345,4 +326,66 @@ public class JFXUtil {
                             .replace(resolveTextKey(TITLE_SAFE_MODE_PATTERN, appName), appName));
             }
         }
+
+    public static void extractResources(Path targetDirectory, String moduleName, String resource) throws IOException {
+        Files.createDirectories(targetDirectory);
+
+        Stream<Path> queryFiles;
+        try {
+            queryFiles = Files.list(Paths.get(JFXUtil.class.getClassLoader()
+                                                                  .getResource(resource)
+                                                                  .getPath()));
+        } catch (Exception e) {
+            try {
+                queryFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
+                                                .get()
+                                                .getPath("modules", moduleName, resource)
+                                                .toAbsolutePath());
+            } catch(Exception exc) {
+                final String resPath = JFXUtil.class.getClassLoader()
+                                                             .getResource(resource)
+                                                             .getPath();
+                Path jarArchive =
+                        Paths.get(resPath.substring(0, resPath.indexOf('!'))
+                                           .replaceAll("file:",""));
+
+                Path tempDir = Files.createTempDirectory("pz");
+                Path srcQueryPath =
+                        Paths.get(tempDir.toAbsolutePath().toString(),
+                                  resPath.substring(resPath.indexOf('!')+1));
+
+                try (JarFile jar = new JarFile(jarArchive.toFile())) {
+                    for (JarEntry entry : jar.stream().toList()) {
+                        if (entry.isDirectory()) {
+                            Path entryDest = tempDir.resolve(entry.getName());
+
+                            if (entry.isDirectory()) {
+                                Files.createDirectory(entryDest);
+                                continue;
+                            }
+
+                            Files.copy(jar.getInputStream(entry), entryDest);
+                        }
+                    }
+                }
+
+                queryFiles = Files.list(srcQueryPath);
+            }
+        }
+
+        queryFiles.forEach(f -> {
+                               try {
+                                   Files.copy(f,
+                                              Paths.get(targetDirectory.toAbsolutePath()
+                                                                    .toString(),
+                                                        f.getFileName()
+                                                         .toString()
+                                              ),
+                                              StandardCopyOption.REPLACE_EXISTING);
+                               } catch(IOException e) {
+                               }
+                           }
+        );
+    }
 }

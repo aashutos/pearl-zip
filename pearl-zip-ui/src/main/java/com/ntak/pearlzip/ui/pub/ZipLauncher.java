@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.pub;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.LicenseService;
@@ -16,17 +17,21 @@ import com.ntak.pearlzip.ui.util.MetricProfile;
 import com.ntak.pearlzip.ui.util.MetricProfileFactory;
 import com.ntak.pearlzip.ui.util.MetricThreadFactory;
 import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
+import com.ntak.pearlzip.ui.util.internal.QueryDefinition;
+import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import javafx.util.Pair;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.util.List;
 import java.util.*;
@@ -84,6 +89,7 @@ public class ZipLauncher {
     }
 
     public static void initialize() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<String,PluginInfo>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
 
@@ -248,6 +254,49 @@ public class ZipLauncher {
                     }
                 }
             } catch(Exception e) {
+            }
+        });
+
+        ////////////////////////////////////////////
+        ///// Named Query Load ////////////////////
+        //////////////////////////////////////////
+
+        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
+        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
+
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
+
+        // 1. Extract all files to internal query directory
+        Path defQueryPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                    .toString(), "db-cache", ".internal");
+        String resource = "queries";
+        String moduleName = "com.ntak.pearlzip.ui";
+        com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defQueryPath, moduleName, resource);
+
+        // 2. Load query definitions into cache
+        Files.list(defQueryPath).forEach(c -> {
+            XMLInputFactory f = XMLInputFactory.newFactory();
+            try (
+                InputStream fis = Files.newInputStream(c)
+            ) {
+                XMLStreamReader sr = f.createXMLStreamReader(fis);
+                XmlMapper mapper = new XmlMapper(f);
+                QueryDefinition queryDef = mapper.readValue(sr, QueryDefinition.class);
+                queryDefinitionCache.put(queryDef.getId(), queryDef);
+            } catch(IOException | XMLStreamException e) {
+            }
+        });
+
+        // 2. Load cached query results
+        Path defDataPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                .toString(), "db-cache", "data");
+        Files.createDirectories(defDataPath);
+        Files.list(defDataPath).forEach(c -> {
+            try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(c))) {
+                QueryResult result = (QueryResult)ois.readObject();
+                queryDataCache.put(c.getFileName().toString(), result);
+            } catch(IOException | ClassNotFoundException e) {
             }
         });
 

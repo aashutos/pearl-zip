@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
+import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -15,8 +16,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.REGEX_TIMESTAMP_DIR;
@@ -109,8 +112,7 @@ public class ClearCacheRunnable implements CaughtRunnable {
             // LOG: Temporary directories to be deleted: %s
             LOGGER.debug(resolveTextKey(LOG_TEMP_DIRS_TO_DELETE,
                                         tempDirectories));
-            tempDirectories.stream()
-                           .forEach(p -> ArchiveUtil.deleteDirectory(p,
+            tempDirectories.forEach(p -> ArchiveUtil.deleteDirectory(p,
                                                                      (f)->openFiles.contains(f.toAbsolutePath().toString())));
         } else {
             ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
@@ -129,6 +131,20 @@ public class ClearCacheRunnable implements CaughtRunnable {
                                                                         LBL_CLEAR_UP_RECENTS),
                                                                 INDETERMINATE_PROGRESS, 1));
             Files.deleteIfExists(RECENT_FILE);
+
+            // Clearing DB caches...
+            ArchiveService.DEFAULT_BUS.post(new ProgressMessage(sessionId,
+                                                                PROGRESS,
+                                                                resolveTextKey(LBL_CLEAR_UP_DB_CACHE),
+                                                                INDETERMINATE_PROGRESS,
+                                                                1));
+            ArchiveUtil.deleteDirectory(GLOBAL_INTERNAL_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                             .get()
+                                                             .resolve(Paths.get("db-cache")), (p)->false);
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                .<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE)
+                                .get()
+                                .clear();
         }
     }
 }

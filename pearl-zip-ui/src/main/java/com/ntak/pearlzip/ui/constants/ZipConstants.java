@@ -46,6 +46,7 @@ public class ZipConstants {
     public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED = "configuration.ntak.pearl-zip.show-target-folder-extract-selected";
     public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL = "configuration.ntak.pearl-zip.show-target-folder-extract-all";
     public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
+    public static final String CNS_NTAK_PEARL_ZIP_DB_CACHE_THRESHOLD_HOURS = "configuration.ntak.pearl-zip.db-cache.threshold.hours";
 
 
     ///// PEARLZIP SRTING PROPERTY KEYS /////
@@ -324,6 +325,9 @@ public class ZipConstants {
     public static final String LOG_VERSION_MAX_VERSION_BREACH = "logging.ntak.pearl-zip.max-version-breach";
     public static final String LOG_THEME_NOT_EXIST = "logging.ntak.pearl-zip.theme-not-exist";
 
+    public static final String LOG_QUERY_RESULT_INVALID_EXTRACTION = "logging.ntak.pearl-zip.query-result-invalid-extraction";
+    public static final String LOG_ISSUE_RETRIEVE_QUERY_DATA = "logging.ntak.pearl-zip.issue-retrieve-query-data";
+
     public static final String TITLE_SAFE_MODE_PATTERN = "title.ntak.pearl-zip.safe-mode-pattern";
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
@@ -367,10 +371,14 @@ public class ZipConstants {
     public static final String LBL_CLEAR_UP_OS_TEMP = "label.ntak.pearl-zip.clear-up-os-temp";
     public static final String LBL_SKIP_OS_TEMP_CLEAN = "label.ntak.pearl-zip.skip-os-temp-clean";
     public static final String LBL_CLEAR_UP_RECENTS = "label.ntak.pearl-zip.clear-up-recents";
+    public static final String LBL_CLEAR_UP_DB_CACHE = "label.ntak.pearl-zip.clear-up-db-cache";
 
     public static final String LOG_CREATE_DIRECTORY = "logging.ntak.pearl-zip.create-directory";
     public static final String LOG_DIR_EXTRACT_COMPLETE = "logging.ntak.pearl-zip.dir-extract-complete";
 
+    public static final String LOG_INVALID_QUERY_PARAMETER_SET = "logging.ntak.pearl-zip.invalid-query-parameter-set";
+
+    public static final String LOG_USING_CACHE_FOR_QUERY = "logging.ntak.pearl-zip.using-cached-query";
 
     ///// PUBLIC CACHE /////
     public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
@@ -403,6 +411,8 @@ public class ZipConstants {
     public static final String CK_MANIFEST_RULES = "MANIFEST_RULES";
     public static final String CK_PLUGINS_METADATA = "PLUGINS_METADATA";
     public static final String CK_MAX_SIZE_DRAG_OUT = "MAX_SIZE_DRAG_OUT";
+    public static final String CK_QUERY_RESULT_CACHE = "QUERY_CACHE";
+    public static final String CK_QUERY_DEFINITION_CACHE = "QUERY_DEFINITION_CACHE";
 
 
     ///// GENERAL PEARLZIP CONSTANTS /////

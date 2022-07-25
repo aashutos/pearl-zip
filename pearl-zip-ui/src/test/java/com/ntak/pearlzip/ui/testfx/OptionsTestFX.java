@@ -14,6 +14,7 @@ import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
+import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.FormUtil;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
@@ -116,6 +117,12 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
         Files.createFile(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar"));
         Files.createFile(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar"));
+
+        // Test query result data...
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE)
+                .get()
+                .put("test", new QueryResult(Collections.emptyList()));
     }
 
     @AfterEach
@@ -137,6 +144,15 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     @DisplayName("Test: Clear cache with an open temporary archive. Temporary files except for open archive is removed")
     public void testFX_ClearCacheTemporaryArchiveOpen_MatchExpectations() throws IOException {
         // Verify initial state
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                .get();
+        final var dbCacheDir = STORE_ROOT.toAbsolutePath()
+                                         .resolve("db-cache");
+        if (!Files.exists(dbCacheDir)) {
+             Files.createDirectories(dbCacheDir);
+        }
+
         Assertions.assertEquals(2,
                                 Files.list(STORE_TEMP)
                                      .filter(Files::isRegularFile)
@@ -175,6 +191,11 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         Assertions.assertFalse(Files.exists(tempOSDir), "Temporary directory in OS ephemeral store was not deleted");
         Assertions.assertFalse(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
                                "temp file in OS ephemeral storage was not deleted");
+
+        // DB definitions do not exist and cache is cleared
+        Assertions.assertFalse(Files.exists(dbCacheDir),
+                               "DB cache not deleted");
+        Assertions.assertEquals(0, InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE).get().size(), "In-memory cache was not emptied");
     }
 
     @Test

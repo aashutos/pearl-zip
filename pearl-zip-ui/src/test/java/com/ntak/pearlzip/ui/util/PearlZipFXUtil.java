@@ -20,6 +20,8 @@ import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
 import com.ntak.pearlzip.ui.rules.*;
 import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
+import com.ntak.pearlzip.ui.util.internal.QueryDefinition;
+import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.NativeFileChooserUtil;
@@ -628,6 +630,13 @@ public class PearlZipFXUtil {
         for (ArchiveWriteService writeService : writeServices) {
             ZipState.addArchiveProvider(writeService);
         }
+
+        // Load queries...
+        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
+        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
+
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
 
         initialiseMenu();
 

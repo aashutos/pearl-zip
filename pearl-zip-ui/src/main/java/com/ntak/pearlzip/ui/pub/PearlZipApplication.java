@@ -30,8 +30,9 @@ import javafx.util.Pair;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -39,7 +40,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
@@ -124,7 +124,6 @@ public abstract class PearlZipApplication extends Application {
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, this);
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
             InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_HOST_SERVICES, this.getHostServices());
             InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PARAMETERS, this.getParameters());
             InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)() -> System.exit(0));
@@ -169,32 +168,8 @@ public abstract class PearlZipApplication extends Application {
             for (String theme : CORE_THEMES) {
                 Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
                                                         .toString(), "themes", theme);
-                Files.createDirectories(defThemePath);
-                Stream<Path> themeFiles;
-                try {
-                    themeFiles = Files.list(Paths.get(getClass().getClassLoader()
-                                                   .getResource(theme)
-                                                   .getPath()));
-                } catch (Exception e) {
-                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
-                                                                .get()
-                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
-                                                                .toAbsolutePath());
-                }
-                themeFiles.forEach(f -> {
-                                        try {
-                                            Files.copy(f,
-                                                       Paths.get(defThemePath.toAbsolutePath()
-                                                                             .toString(),
-                                                                 f.getFileName()
-                                                                  .toString()
-                                                       ),
-                                                       StandardCopyOption.REPLACE_EXISTING);
-                                        } catch(IOException e) {
-                                        }
-                 }
-                );
+                String moduleName = "com.ntak.pearlzip.ui";
+                com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defThemePath, moduleName, theme);
             }
 
             // Initialise theme...
