@@ -34,6 +34,7 @@
         <pearlzip.sign.key.password>SET KEY PASSWORD</pearlzip.sign.key.password>
         <maven.deploy.skip>true</maven.deploy.skip>
         <deploy.settings.loc>${project.basedir}/scripts/settings.properties</deploy.settings.loc>
+        <archive.settings.location>${project.basedir}/scripts/settings.properties</archive.settings.location>
     </properties>
 
     <licenses>
@@ -118,8 +119,9 @@
                                 <configuration>
                                     <executable>sh</executable>
                                     <arguments>
-                                        <argument>${project.basedir}/scripts/sign-lib.sh</argument>
+                                        <argument>${project.basedir}/../scripts/sign-lib.sh</argument>
                                         <argument>${project.version}</argument>
+                                        <argument>${archive.settings.location}</argument>
                                     </arguments>
                                     <environmentVariables>
                                         <JAVA_HOME>${jdk.location}</JAVA_HOME>
@@ -136,7 +138,7 @@
                                 <configuration>
                                     <executable>sh</executable>
                                     <arguments>
-                                        <argument>${project.basedir}/scripts/clear-mvn-package.sh</argument>
+                                        <argument>${project.basedir}/../scripts/clear-mvn-package.sh</argument>
                                         <argument>${project.version}</argument>
                                         <argument>${deploy.settings.loc}</argument>
                                     </arguments>

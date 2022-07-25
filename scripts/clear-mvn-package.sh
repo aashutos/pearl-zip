@@ -1,21 +1,12 @@
 #!/bin/bash
 #
-# Copyright © 2021 92AK
+# Copyright © 2022 92AK
 #
 
 RELEASE=$1
 P_SETTINGS=${2:-./scripts/settings.properties}
 
-echo "Settings file: $P_SETTINGS"
-while read line; do
-  if [ $(echo "$line" | grep "=" | wc -l) == 1 ]
-  then
-    echo "Setting environment variable: $(echo $line | cut -d= -f1)..."
-    key=$(echo $line | cut -d= -f1)
-    value=$(echo $line | cut -d= -f2-)
-    declare P_$key="$value"
-  fi
-done < $P_SETTINGS
+source ./init-settings.sh "$P_SETTINGS"
 
 P_TOKEN_HEADER="Authorization: token ${P_GITHUB_API_TOKEN}"
 PACKAGE_ID=$(curl --progress-bar -sH "${P_TOKEN_HEADER}" "${P_GITHUB_API}/user/packages/maven/${P_PACKAGE_NAME}/versions" | grep -B1 "\"name\": \"${RELEASE}\"" | grep id | tr ',' ' ' | cut -d: -f2 | xargs)

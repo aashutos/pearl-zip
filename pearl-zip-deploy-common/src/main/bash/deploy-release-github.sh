@@ -12,15 +12,7 @@ P_RELEASE=$1
 P_LOCALE=$2
 P_CODENAME=$3
 
-while read line; do
-  if [ $(echo "$line" | grep "=" | wc -l) == 1 ]
-  then
-    echo "Setting environment variable: $(echo $line | cut -d= -f1)..."
-    key=$(echo $line | cut -d= -f1)
-    value=$(echo $line | cut -d= -f2-)
-    declare P_$key="$value"
-  fi
-done < ./src/main/resources/settings.properties
+source ../scripts/init-settings.sh "./src/main/resources/settings.properties"
 
 # Get set environment variables
 # ( set -o posix ; set )
