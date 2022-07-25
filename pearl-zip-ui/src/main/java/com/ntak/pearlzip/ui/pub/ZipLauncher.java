@@ -285,7 +285,6 @@ public class ZipLauncher {
                 QueryDefinition queryDef = mapper.readValue(sr, QueryDefinition.class);
                 queryDefinitionCache.put(queryDef.getId(), queryDef);
             } catch(IOException | XMLStreamException e) {
-                e.printStackTrace();
             }
         });
 

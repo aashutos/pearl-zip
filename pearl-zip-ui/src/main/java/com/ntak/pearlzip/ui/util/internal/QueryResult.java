@@ -29,9 +29,9 @@ public final class QueryResult implements Serializable {
     private static final long serialVersionUID = -3044874206183846580L;
 
     private final LocalDateTime expiryTimestamp;
-    private final LinkedList<HashMap<String,String>> results;
+    private final List<Map<String,String>> results;
 
-    public QueryResult(LinkedList<HashMap<String,String>> results) {
+    public QueryResult(List<Map<String,String>> results) {
         this.expiryTimestamp = LocalDateTime.now().plus(Duration.of(Long.parseLong(System.getProperty(CNS_NTAK_PEARL_ZIP_DB_CACHE_THRESHOLD_HOURS, "4")), ChronoUnit.HOURS));
         this.results = results;
     }

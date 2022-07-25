@@ -8,6 +8,7 @@ import com.ntak.pearlzip.archive.pub.ProgressMessage;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.FXMigrationInfo;
+import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.REGEX_TIMESTAMP_DIR;
@@ -139,6 +141,10 @@ public class ClearCacheRunnable implements CaughtRunnable {
             ArchiveUtil.deleteDirectory(GLOBAL_INTERNAL_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT)
                                                              .get()
                                                              .resolve(Paths.get("db-cache")), (p)->false);
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                .<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE)
+                                .get()
+                                .clear();
         }
     }
 }

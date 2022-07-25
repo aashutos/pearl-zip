@@ -39,6 +39,8 @@ public class QueryExecutor {
     private final Map<String, Function<Object,String>> extractors;
     private QueryResult queryResult;
 
+    private Connection connection;
+
     public QueryExecutor(String cacheIdentifier, QueryDefinition definition, boolean isRefreshForced, Map<String,Object> parameters, Map<String,Function<Object,String>> extractors) {
         if (Objects.nonNull(cacheIdentifier)) {
             this.cacheIdentifier = String.format("%s-%s", definition.getId(), cacheIdentifier);
@@ -55,6 +57,14 @@ public class QueryExecutor {
         return Optional.ofNullable(queryResult);
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
     public void execute() {
         synchronized(QUERY_RESULT_CACHE) {
             // Retrieve from source DB if:
@@ -66,8 +76,7 @@ public class QueryExecutor {
                 || (QUERY_RESULT_CACHE.containsKey(cacheIdentifier) && QUERY_RESULT_CACHE.get(cacheIdentifier).getExpiryTimestamp().isBefore(LocalDateTime.now()))
             ) {
                 // PostGres SQL Driver does not support CallableStatement and so have to manually consume and form parameters...
-                try (Connection conn = DriverManager.getConnection(
-                        System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+                try (Connection conn = initConnection();
                      Statement s = conn.createStatement()) {
                      String query = definition.getQuery();
 
@@ -93,7 +102,7 @@ public class QueryExecutor {
                                                      .filter(n -> definition.getOutputColumns().contains(n))
                                                      .collect(Collectors.toList());
 
-                     LinkedList<HashMap<String,String>> results = new LinkedList<>();
+                     List<Map<String,String>> results = new LinkedList<>();
                      while (resultSet.next()) {
                         HashMap<String,String> rowResult = new HashMap<>();
                         columns.forEach(c -> {
@@ -134,6 +143,15 @@ public class QueryExecutor {
                 queryResult = QUERY_RESULT_CACHE.get(cacheIdentifier);
             }
         }
+    }
+
+    private Connection initConnection() throws SQLException {
+            if (Objects.isNull(connection) || connection.isClosed()) {
+                return DriverManager.getConnection(
+                        System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+            } else {
+                return connection;
+            }
     }
 
     public static class QueryExecutorBuilder {
