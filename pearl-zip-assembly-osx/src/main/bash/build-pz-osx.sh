@@ -136,7 +136,7 @@ echo "Create runtime..."
 #cp $rootDir/src/main/resources/lib/javafx-jmods-15.0.1/* mods/
 #find $rootDir/mods -name  "javafx*[^m][^a][^c].jar" -delete
 #find $rootDir/mods/ -name  "javafx*mac.jar" -delete
-${JAVA_ROOT}jlink --module-path=$rootDir/mods/ --add-modules=ALL-MODULE-PATH,jdk.crypto.cryptoki --output $rootDir/pz-runtime
+${JAVA_ROOT}jlink --module-path=$rootDir/mods/ --add-modules=ALL-MODULE-PATH,jdk.crypto.cryptoki --output $rootDir/pz-runtime --strip-debug --compress 2
 
 echo "Generate App Image"
 mkdir -p target/${LOCALE}
