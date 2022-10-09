@@ -43,7 +43,7 @@ public class ZipState {
 
     public static Optional<ArchiveReadService> getReadArchiveServiceForFile(String filename) {
         try {
-            String extension = filename.substring(filename.lastIndexOf(".")+1);
+            String extension = filename.substring(filename.lastIndexOf(".")+1).toLowerCase();
             return  Optional.ofNullable(ARCHIVE_READ_MAP.get(extension));
         } catch(Exception e) {
             return Optional.empty();
@@ -52,7 +52,7 @@ public class ZipState {
 
     public static Optional<ArchiveWriteService> getWriteArchiveServiceForFile(String filename) {
         try {
-            String extension = filename.substring(filename.lastIndexOf(".")+1);
+            String extension = filename.substring(filename.lastIndexOf(".")+1).toLowerCase();
             return  Optional.ofNullable(ARCHIVE_WRITE_MAP.get(extension));
         } catch(Exception e) {
             return Optional.empty();
