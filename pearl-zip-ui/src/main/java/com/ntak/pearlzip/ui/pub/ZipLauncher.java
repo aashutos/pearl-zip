@@ -36,6 +36,7 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
@@ -92,6 +93,7 @@ public class ZipLauncher {
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<String,PluginInfo>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
 
         // Load bootstrap properties
         Properties props = initialiseBootstrapProperties();
@@ -142,11 +144,11 @@ public class ZipLauncher {
         Locale.setDefault(genLocale(props));
         Path RUNTIME_MODULE_PATH = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_RUNTIME_MODULE_PATH).get();
         LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                                    Locale.getDefault());
+                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                        Locale.getDefault());
         CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                                        System.getProperty(CNS_CUSTOM_RES_BUNDLE,"custom"),
-                                                                        Locale.getDefault());
+                                                       System.getProperty(CNS_CUSTOM_RES_BUNDLE, "custom"),
+                                                       Locale.getDefault());
 
         // Load License Declarations
         try {
@@ -305,9 +307,13 @@ public class ZipLauncher {
         //////////////////////////////////////////
 
         if (Files.isDirectory(RUNTIME_MODULE_PATH)) {
-            // LOG: Loading modules from path: %s
-            ROOT_LOGGER.info(resolveTextKey(LOG_LOADING_MODULE, RUNTIME_MODULE_PATH.toAbsolutePath().toString()));
-            ModuleUtil.loadModulesDynamic(RUNTIME_MODULE_PATH);
+            // Load modules by iterating through folders under RUNTIME_MODULE_PATH...
+            for (Path modulePath : Files.list(RUNTIME_MODULE_PATH).filter(Files::isDirectory).collect(Collectors.toSet())) {
+                // LOG: Loading modules from path: %s
+                ROOT_LOGGER.info(resolveTextKey(LOG_LOADING_MODULE,
+                                                modulePath.toAbsolutePath().toString()));
+                ModuleUtil.loadModulesDynamic(modulePath.toAbsolutePath());
+            }
         } else {
             ModuleUtil.loadModulesStatic();
         }

@@ -380,6 +380,9 @@ public class ZipConstants {
 
     public static final String LOG_USING_CACHE_FOR_QUERY = "logging.ntak.pearl-zip.using-cached-query";
 
+    public static final String LOG_FAILED_EXECUTE_REMOVE_PATTERN = "logging.ntak.pearl-zip.failed-execute-remove-pattern";
+    public static final String LOG_ISSUE_PARSING_MANIFEST = "logging.ntak.pearl-zip.issue-parsing-manifest";
+
     ///// PUBLIC CACHE /////
     public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
 
@@ -413,6 +416,7 @@ public class ZipConstants {
     public static final String CK_MAX_SIZE_DRAG_OUT = "MAX_SIZE_DRAG_OUT";
     public static final String CK_QUERY_RESULT_CACHE = "QUERY_CACHE";
     public static final String CK_QUERY_DEFINITION_CACHE = "QUERY_DEFINITION_CACHE";
+    public static final String CK_MLC_CACHE = "MLC_CACHE";
 
 
     ///// GENERAL PEARLZIP CONSTANTS /////
