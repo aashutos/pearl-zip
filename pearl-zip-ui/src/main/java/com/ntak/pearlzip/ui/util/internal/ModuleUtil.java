@@ -15,6 +15,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
@@ -27,18 +28,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.spi.ResourceBundleProvider;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.ROOT_LOGGER;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_CUSTOM_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.constants.internal.LoggingConstants.PLUGIN_BUNDLES;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.*;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
@@ -138,7 +138,7 @@ public class ModuleUtil {
         }
 
         try {
-            URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
+            ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
             ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
             Configuration moduleConfig = Configuration.resolveAndBind(moduleFinder,
                                                                       List.of(ModuleLayer.boot()
@@ -151,9 +151,12 @@ public class ModuleUtil {
                                                                                   .collect(
                                                                                           Collectors.toSet()));
 
-            ModuleLayer moduleLayer =
-                    ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), urlClassLoader)
-                               .layer();
+            ModuleLayer.Controller mlc =
+                    ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), systemClassLoader);
+            ModuleLayer moduleLayer = mlc.layer();
+            Map<String,ModuleLayer.Controller> mlc_cache = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>getAdditionalConfig(CK_MLC_CACHE).get();
+            mlc_cache.put(modulePath.getFileName().toString(), mlc);
+
             ServiceLoader<ArchiveWriteService> serviceWriteLoader = ServiceLoader.load(moduleLayer,
                                                                                        ArchiveWriteService.class);
             ServiceLoader<ArchiveReadService> serviceReadLoader = ServiceLoader.load(moduleLayer,
@@ -332,6 +335,7 @@ public class ModuleUtil {
                                   .collect(Collectors.toList());
             Path moduleDirectory = Path.of(STORE_ROOT.toAbsolutePath()
                                                      .toString(), "providers");
+            Files.createDirectories(moduleDirectory);
 
             for (Path lib : libs) {
                 // Delete older version libs - if automatically managed
@@ -343,6 +347,7 @@ public class ModuleUtil {
                 Files.copy(lib,
                            Paths.get(moduleDirectory.toAbsolutePath()
                                                     .toString(),
+                                     info.getName(),
                                      lib.getFileName()
                                         .toString()),
                            StandardCopyOption.REPLACE_EXISTING);
@@ -426,7 +431,14 @@ public class ModuleUtil {
             }
 
             // Reload provider modules into PearlZip
-            loadModulesDynamic(moduleDirectory);
+            final var moduleLibDirectory = moduleDirectory.resolve(info.getName());
+            loadModulesDynamic(moduleLibDirectory);
+            LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(moduleLibDirectory,
+                                                        System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
+                                                        Locale.getDefault());
+            CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(moduleLibDirectory,
+                                                           System.getProperty(CNS_CUSTOM_RES_BUNDLE, "custom"),
+                                                           Locale.getDefault());
 
             // TITLE: Library installed successfully
             // BODY:  The library %s has been successfully installed.
@@ -480,32 +492,21 @@ public class ModuleUtil {
     public static void purgeLibrary(Path moduleDirectory, Path lib, String pluginName) throws IOException {
         String rootLib = Paths.get(moduleDirectory.toAbsolutePath()
                                                   .toString(),
+                                   pluginName,
                                    lib.getFileName().toString()
                                       .replaceAll("\\d+(\\.\\d+)+\\.jar", ".*")
                               )
                               .toString();
 
-        synchronized(PLUGINS_METADATA) {
-            Set<Path> dependencies = PLUGINS_METADATA.entrySet()
-                                                     .stream()
-                                                     .filter(e -> !e.getKey()
-                                                                    .equals(pluginName))
-                                                     .map(Map.Entry::getValue)
-                                                     .flatMap(l -> l.getDependencies()
-                                                                    .stream())
-                                                     .map(s -> Paths.get(moduleDirectory.toAbsolutePath()
-                                                                                        .toString(), s))
-                                                     .filter(p -> p.toAbsolutePath()
-                                                                   .toString()
-                                                                   .matches(rootLib))
-                                                     .collect(Collectors.toSet());
+            if (Files.notExists(moduleDirectory.resolve(pluginName))) {
+                Files.createDirectories(moduleDirectory.resolve(pluginName));
+            }
 
-            Files.list(moduleDirectory)
+            Files.list(moduleDirectory.resolve(pluginName))
                  .filter(f -> f.toAbsolutePath()
                                .toString()
-                               .matches(rootLib) && !dependencies.contains(f))
+                               .matches(rootLib))
                  .forEach(ModuleUtil::safeDeletePath);
-        }
     }
 
     public static void purgeLibraries(String moduleDirectory, Set<String> names) throws IOException {
@@ -528,6 +529,7 @@ public class ModuleUtil {
                                                      Paths.get(moduleDirectory, dependency),
                                                      m.getName());
                                     }
+                                    deleteDirectory(Paths.get(moduleDirectory, m.getName()), p -> false);
 
                                     // Remove themes by unique key...
                                     for (String theme : m.getThemes()) {
@@ -538,6 +540,7 @@ public class ModuleUtil {
                                         );
 
                                         deleteDirectory(themePath, (p) -> false);
+                                        deleteDirectory(Paths.get(moduleDirectory, m.getName()), f -> false);
                                     }
                                 } catch(IOException ex) {
                                 }
@@ -569,6 +572,11 @@ public class ModuleUtil {
         final Path LOCAL_MANIFEST_DIR = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                 .<Path>getAdditionalConfig(CK_LOCAL_MANIFEST_DIR)
                 .get();
+
+        Files.list(Path.of(STORE_ROOT.toAbsolutePath()
+                                     .toString(), "providers"))
+             .filter(Files::isDirectory)
+             .forEach(d -> ArchiveUtil.deleteDirectory(d, p -> false));
 
         Files.list(Path.of(STORE_ROOT.toAbsolutePath()
                                      .toString(), "providers"))
@@ -662,6 +670,8 @@ public class ModuleUtil {
             return Optional.of(new PluginInfo(name, minVersion, maxVersion, licenses, dependencies, hashFormats, themes,
                                               properties));
         } catch(Exception e) {
+            // LOG: Issue parsing manifest.\nException type: %s\nException Message: %s\nStack trace:\n%s
+            ROOT_LOGGER.warn(resolveTextKey(LOG_ISSUE_PARSING_MANIFEST, e.getClass().getCanonicalName(), e.getMessage(), getStackTraceFromException(e)));
         }
         return Optional.empty();
     }
@@ -696,26 +706,36 @@ public class ModuleUtil {
         }
 
         try {
-            URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{modulePath.toUri().toURL()});
-            ModuleFinder moduleFinder = ModuleFinder.of(modulePath);
-            Configuration moduleConfig = Configuration.resolveAndBind(moduleFinder,
-                                                                      List.of(ModuleLayer.boot()
-                                                                                         .configuration()),
-                                                                      moduleFinder,
-                                                                      moduleFinder.findAll()
-                                                                                  .stream()
-                                                                                  .map(m -> m.descriptor()
-                                                                                             .name())
-                                                                                  .collect(
-                                                                                          Collectors.toSet()));
+            List<PearlZipResourceBundleProvider> providers = new LinkedList<>();
+            for (Path subDir : Files.list(modulePath).filter(Files::isDirectory).collect(Collectors.toSet())) {
+                ModuleFinder moduleFinder = ModuleFinder.of(subDir);
+                Configuration moduleConfig = Configuration.resolveAndBind(moduleFinder,
+                                                                          List.of(ModuleLayer.boot()
+                                                                                             .configuration()),
+                                                                          moduleFinder,
+                                                                          moduleFinder.findAll()
+                                                                                      .stream()
+                                                                                      .map(m -> m.descriptor()
+                                                                                                 .name())
+                                                                                      .collect(
+                                                                                              Collectors.toSet()));
 
-            ModuleLayer moduleLayer =
-                    ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), urlClassLoader)
-                               .layer();
-            ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
-                                                                                                    PearlZipResourceBundleProvider.class);
-            resourceBundleLoader.forEach(b -> FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get().addAll(b.providedLanguages())));
-            for (ResourceBundleProvider prov : resourceBundleLoader) {
+                ModuleLayer.Controller mlc =
+                        ModuleLayer.defineModulesWithOneLoader(moduleConfig, List.of(ModuleLayer.boot()), ClassLoader.getSystemClassLoader());
+                ModuleLayer moduleLayer = mlc.layer();
+                Map<String,ModuleLayer.Controller> mlc_cache = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>getAdditionalConfig(CK_MLC_CACHE).get();
+                mlc_cache.put(modulePath.getFileName().toString(), mlc);
+
+                ServiceLoader<PearlZipResourceBundleProvider> resourceBundleLoader = ServiceLoader.load(moduleLayer,
+                                                                                                        PearlZipResourceBundleProvider.class);
+                resourceBundleLoader.forEach(b -> FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS)
+                                                                                                                                     .get()
+                                                                                                                                     .addAll(b.providedLanguages())));
+                providers.addAll(resourceBundleLoader.stream().map(ServiceLoader.Provider::get).collect(Collectors.toList()));
+            }
+
+            // Return on first match...
+            for (PearlZipResourceBundleProvider prov : providers) {
                 final Set<String> diffLoggingKeys = new HashSet<>(enGBBundle.keySet());
                 if (Objects.nonNull(bundle = prov.getBundle(baseName, locale))) {
                     diffLoggingKeys.removeAll(bundle.keySet());

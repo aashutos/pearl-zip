@@ -908,7 +908,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         // Backup providers & manifests directory
         // providers...
         Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers");
+                                                .toString(),"providers", "zip4j");
         Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
                                                       .toString(),"providers-backup");
         Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);

@@ -108,6 +108,8 @@ public class FrmOptionsController {
     @FXML
     private TableView<Pair<Boolean,ArchiveService>> tblProviders;
     @FXML
+    private TableColumn<Pair<Boolean,ArchiveService>,String> pluginName;
+    @FXML
     private TableColumn<Pair<Boolean,ArchiveService>,String> name;
     @FXML
     private TableColumn<Pair<Boolean,ArchiveService>,Pair<Boolean,ArchiveService>> readCapability;
@@ -258,6 +260,11 @@ public class FrmOptionsController {
         });
         
         ///// Provider Properties /////
+        pluginName.setCellValueFactory((s) -> new SimpleStringProperty(s.getValue()
+                                                                        .getValue()
+                                                                        .getClass()
+                                                                        .getModule()
+                                                                        .getName()));
         name.setCellValueFactory((s) -> new SimpleStringProperty(s.getValue()
                                                                   .getValue()
                                                                   .getClass()
