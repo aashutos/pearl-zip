@@ -62,6 +62,8 @@ public class SysMenuController {
     private MenuItem mnuClose;
     @FXML
     private MenuItem mnuOptions;
+    @FXML
+    private MenuItem mnuStore;
 
     @FXML
     private MenuItem mnuNotifications;
@@ -165,6 +167,42 @@ public class SysMenuController {
                        resolveTextKey(BODY_ISSUE_CREATING_STAGE, this.getClass().getName()), exc,
                        null);
         }}));
+
+        mnuStore.setOnAction((e)-> JFXUtil.runLater(() -> {
+            try {
+                Stage newStage = new Stage();
+                AnchorPane root;
+
+                newStage.setTitle(resolveTextKey(TITLE_EXTENSION_STORE));
+                newStage.setResizable(false);
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(ZipLauncher.class.getClassLoader()
+                                                    .getResource("frmStore.fxml"));
+                loader.setResources(LOG_BUNDLE);
+                root = loader.load();
+                FrmStoreController controller = loader.getController();
+                controller.initData(newStage);
+
+                Scene scene = new Scene(root);
+                newStage.setScene(scene);
+
+                newStage.show();
+                newStage.setAlwaysOnTop(true);
+            } catch (Exception exc) {
+                // LOG: Issue creating stage.\nException type: %s\nMessage:%s\nStack trace:\n%s
+                LOGGER.warn(resolveTextKey(LOG_ISSUE_CREATING_STAGE, exc.getClass().getCanonicalName(),
+                                           exc.getMessage(),
+                                           LoggingUtil.getStackTraceFromException(exc)));
+                // TITLE: ERROR: Issue creating stage
+                // HEADER: There was an issue creating the required dialog
+                // BODY: Upon initiating function '%s', an issue occurred on attempting to create the dialog. This
+                // function will not proceed any further.
+                raiseAlert(Alert.AlertType.ERROR, resolveTextKey(TITLE_ISSUE_CREATING_STAGE),
+                           resolveTextKey(HEADER_ISSUE_CREATING_STAGE),
+                           resolveTextKey(BODY_ISSUE_CREATING_STAGE, this.getClass().getName()), exc,
+                           null);
+            }}));
+
 
         mnuNotifications.setOnAction((e)-> JFXUtil.runLater(com.ntak.pearlzip.ui.util.internal.JFXUtil::showNotifications));
         mnuNewVersion.setOnAction((e)-> com.ntak.pearlzip.ui.util.internal.JFXUtil.checkNewVersionAvailable());

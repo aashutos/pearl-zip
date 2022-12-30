@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<AnchorPane prefHeight="504.0" prefWidth="538.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmStoreController">
+    <Label alignment="TOP_LEFT" layoutX="7.0" layoutY="7.0" prefHeight="62.0" prefWidth="525.0"
+           text="%store.description.text" wrapText="true"/>
+    <HBox layoutX="15.0" layoutY="474.0" prefHeight="29.0" prefWidth="507.0">
+        <Button fx:id="btnDetails" disable="true" mnemonicParsing="false" text="%store.btnDetails.text"/>
+        <Button fx:id="btnInstall" disable="true" mnemonicParsing="false" text="%store.btnInstall.text"/>
+        <Button fx:id="btnPrevious" disable="true" mnemonicParsing="false" text="%store.btnPrevious.text"/>
+        <Button fx:id="btnNext" disable="true" mnemonicParsing="false" prefHeight="27.0" prefWidth="124.0"
+                text="%store.btnNext.text"/>
+    </HBox>
+    <TableView fx:id="tblStore" layoutX="6.0" layoutY="229.0" prefHeight="245.0" prefWidth="525.0">
+      <columns>
+          <TableColumn fx:id="colName" prefWidth="135.0" text="%store.tblStore.name.text"/>
+          <TableColumn fx:id="colDescription" prefWidth="149.0" text="%store.tblStore.description.text"/>
+          <TableColumn fx:id="colMinVersion" prefWidth="127.0" text="%store.tblStore.min-version.text"/>
+          <TableColumn fx:id="colInstallState" prefWidth="127.0" text="%store.tblStore.install-state.text"/>
+      </columns>
+    </TableView>
+    <Label fx:id="lblFilterInstallState" layoutX="9.0" layoutY="120.0" text="%store.lblFilterInstallState.text"/>
+    <Label fx:id="lblFilterExtType" layoutX="9.0" layoutY="156.0" text="%store.lblFilterExtType.text"/>
+    <Label fx:id="lblFilterPagination" layoutX="9.0" layoutY="194.0" text="%store.lblFilterPagination.text"/>
+    <ChoiceBox fx:id="choiceInstallState" layoutX="131.0" layoutY="116.0" prefWidth="150.0"/>
+    <ChoiceBox fx:id="choiceExtType" layoutX="131.0" layoutY="152.0" prefWidth="150.0"/>
+    <ChoiceBox fx:id="choicePagination" layoutX="131.0" layoutY="190.0" prefHeight="27.0" prefWidth="62.0"/>
+    <ButtonBar layoutX="14.0" layoutY="503.0" prefHeight="42.0" prefWidth="517.0">
+      <buttons>
+          <Button fx:id="btnCancel" alignment="CENTER" mnemonicParsing="false" text="%store.btnClose.text"/>
+      </buttons>
+    </ButtonBar>
+    <Label fx:id="lblFilterStore" layoutX="9.0" layoutY="84.0" text="%store.lblFilterStore.text"/>
+    <ChoiceBox fx:id="choiceStore" layoutX="131.0" layoutY="80.0" prefWidth="150.0"/>
+    <Button fx:id="btnSearch" alignment="BOTTOM_CENTER" layoutX="410.0" layoutY="95.0" mnemonicParsing="false"
+            prefHeight="84.0" prefWidth="84.0" contentDisplay="TOP" text="%store.search.text">
+        <graphic>
+            <ImageView fx:id="imgSearch" fitHeight="54.0" fitWidth="54.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="search.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+</AnchorPane>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2021 92AK
+  ~ Copyright © 2022 92AK
   -->
 
 <?import javafx.scene.control.*?>
@@ -23,6 +23,8 @@
     </Menu>
     <Menu text="%sysmenu.tools.text">
         <MenuItem fx:id="mnuOptions" text="%sysmenu.tools.options.text"/>
+        <SeparatorMenuItem/>
+        <MenuItem fx:id="mnuStore" text="%sysmenu.tools.store.text"/>
     </Menu>
     <Menu fx:id="mnuWindowWrapper" text="%sysmenu.window.text">
     </Menu>

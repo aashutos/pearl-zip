@@ -87,6 +87,9 @@ public class QueryExecutor {
                         );
                      }
 
+                     // LOG: Query executed: %s
+                     LOGGER.debug(resolveTextKey(LOG_QUERY_EXECUTED, query));
+
                      // Retrieve column output values of interest and persist down into marshal into file
                      ResultSet resultSet = s.executeQuery(query);
                      final ResultSetMetaData metaData = resultSet.getMetaData();

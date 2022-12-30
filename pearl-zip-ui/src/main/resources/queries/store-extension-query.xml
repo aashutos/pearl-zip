@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<NamedQuery>
+    <id>store-extension-query</id>
+    <query>SELECT rowNumber, id, packageName, packageUrl, packageHash, description, minVersion, maxVersion, typeName, providerName, about FROM (SELECT ROW_NUMBER() OVER () AS rowNumber, id, packageName, packageUrl, packageHash, description, minVersion, maxVersion, typeName, providerName, about FROM public.PearlZipPackages p) tbl WHERE (SELECT id FROM dbo.PearlZipVersion WHERE Version = minVersion)  &gt;= (SELECT id FROM dbo.PearlZipVersion WHERE Version = :version) AND (SELECT id FROM dbo.PearlZipVersion WHERE Version = maxVersion)  &lt;= (SELECT id FROM dbo.PearlZipVersion WHERE Version = :version) AND rowNumber &gt; CAST(:lowerBound AS INT) AND rowNumber &lt;= CAST(:upperBound AS INT) ORDER BY id</query>
+    <outputColumns>
+        <column>id</column>
+        <column>packagename</column>
+        <column>packageurl</column>
+        <column>packagehash</column>
+        <column>description</column>
+        <column>minversion</column>
+        <column>maxversion</column>
+        <column>typename</column>
+        <column>providername</column>
+        <column>about</column>
+    </outputColumns>
+    <inputParameters>
+        <parameter>:version</parameter>
+        <parameter>:lowerBound</parameter>
+        <parameter>:upperBound</parameter>
+    </inputParameters>
+</NamedQuery>

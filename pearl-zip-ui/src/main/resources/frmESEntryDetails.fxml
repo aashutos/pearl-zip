@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane fx:id="paneESEntryDetails" prefHeight="443.0" prefWidth="415.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmESEntryDetailsController">
+    <Accordion fx:id="accESEntryDetails" prefHeight="400.0" prefWidth="415.0">
+      <panes>
+          <TitledPane fx:id="paneName" animated="false" text="%ESEntryDetails.package.text">
+              <GridPane fx:id="gridPackage">
+                  <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="302.0" minWidth="10.0" prefWidth="223.0"/>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="169.0"/>
+                  </columnConstraints>
+                  <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                      <RowConstraints maxHeight="114.0" minHeight="10.0" prefHeight="114.0" vgrow="SOMETIMES"/>
+                      <RowConstraints maxHeight="115.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES"/>
+                      <RowConstraints maxHeight="51.0" minHeight="10.0" prefHeight="16.0" vgrow="SOMETIMES"/>
+                  </rowConstraints>
+                  <Label fx:id="lblPkgName" text="%ESEntryDetails.gridPackage.packagename.text"/>
+                  <Label fx:id="lblPkgUrl" text="%ESEntryDetails.gridPackage.packageurl.text"
+                         GridPane.rowIndex="1"/>
+                  <Label fx:id="lblPkgHash" text="%ESEntryDetails.gridPackage.packagehash.text"
+                         GridPane.rowIndex="2"/>
+                  <Label fx:id="lblPkgNameValue" alignment="CENTER" text="-" wrapText="true"
+                         GridPane.columnIndex="1"/>
+                  <Label fx:id="lblPkgUrlValue" alignment="CENTER" text="-" wrapText="true"
+                         GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                  <Label fx:id="lblPkgHashValue" alignment="CENTER" text="-" wrapText="true"
+                         GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+              </GridPane>
+          </TitledPane>
+          <TitledPane fx:id="paneDescription" animated="false" text="%ESEntryDetails.description.text">
+              <Label fx:id="lblDescription" alignment="TOP_LEFT" prefHeight="384.0" prefWidth="428.0"
+                     wrapText="true"/>
+          </TitledPane>
+          <TitledPane fx:id="paneCompatibility" prefHeight="200.0" prefWidth="200.0"
+                      text="%ESEntryDetails.compatibility.text">
+              <GridPane fx:id="gridCompatibility">
+                  <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                  </columnConstraints>
+                  <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                  </rowConstraints>
+                  <Label fx:id="lblMinVersion" text="%ESEntryDetails.minVersion.text" wrapText="true"/>
+                  <Label fx:id="lblMaxVersion" text="%ESEntryDetails.maxVersion.text" wrapText="true"
+                         GridPane.rowIndex="1"/>
+                  <Label fx:id="lblMinVersionValue" text="-" GridPane.columnIndex="1"/>
+                  <Label fx:id="lblMaxVersionValue" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+              </GridPane>
+          </TitledPane>
+          <TitledPane fx:id="paneProvider" prefHeight="200.0" prefWidth="200.0" text="%ESEntryDetails.provider.text">
+              <VBox fx:id="vBoxProvider" prefHeight="200.0" prefWidth="100.0">
+                  <HBox fx:id="hBoxProvider" prefHeight="60.0" prefWidth="392.0">
+                      <GridPane fx:id="gridProvider" prefHeight="60.0" prefWidth="413.0">
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                              <ColumnConstraints fx:id="gridProviderName" hgrow="SOMETIMES"
+                                                 minWidth="10.0" prefWidth="100.0"/>
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                          </rowConstraints>
+                          <Label fx:id="lblProviderName" alignment="CENTER_RIGHT"
+                                 text="%ESEntryDetails.providerName.text"/>
+                          <Label fx:id="lblProviderNameValue" text="-" wrapText="true"
+                                 GridPane.columnIndex="1"/>
+                      </GridPane>
+                  </HBox>
+                  <Label fx:id="lblAbout" text="%ESEntryDetails.about.text"/>
+                  <Label fx:id="lblAboutValue" alignment="TOP_LEFT" prefHeight="187.0" prefWidth="392.0"
+                         style="-fx-border-style: solid;" text="-" wrapText="true">
+                      <VBox.margin>
+                          <Insets top="5.0"/>
+                      </VBox.margin>
+                      <padding>
+                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                      </padding>
+                  </Label>
+              </VBox>
+          </TitledPane>
+      </panes>
+    </Accordion>
+    <ButtonBar layoutY="400.0" prefHeight="40.0" prefWidth="415.0">
+      <buttons>
+          <Button fx:id="btnClose" mnemonicParsing="false" text="%ESEntryDetails.close.text"/>
+      </buttons>
+        <padding>
+          <Insets right="5.0"/>
+        </padding>
+    </ButtonBar>
+</AnchorPane>

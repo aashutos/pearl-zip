@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane prefHeight="281.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1">
+    <Label fx:id="lblName" layoutX="15.0" layoutY="69.0" text="%store-details.name.text"/>
+    <Label fx:id="lblURL" layoutX="15.0" layoutY="110.0" text="%store-details.url.text"/>
+    <Label fx:id="lblDescription" alignment="TOP_LEFT" layoutX="2.0" layoutY="1.0" prefHeight="51.0" prefWidth="375.0"
+           text="%store-details.description.text" wrapText="true"/>
+    <TextField fx:id="txtBoxName" layoutX="166.0" layoutY="66.0" prefHeight="27.0" prefWidth="269.0"/>
+    <TextField fx:id="txtBoxURL" layoutX="166.0" layoutY="107.0" prefHeight="27.0" prefWidth="269.0"/>
+    <ButtonBar layoutX="1.0" layoutY="241.0" prefHeight="40.0" prefWidth="450.0">
+      <buttons>
+          <Button fx:id="btnEdit" mnemonicParsing="false" prefHeight="27.0" text="%store-details.edit.text"
+                  visible="false"/>
+          <Button fx:id="btnAdd" mnemonicParsing="false" prefHeight="27.0" text="%store-details.add.text"/>
+          <Button fx:id="btnCancel" mnemonicParsing="false" prefHeight="27.0" prefWidth="252.0"
+                  text="%store-details.cancel.text">
+              <opaqueInsets>
+                  <Insets/>
+              </opaqueInsets>
+          </Button>
+      </buttons>
+        <padding>
+          <Insets right="5.0"/>
+        </padding>
+    </ButtonBar>
+    <Label fx:id="lblUsername" layoutX="15.0" layoutY="154.0" text="%store-details.username.text"/>
+    <Label fx:id="lblPassword" layoutX="15.0" layoutY="191.0" text="%store-details.password.text"/>
+    <TextField fx:id="txtBoxUsername" layoutX="166.0" layoutY="148.0" prefHeight="27.0" prefWidth="269.0"/>
+    <PasswordField fx:id="txtBoxPassword" layoutX="167.0" layoutY="188.0" prefHeight="27.0" prefWidth="269.0"/>
+</AnchorPane>

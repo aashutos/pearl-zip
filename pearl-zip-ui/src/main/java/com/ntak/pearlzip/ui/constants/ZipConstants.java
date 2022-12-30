@@ -47,7 +47,7 @@ public class ZipConstants {
     public static final String CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL = "configuration.ntak.pearl-zip.show-target-folder-extract-all";
     public static final String CNS_THEME_NAME = "configuration.ntak.pearl-zip.theme-name";
     public static final String CNS_NTAK_PEARL_ZIP_DB_CACHE_THRESHOLD_HOURS = "configuration.ntak.pearl-zip.db-cache.threshold.hours";
-
+    public static final String CNS_DB_CONNECTION_TIMEOUT = "configuration.ntak.pearl-zip.db.connection.timeout";
 
     ///// PEARLZIP SRTING PROPERTY KEYS /////
     public static final String LOG_ARCHIVE_CAN_EXTRACT = "logging.ntak.pearl-zip.tar-can-extract";
@@ -114,6 +114,9 @@ public class ZipConstants {
     public static final String LOG_ISSUE_SETTING_UP_KEYSTORE = "logging.ntak.pearl-zip.issue-setting-up-keystore";
     public static final String LOG_NOTIFICATIONS_SQL_ISSUE = "logging.ntak.pearl-zip.notifications-sql-issue";
     public static final String LOG_NOTIFICATIONS_ISSUE = "logging.ntak.pearl-zip.notifications-issue";
+
+    public static final String LOG_EXTENSION_STORE_COUNT_ISSUE = "logging.ntak.pearl-zip.extension-store-count-issue";
+    public static final String LOG_EXTENSION_STORE_ISSUE = "logging.ntak.pearl-zip.extension-store-issue";
 
     // Paste exception
     public static final String LOG_PASTE_EXCEPTION = "logging.ntak.pearl-zip.paste-exception";
@@ -226,6 +229,17 @@ public class ZipConstants {
     public static final String HEADER_FILE_SELECTED_DOES_NOT_EXIST = "header.ntak.pearl-zip.file-selected-does-not-exist";
     public static final String BODY_FILE_SELECTED_DOES_NOT_EXIST = "body.ntak.pearl-zip.file-selected-does-not-exist";
 
+    // File selected does not exist (New single file compressor archive)
+    public static final String LOG_ISSUE_CONNECTING_DB = "logging.ntak.pearl-zip.issue-connecting-db";
+    public static final String TITLE_ISSUE_CONNECTING_DB = "title.ntak.pearl-zip.issue-connecting-db";
+    public static final String BODY_ISSUE_CONNECTING_DB = "body.ntak.pearl-zip.issue-connecting-db";
+
+    // Issue persisting Repository metadata
+    public static final String LOG_ISSUE_PERSISTING_REPO = "logging.ntak.pearl-zip.issue-persisting-repo";
+
+    // Issue parsing Repository metadata
+    public static final String LOG_ISSUE_PARSING_REPO = "logging.ntak.pearl-zip.issue-parsing-repo";
+
     // Cannot move same dir
     public static final String TITLE_CANNOT_DROP_SAME_DIR = "title.ntak.pearl-zip.cannot-drop-same-dir";
 
@@ -328,6 +342,8 @@ public class ZipConstants {
     public static final String LOG_QUERY_RESULT_INVALID_EXTRACTION = "logging.ntak.pearl-zip.query-result-invalid-extraction";
     public static final String LOG_ISSUE_RETRIEVE_QUERY_DATA = "logging.ntak.pearl-zip.issue-retrieve-query-data";
 
+    public static final String LOG_ISSUE_DOWNLOADING_PZAX_ARCHIVE = "logging.ntak.pearl-zip.issue-downloading-pzax-archive";
+
     public static final String TITLE_SAFE_MODE_PATTERN = "title.ntak.pearl-zip.safe-mode-pattern";
     public static final String TITLE_PATTERN = "title.ntak.pearl-zip.title-pattern";
     public static final String TITLE_FILE_PATTERN = "title.ntak.pearl-zip.title-file-pattern";
@@ -343,6 +359,9 @@ public class ZipConstants {
     public static final String TITLE_TARGET_DIR_LOCATION = "title.ntak.pearl-zip.target-dir-location";
     public static final String TITLE_SELECT_INSTALL_EXTENSION = "title.ntak.pearl-zip.select-install-extension";
     public static final String TITLE_SELECT_PLUGINS_PURGE = "title.ntak.pearl-zip.select-plugins-purge";
+    public static final String TITLE_ADD_STORE = "title.ntak.pearl-zip.add-store";
+    public static final String TITLE_EXTENSION_STORE = "title.ntak.pearl-zip.extension-store";
+    public static final String TITLE_EXTENSION_DETAILS = "title.ntak.pearl-zip.extension-details";
 
     public static final String TITLE_NEW_VERSION_AVAILABLE = "title.ntak.pearl-zip.new-version-available";
     public static final String BODY_NEW_VERSION_AVAILABLE = "body.ntak.pearl-zip.new-version-available";
@@ -383,6 +402,8 @@ public class ZipConstants {
     public static final String LOG_FAILED_EXECUTE_REMOVE_PATTERN = "logging.ntak.pearl-zip.failed-execute-remove-pattern";
     public static final String LOG_ISSUE_PARSING_MANIFEST = "logging.ntak.pearl-zip.issue-parsing-manifest";
 
+    public static final String LOG_QUERY_EXECUTED = "logging.ntak.pearl-zip.log-query-executed";
+
     ///// PUBLIC CACHE /////
     public static final AdditionalContextReader GLOBAL_INTERNAL_CACHE = new AdditionalContextReader(InternalContextCache.GLOBAL_CONFIGURATION_CACHE);
 
@@ -417,6 +438,9 @@ public class ZipConstants {
     public static final String CK_QUERY_RESULT_CACHE = "QUERY_CACHE";
     public static final String CK_QUERY_DEFINITION_CACHE = "QUERY_DEFINITION_CACHE";
     public static final String CK_MLC_CACHE = "MLC_CACHE";
+    public static final String CK_REPO_ROOT = "REPO_ROOT";
+    public static final String CK_STORE_REPO = "STORE_REPO";
+    public static final String CK_SSL_CONTEXT = "SSL_CONTEXT";
 
 
     ///// GENERAL PEARLZIP CONSTANTS /////
