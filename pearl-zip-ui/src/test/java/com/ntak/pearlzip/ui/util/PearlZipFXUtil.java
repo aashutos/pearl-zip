@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.mac.MacZipConstants;
@@ -57,7 +58,7 @@ import java.util.stream.Stream;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
@@ -445,6 +446,7 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
@@ -637,8 +639,40 @@ public class PearlZipFXUtil {
 
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
 
         initialiseMenu();
+
+        ////////////////////////////////////////////
+        ///// Store Repository Load ///////////////
+        //////////////////////////////////////////
+
+        Path repoPath = STORE_ROOT.toAbsolutePath().resolve("repository");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .setAdditionalConfig(CK_REPO_ROOT, repoPath);
+
+        if (!Files.exists(repoPath)) {
+            Files.createDirectories(repoPath);
+        }
+
+        // Load default repository and overwrite file
+        Path defaultRepoFile = repoPath.resolve("default");
+
+        StoreRepoDetails storeRepoDetails = new StoreRepoDetails(ResourceConstants.DEFAULT, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+        com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(storeRepoDetails, defaultRepoFile);
+
+        // Load persisted repository files
+        Files.list(repoPath).filter(p -> {
+                 try {
+                     return !Files.isHidden(p);
+                 } catch(IOException e) {
+                     return false;
+                 }
+             })
+             .forEach(com.ntak.pearlzip.ui.util.internal.JFXUtil::loadStoreRepoDetails);
+
+        // Read in repository files into in-memory map
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().put(ResourceConstants.DEFAULT, storeRepoDetails);
 
         // Load main form
         FXMLLoader loader = new FXMLLoader();

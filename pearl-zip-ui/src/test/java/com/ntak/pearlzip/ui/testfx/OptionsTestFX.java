@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -14,8 +14,10 @@ import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
+import com.ntak.pearlzip.ui.util.StoreRepoDetails;
 import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.FormUtil;
+import com.ntak.testfx.TypeUtil;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -39,10 +41,13 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -69,6 +74,8 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
      *  + Incompatible plugin -> higher than maximum version
      *  + Purge all plugins
      *  + Plugin successful install and replacement of legacy library
+     *  + Add Store repository successfully
+     *  + Edit Store repository successfully
      */
 
     @Override
@@ -548,6 +555,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             final TableView<Pair<String,Locale>> tbl = this.lookup("#tblLang")
                                             .queryAs(TableView.class);
+            Locale.setDefault(genLocale(new Properties()));
             tbl.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
             tbl.refresh();
 
@@ -910,9 +918,11 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
                                                 .toString(),"providers", "zip4j");
         Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"providers-backup");
-        Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(providersDir);
+                                                      .toString(), "providers-backup");
+        if (Files.exists(providersDir)) {
+            Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(providersDir);
+        }
 
         // manifests...
         Path manifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
@@ -977,13 +987,99 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                   "Dependency plugin not present as expected");
         } finally {
             clearDirectory(providersDir);
-            Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
+            if (Files.exists(backupProvidersDir)) {
+                Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
+            }
             clearDirectory(manifestsDir);
             Files.move(backupManifestsDir, manifestsDir, StandardCopyOption.REPLACE_EXISTING);
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
+        }
+    }
+
+    @Test
+    @DisplayName("Test: Add store repository successfully")
+    public void testFX_AddStore_Success() throws IOException {
+        final var repositoryFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo");
+
+        Properties props = new Properties();
+        props.load(Files.newInputStream(Paths.get("src", "main", "resources", "application.properties")));
+
+        try {
+            // Navigate to Store Options...
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30))
+                .clickOn(Point2D.ZERO.add(925, 200))
+                .clickOn(Point2D.ZERO.add(925, 380))
+                .sleep(300, MILLISECONDS)
+
+                // Click on add store
+                .clickOn("#btnAddStore")
+                .sleep(300, MILLISECONDS);
+
+            // Enter default details
+            this.clickOn("#txtBoxName");
+            TypeUtil.typeString(this, "test-repo");
+            this.clickOn("#txtBoxURL");
+            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL));
+            this.clickOn("#txtBoxUsername");
+            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER));
+            this.clickOn("#txtBoxPassword");
+            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+            this.clickOn(this.lookup("Add")
+                             .queryButton())
+                .sleep(300, MILLISECONDS);
+
+            // Check file exists in repository folder
+            Assertions.assertTrue(Files.exists(repositoryFile), "Repository file was not created");
+        } finally {
+            Files.deleteIfExists(repositoryFile);
+        }
+    }
+
+    @Test
+    @DisplayName("Test: Edit store repository successfully")
+    public void testFX_EditStore_Success() throws IOException {
+        // Copy test repository file...
+        final var repositoryFile = Paths.get("src", "test", "resources", "test-repo");
+        final var targetFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo");
+        final var newTargetFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo2");
+        Files.copy(repositoryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+
+        // Add repo to in-memory collection
+        loadStoreRepoDetails(targetFile);
+
+        try {
+            // Navigate to Store Options...
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30))
+                .clickOn(Point2D.ZERO.add(925, 200))
+                .clickOn(Point2D.ZERO.add(925, 380))
+                .sleep(300, MILLISECONDS);
+
+            // Navigate to appropriate row
+            TableView<StoreRepoDetails> tblRepo = this.lookup("#tblStore").queryTableView();
+            FormUtil.selectTableViewEntry(this, tblRepo, (r)->r.name(), "test-repo");
+
+            // Click on edit store
+            this.clickOn("#btnEditStore")
+                .sleep(300, MILLISECONDS);
+
+            // Edit Name
+            this.clickOn("#txtBoxName");
+            TypeUtil.typeString(this, "2");
+
+            this.clickOn(this.lookup("Edit")
+                             .queryButton())
+                .sleep(300, MILLISECONDS);
+
+            // Check new file exists in repository folder
+            Assertions.assertTrue(Files.exists(newTargetFile), "Repository file was not created");
+        } finally {
+            Files.deleteIfExists(targetFile);
+            Files.deleteIfExists(newTargetFile);
         }
     }
 }
