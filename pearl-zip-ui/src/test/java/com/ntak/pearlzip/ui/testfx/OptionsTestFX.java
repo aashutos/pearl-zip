@@ -458,7 +458,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -584,7 +583,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -692,7 +690,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
             Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
@@ -812,7 +809,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -852,7 +848,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
             Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
@@ -902,7 +897,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
             Files.move(backupManifestsDir, manifestsDir, StandardCopyOption.REPLACE_EXISTING);
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
@@ -995,7 +989,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
             WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
         }
     }
 
@@ -1061,7 +1054,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             // Navigate to appropriate row
             TableView<StoreRepoDetails> tblRepo = this.lookup("#tblStore").queryTableView();
-            FormUtil.selectTableViewEntry(this, tblRepo, (r)->r.name(), "test-repo");
+            FormUtil.selectTableViewEntry(this, tblRepo, StoreRepoDetails::name, "test-repo");
 
             // Click on edit store
             this.clickOn("#btnEditStore")

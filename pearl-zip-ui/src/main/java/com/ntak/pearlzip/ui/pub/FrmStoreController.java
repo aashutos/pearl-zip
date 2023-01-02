@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -107,10 +107,11 @@ public class FrmStoreController {
         colMinVersion.setCellValueFactory((s)-> new SimpleStringProperty(s.getValue().minVersion()));
 
         // Cached data load, if available
-        pgRef.set(new QueryPagination(0, choicePagination.getValue(), JFXUtil.getExtensionStoreEntryCount(System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), false)));
+        pgRef.set(new QueryPagination(choiceStore.getValue(), 0, choicePagination.getValue(), JFXUtil.getExtensionStoreEntryCount(choiceStore.getValue(), System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), false)));
         synchronized(pgRef) {
             // Execute query and pull entries for current page
-            updatePaginatedTable(pgRef.get(), tblStore, btnNext, btnPrevious, colInstallState, choiceExtType.getSelectionModel().getSelectedItem(), choiceInstallState.getSelectionModel().getSelectedItem(), false);
+            updatePaginatedTable(pgRef.get(), tblStore, btnNext, btnPrevious, colInstallState, choiceExtType.getSelectionModel().getSelectedItem(),
+                                 choiceInstallState.getSelectionModel().getSelectedItem(), false);
         }
 
         // Initialise buttons
@@ -118,11 +119,12 @@ public class FrmStoreController {
         btnSearch.setOnAction(e -> {
             // Execute count query and encapsulate in pagination object
             // Assumption: Very slow moving dataset and so cached count will be valid over a long period of time.
-            pgRef.set(new QueryPagination(0, choicePagination.getValue(), JFXUtil.getExtensionStoreEntryCount(System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), true)));
+            pgRef.set(new QueryPagination(choiceStore.getValue(), 0, choicePagination.getValue(), JFXUtil.getExtensionStoreEntryCount(choiceStore.getValue(), System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), true)));
 
             synchronized(pgRef) {
                 // Execute query and pull entries for current page
-                updatePaginatedTable(pgRef.get(), tblStore, btnNext, btnPrevious, colInstallState, choiceExtType.getSelectionModel().getSelectedItem(), choiceInstallState.getSelectionModel().getSelectedItem(), true);
+                updatePaginatedTable(pgRef.get(), tblStore, btnNext, btnPrevious, colInstallState, choiceExtType.getSelectionModel().getSelectedItem(),
+                                     choiceInstallState.getSelectionModel().getSelectedItem(), true);
             }
         });
         btnNext.setOnAction((e)-> {
@@ -258,14 +260,14 @@ public class FrmStoreController {
         // Execute query and pull entries for current page
         List<ExtensionStoreEntry> entries = new LinkedList<>();
         if (!isFiltered) {
-            entries = JFXUtil.getExtensionStoreEntries(System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), pagination.getOffset(), pagination.getPagination(), isRefreshForced);
+            entries = JFXUtil.getExtensionStoreEntries(pagination.getIdentifier(), System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), pagination.getOffset(), pagination.getPagination(), isRefreshForced);
         } else { // Filtered data - Quite inefficient process at present...
-            int count = JFXUtil.getExtensionStoreEntryCount(System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), isRefreshForced);
+            int count = JFXUtil.getExtensionStoreEntryCount(pagination.getIdentifier(), System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), isRefreshForced);
             int pages = (int)Math.ceil((double)count/pagination.getPagination());
 
             // Get all page entries...
             for (int i = 0; i < pages; i++) {
-                entries.addAll(JFXUtil.getExtensionStoreEntries(System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), i, pagination.getPagination(), isRefreshForced));
+                entries.addAll(JFXUtil.getExtensionStoreEntries(pagination.getIdentifier(), System.getProperty(CNS_NTAK_PEARL_ZIP_RAW_VERSION), i, pagination.getPagination(), isRefreshForced));
             }
         }
 

@@ -3,6 +3,7 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
@@ -43,6 +44,9 @@ import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
 import org.testfx.util.WaitForAsyncUtils;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -446,6 +450,11 @@ public class PearlZipFXUtil {
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
             List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
 
+        // Set properties
+        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL,"jdbc:postgresql://free-tier5.gcp-europe-west1.cockroachlabs.cloud:26257/ntaknotify_uat?sslmode=verify-full&options=--cluster%3Dmagic-strider-3882");
+        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER, "APP");
+        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD, "f50pwWhdYshxT34UuQ0BNg");
+
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
@@ -538,6 +547,37 @@ public class PearlZipFXUtil {
             CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
             CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
         }
+
+        ////////////////////////////////////////////
+        ///// Named Query Load ////////////////////
+        //////////////////////////////////////////
+
+        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
+        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
+
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
+
+        // 1. Extract all files to internal query directory
+        Path defQueryPath = Paths.get(STORE_ROOT.toAbsolutePath()
+                                                .toString(), "db-cache", ".internal");
+        String resource = "queries";
+        String moduleName = "com.ntak.pearlzip.ui";
+        com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defQueryPath, moduleName, resource);
+
+        // 2. Load query definitions into cache
+        Files.list(defQueryPath).forEach(c -> {
+            XMLInputFactory f = XMLInputFactory.newFactory();
+            try (
+                    InputStream fis = Files.newInputStream(c)
+            ) {
+                XMLStreamReader sr = f.createXMLStreamReader(fis);
+                XmlMapper mapper = new XmlMapper(f);
+                QueryDefinition queryDef = mapper.readValue(sr, QueryDefinition.class);
+                queryDefinitionCache.put(queryDef.getId(), queryDef);
+            } catch(IOException | XMLStreamException e) {
+            }
+        });
 
         // Themes
 
@@ -633,19 +673,13 @@ public class PearlZipFXUtil {
             ZipState.addArchiveProvider(writeService);
         }
 
-        // Load queries...
-        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
-        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
-
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
-
         initialiseMenu();
 
         ////////////////////////////////////////////
         ///// Store Repository Load ///////////////
         //////////////////////////////////////////
+
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
 
         Path repoPath = STORE_ROOT.toAbsolutePath().resolve("repository");
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE

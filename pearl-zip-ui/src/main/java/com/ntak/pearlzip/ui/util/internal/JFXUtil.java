@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util.internal;
 
@@ -38,6 +38,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -220,15 +222,18 @@ public class JFXUtil {
         return entries;
     }
 
-    public static int getExtensionStoreEntryCount(String version, boolean isRefreshForced) {
-
-        try {
+    public static int getExtensionStoreEntryCount(String connectionId, String version, boolean isRefreshForced) {
+        StoreRepoDetails storeRepoDetails = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO)
+                .get().get(connectionId);
+        try(Connection connection = DriverManager.getConnection(storeRepoDetails.url(), storeRepoDetails.username(), storeRepoDetails.password())) {
             QueryExecutor executor = new QueryExecutor.QueryExecutorBuilder()
                     .withCacheIdentifier("store-count-query")
                     .withQueryByIdentifier("store-count-query")
                     .withRefreshForced(isRefreshForced)
                     .withParameter("version", version)
                     .build();
+            executor.setConnection(connection);
             executor.execute();
             Optional<QueryResult> optRes;
             if ((optRes = executor.getQueryResult()).isPresent()) {
@@ -242,11 +247,13 @@ public class JFXUtil {
         return 0;
     }
 
-    public static List<ExtensionStoreEntry> getExtensionStoreEntries(String version, int offset, int pagination, boolean isRefreshForced) {
+    public static List<ExtensionStoreEntry> getExtensionStoreEntries(String connectionId, String version, int offset, int pagination, boolean isRefreshForced) {
 
         List<ExtensionStoreEntry> results = new LinkedList<>();
-
-        try {
+        StoreRepoDetails storeRepoDetails = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO)
+                .get().get(connectionId);
+        try(Connection connection = DriverManager.getConnection(storeRepoDetails.url(), storeRepoDetails.username(), storeRepoDetails.password())) {
             QueryExecutor executor = new QueryExecutor.QueryExecutorBuilder()
                     .withCacheIdentifier(String.format("store-extension-query#%d", offset))
                     .withQueryByIdentifier("store-extension-query")
@@ -255,6 +262,7 @@ public class JFXUtil {
                     .withParameter("lowerBound", offset * pagination)
                     .withParameter("upperBound", (offset + 1) * pagination)
                     .build();
+            executor.setConnection(connection);
             executor.execute();
             Optional<QueryResult> optRes;
             if ((optRes = executor.getQueryResult()).isPresent()) {

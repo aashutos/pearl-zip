@@ -1,18 +1,28 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
 public class QueryPagination {
 
+    private String identifier;
     private int offset = 0;
     private int pagination;
     private int count;
 
-    public QueryPagination(int offset, int pagination, int count) {
+    public QueryPagination(String identifier, int offset, int pagination, int count) {
+        this.identifier = identifier;
         this.offset = offset;
         this.pagination = pagination;
         this.count = count;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public int getOffset() {
