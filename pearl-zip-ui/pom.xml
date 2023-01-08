@@ -242,15 +242,16 @@
                 <executions>
                     <execution>
                         <id>copy-keystores</id>
-                        <phase>verify</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <executable>cp</executable>
+                    <executable>rsync</executable>
                     <arguments>
+                        <argument>-a</argument>
                         <argument>${project.basedir}/src/main/resources/keystore</argument>
                         <argument>${project.basedir}/src/main/resources/truststore</argument>
                         <argument>${project.build.directory}/classes</argument>

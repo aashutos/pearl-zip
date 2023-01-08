@@ -1,0 +1,14 @@
+<!--
+  ~ Copyright © 2022 92AK
+  -->
+
+<NamedQuery>
+    <id>store-count-query</id>
+    <query>SELECT count(id) AS "count" FROM public.PearlZipPackages p WHERE minVersionId &gt;= (SELECT id FROM dbo.PearlZipVersion WHERE Version = :version) AND maxVersionId &lt;= (SELECT id FROM dbo.PearlZipVersion WHERE Version = :version)</query>
+    <outputColumns>
+        <column>count</column>
+    </outputColumns>
+    <inputParameters>
+        <parameter>:version</parameter>
+    </inputParameters>
+</NamedQuery>

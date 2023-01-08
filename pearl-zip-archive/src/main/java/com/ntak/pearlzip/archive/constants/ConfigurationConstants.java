@@ -27,6 +27,8 @@ public class ConfigurationConstants {
 
     public static final String CNS_JAVAX_NET_SSL_KEYSTORE = "javax.net.ssl.keyStore";
     public static final String CNS_JAVAX_NET_SSL_TRUSTSTORE = "javax.net.ssl.trustStore";
+    public static final String CNS_JAVAX_NET_SSL_KEYSTORETYPE = "javax.net.ssl.keyStoreType";
+    public static final String CNS_JAVAX_NET_SSL_TRUSTSTORETYPE = "javax.net.ssl.trustStoreType";
     public static final String CNS_JAVAX_NET_SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
     public static final String CNS_JAVAX_NET_SSL_TRUSTSTORE_PASSWORD = "javax.net.ssl.trustStorePassword";
 

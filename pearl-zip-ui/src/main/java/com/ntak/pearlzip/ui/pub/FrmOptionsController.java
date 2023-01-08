@@ -13,6 +13,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.StoreRepoDetails;
 import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import javafx.beans.property.SimpleObjectProperty;
@@ -154,6 +155,18 @@ public class FrmOptionsController {
     private TableColumn<Pair<String,Locale>,String> colLang;
     @FXML
     private Button btnSetLang;
+
+    ///// Store Properties /////
+    @FXML
+    private TableView<StoreRepoDetails> tblStore;
+    @FXML
+    private TableColumn<StoreRepoDetails,String> colStore;
+    @FXML
+    private Button btnAddStore;
+    @FXML
+    private Button btnRemoveStore;
+    @FXML
+    private Button btnEditStore;
 
     @FXML
     public void initialize() {
@@ -736,6 +749,98 @@ public class FrmOptionsController {
                 }
             } finally {
                 stage.setAlwaysOnTop(true);
+            }
+        });
+
+        ///// Store Properties /////
+        tblStore.setItems(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).map(m -> m.values()).orElse(Collections.emptyList())));
+        colStore.setCellValueFactory((o) -> new SimpleStringProperty(o.getValue().name()));
+        btnAddStore.setOnAction((e) -> {
+            try {
+                // Display Add Store dialog
+                // Initialise Stage
+                Stage addStoreStage = new Stage();
+                AnchorPane root;
+
+                addStoreStage.setTitle(resolveTextKey(TITLE_ADD_STORE));
+                addStoreStage.setResizable(false);
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(ZipLauncher.class.getClassLoader()
+                                                    .getResource("frmStoreDetails.fxml"));
+                loader.setResources(LOG_BUNDLE);
+                FrmAddStoreController controller = new FrmAddStoreController();
+                loader.setController(controller);
+                root = loader.load();
+                controller.initData(tblStore, addStoreStage);
+
+                Scene scene = new Scene(root);
+                addStoreStage.setScene(scene);
+
+                addStoreStage.show();
+                addStoreStage.setAlwaysOnTop(true);
+            } catch (Exception exc) {
+
+            }
+        });
+        btnRemoveStore.setOnAction((e)-> {
+            StoreRepoDetails repo = tblStore.getSelectionModel().getSelectedItem();
+            if (Objects.nonNull(repo)) {
+                try {
+                    // Remove store from list
+                    tblStore.getItems()
+                            .remove(repo);
+                    tblStore.refresh();
+
+                    // Remove store from cache
+                    InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO)
+                                                                     .get()
+                                                                     .remove(repo.name());
+
+                    // Remove store from persistent storage
+                    Path repoFile = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                            .<Path>getAdditionalConfig(CK_REPO_ROOT)
+                            .get()
+                            .resolve(repo.name());
+                    Files.deleteIfExists(repoFile);
+                } catch (Exception exc) {
+
+                }
+            }
+        });
+        tblStore.setOnMouseClicked(e -> {
+            StoreRepoDetails repo;
+            if (Objects.nonNull(repo = tblStore.getSelectionModel().getSelectedItem())) {
+                btnEditStore.setDisable(false);
+            } else {
+                btnEditStore.setDisable(true);
+            }
+        });
+        btnEditStore.setDisable(true);
+        btnEditStore.setOnAction((e) -> {
+            try {
+                // Display Edit Store dialog
+                // Initialise Stage
+                Stage editStoreStage = new Stage();
+                AnchorPane root;
+
+                editStoreStage.setTitle(resolveTextKey(TITLE_ADD_STORE));
+                editStoreStage.setResizable(false);
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(ZipLauncher.class.getClassLoader()
+                                                    .getResource("frmStoreDetails.fxml"));
+                loader.setResources(LOG_BUNDLE);
+                FrmEditStoreController controller = new FrmEditStoreController();
+                loader.setController(controller);
+                root = loader.load();
+                controller.initData(tblStore, editStoreStage);
+
+                Scene scene = new Scene(root);
+                editStoreStage.setScene(scene);
+
+                editStoreStage.show();
+                editStoreStage.setAlwaysOnTop(true);
+            } catch (Exception exc) {
+
             }
         });
     }

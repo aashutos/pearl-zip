@@ -90,6 +90,22 @@
                 <Button fx:id="btnSetLang" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="215.0" text="%options.langs.set-lang.text" />
             </AnchorPane>
         </Tab>
+        <Tab fx:id="tabStore" text="%options.stores.store">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <VBox layoutX="9.0" layoutY="14.0" prefWidth="410.0">
+                    <TableView fx:id="tblStore" prefHeight="208.0" prefWidth="410.0">
+                        <columns>
+                            <TableColumn fx:id="colStore" prefWidth="408.0" text="%options.stores.repository.text" />
+                        </columns>
+                    </TableView>
+                    <HBox>
+                        <Button fx:id="btnAddStore" layoutX="9.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" text="%options.stores.add-store.text" />
+                        <Button fx:id="btnRemoveStore" layoutX="90.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" text="%options.stores.remove-store.text" />
+                        <Button fx:id="btnEditStore" layoutX="196.0" layoutY="228.0" mnemonicParsing="false" prefHeight="27.0" text="%options.stores.edit-store.text" />
+                    </HBox>
+                </VBox>
+            </AnchorPane>
+        </Tab>
     </TabPane>
     <ButtonBar layoutY="364.0" prefHeight="51.0" prefWidth="428.0">
         <buttons>

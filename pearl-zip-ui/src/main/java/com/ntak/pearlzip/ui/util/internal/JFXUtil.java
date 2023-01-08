@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util.internal;
 
@@ -9,9 +9,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.pub.FrmLicenseDetailsController;
 import com.ntak.pearlzip.ui.pub.ZipLauncher;
-import com.ntak.pearlzip.ui.util.NotificationEntry;
-import com.ntak.pearlzip.ui.util.QueryExecutor;
-import com.ntak.pearlzip.ui.util.VersionComparator;
+import com.ntak.pearlzip.ui.util.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AccessibleAttribute;
@@ -34,13 +32,14 @@ import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -223,6 +222,70 @@ public class JFXUtil {
         return entries;
     }
 
+    public static int getExtensionStoreEntryCount(String connectionId, String version, boolean isRefreshForced) {
+        StoreRepoDetails storeRepoDetails = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO)
+                .get().get(connectionId);
+        try(Connection connection = DriverManager.getConnection(storeRepoDetails.url(), storeRepoDetails.username(), storeRepoDetails.password())) {
+            QueryExecutor executor = new QueryExecutor.QueryExecutorBuilder()
+                    .withCacheIdentifier("store-count-query")
+                    .withQueryByIdentifier("store-count-query")
+                    .withRefreshForced(isRefreshForced)
+                    .withParameter("version", version)
+                    .build();
+            executor.setConnection(connection);
+            executor.execute();
+            Optional<QueryResult> optRes;
+            if ((optRes = executor.getQueryResult()).isPresent()) {
+                QueryResult result = optRes.get();
+                return result.mapResult((r,i) -> r.getInt(i, "count")).get(0);
+            }
+        } catch (Exception e) {
+            // LOG: Exception raised upon trying to retrieve extension store count.\nStack trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_EXTENSION_STORE_COUNT_ISSUE), getStackTraceFromException(e));
+        }
+        return 0;
+    }
+
+    public static List<ExtensionStoreEntry> getExtensionStoreEntries(String connectionId, String version, int offset, int pagination, boolean isRefreshForced) {
+
+        List<ExtensionStoreEntry> results = new LinkedList<>();
+        StoreRepoDetails storeRepoDetails = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO)
+                .get().get(connectionId);
+        try(Connection connection = DriverManager.getConnection(storeRepoDetails.url(), storeRepoDetails.username(), storeRepoDetails.password())) {
+            QueryExecutor executor = new QueryExecutor.QueryExecutorBuilder()
+                    .withCacheIdentifier(String.format("store-extension-query#%d", offset))
+                    .withQueryByIdentifier("store-extension-query")
+                    .withRefreshForced(isRefreshForced)
+                    .withParameter("version", version)
+                    .withParameter("lowerBound", offset * pagination)
+                    .withParameter("upperBound", (offset + 1) * pagination)
+                    .build();
+            executor.setConnection(connection);
+            executor.execute();
+            Optional<QueryResult> optRes;
+            if ((optRes = executor.getQueryResult()).isPresent()) {
+                QueryResult result = optRes.get();
+                return result.mapResult((r,i) -> new ExtensionStoreEntry(r.getInt(i,"id"),
+                                                                         r.getString(i, "packagename").get(),
+                                                                         r.getString(i, "packageurl").get(),
+                                                                         r.getString(i, "packagehash").get(),
+                                                                         r.getString(i, "description").get(),
+                                                                         r.getString(i, "minversion").get(),
+                                                                         r.getString(i, "maxversion").get(),
+                                                                         r.getString(i, "typename").get(),
+                                                                         r.getString(i, "providername").get(),
+                                                                         r.getString(i, "about").get())
+                );
+            }
+        } catch (Exception e) {
+            // LOG: Exception raised upon trying to retrieve extension store records.\nStack trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_EXTENSION_STORE_ISSUE), getStackTraceFromException(e));
+        }
+        return results;
+    }
+
     public static Properties initialiseBootstrapProperties() throws IOException {
         Properties props = new Properties();
         props.load(MacPearlZipApplication.class.getClassLoader()
@@ -387,5 +450,33 @@ public class JFXUtil {
                                }
                            }
         );
+    }
+
+    public static void persistStoreRepoDetails(StoreRepoDetails storeRepoDetails, Path repoFile) {
+        try {
+            Files.deleteIfExists(repoFile);
+        } catch(IOException e) {
+        }
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(repoFile.toString()))) {
+            oos.writeObject(storeRepoDetails);
+            oos.flush();
+        } catch (IOException ioe) {
+            // LOG: Issue persisting Repository metadata (%s). Message: %s\nStack Trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_ISSUE_PERSISTING_REPO, storeRepoDetails.name(), getStackTraceFromException(ioe)));
+        }
+    }
+
+    public static void loadStoreRepoDetails(Path repoFile) {
+        try (ObjectInputStream oos = new ObjectInputStream(new FileInputStream(repoFile.toString()))) {
+            Object o = oos.readObject();
+            if (o instanceof StoreRepoDetails repo) {
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get()
+                                                                 .put(repo.name(), repo);
+            }
+        } catch (Exception e) {
+            // LOG: Issue parsing Repository metadata (%s). Message: %s\nStack Trace:\n%s
+            LOGGER.error(resolveTextKey(LOG_ISSUE_PARSING_REPO, repoFile.getFileName(), getStackTraceFromException(e)));
+        }
     }
 }

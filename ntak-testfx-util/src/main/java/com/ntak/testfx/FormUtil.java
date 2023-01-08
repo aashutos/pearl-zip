@@ -1,15 +1,12 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.testfx;
 
 import javafx.collections.ObservableList;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
@@ -65,6 +62,27 @@ public class FormUtil {
         }
         robot.push(new KeyCode[]{KeyCode.ENTER});
     }
+
+    public static <T> void selectChoiceBoxEntry(FxRobot robot, ChoiceBox<T> combo, T option) {
+        final String id = String.format("#%s", combo.getId());
+
+        final ObservableList<T> items = combo.getItems();
+        int index = 0;
+        for (T item : items) {
+            if (item.equals(option)) {
+                break;
+            }
+            index++;
+        }
+        robot.clickOn(id, new MouseButton[]{MouseButton.PRIMARY})
+             .sleep(50, MILLISECONDS);
+        for (int i = 0; i < index; i++) {
+            robot.push(new KeyCode[]{KeyCode.DOWN})
+                 .sleep(50, MILLISECONDS);
+        }
+        robot.push(new KeyCode[]{KeyCode.ENTER});
+    }
+
 
     public static void resetComboBox(FxRobot robot, ComboBox comboDefaultCompressionLevel) {
         robot.clickOn(comboDefaultCompressionLevel);

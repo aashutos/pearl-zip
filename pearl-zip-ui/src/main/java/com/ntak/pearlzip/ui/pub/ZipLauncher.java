@@ -8,14 +8,12 @@ import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.LicenseService;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
+import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.rules.*;
-import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.MetricProfile;
-import com.ntak.pearlzip.ui.util.MetricProfileFactory;
-import com.ntak.pearlzip.ui.util.MetricThreadFactory;
+import com.ntak.pearlzip.ui.util.*;
 import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import com.ntak.pearlzip.ui.util.internal.QueryDefinition;
 import com.ntak.pearlzip.ui.util.internal.QueryResult;
@@ -23,6 +21,10 @@ import javafx.util.Pair;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -33,6 +35,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.security.KeyStore;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
@@ -94,6 +97,7 @@ public class ZipLauncher {
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<String,PluginInfo>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
 
         // Load bootstrap properties
         Properties props = initialiseBootstrapProperties();
@@ -191,27 +195,53 @@ public class ZipLauncher {
             }
             Files.copy(cis, certTargetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Copy KeyStore files
+            // Copy KeyStore files only if it does not exist already
             String keystorePathString = Paths.get(storePath.toString(), "keystore.jks")
                                              .toString();
             final Path keystorePath = Paths.get(keystorePathString);
-            if (Files.exists(keystorePath)) {
-                Files.deleteIfExists(keystorePath);
+            if (!Files.exists(keystorePath)) {
+                Files.copy(kis, keystorePath);
             }
-            Files.copy(kis, keystorePath);
+
             System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE, keystorePathString);
+            System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORETYPE, System.getProperty(CNS_JAVAX_NET_SSL_KEYSTORETYPE));
             System.setProperty(CNS_JAVAX_NET_SSL_KEYSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD));
 
-            // Copy truststore files
+            // Copy truststore files only if it does not exist already
             String truststorePathString = Paths.get(storePath.toString(), "truststore.jks")
                                                .toString();
             final Path truststorePath = Paths.get(truststorePathString);
-            if (Files.exists(truststorePath)) {
-                Files.deleteIfExists(truststorePath);
+            if (!Files.exists(truststorePath)) {
+                Files.copy(tis, truststorePath);
             }
-            Files.copy(tis, truststorePath);
             System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE, truststorePathString);
+            System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORETYPE, System.getProperty(CNS_JAVAX_NET_SSL_TRUSTSTORETYPE));
             System.setProperty(CNS_JAVAX_NET_SSL_TRUSTSTORE_PASSWORD, System.getProperty(CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD));
+
+            try(InputStream ist = Files.newInputStream(truststorePath);
+                InputStream isk = Files.newInputStream(keystorePath)) {
+
+                // Initialise Trust Stores...
+                SSLContext context = SSLContext.getInstance("SSL");
+                TrustManagerFactory tsFactory = TrustManagerFactory
+                        .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                KeyStore ts = KeyStore.getInstance(System.getProperty(CNS_JAVAX_NET_SSL_TRUSTSTORETYPE));
+                ts.load(ist, System.getProperty(CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD).toCharArray());
+                tsFactory.init(ts);
+
+                // Initialise Key Stores...
+                KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                KeyStore ks = KeyStore.getInstance(System.getProperty(CNS_JAVAX_NET_SSL_KEYSTORETYPE));
+                ks.load(isk, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD).toCharArray());
+                kmFactory.init(ks, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD).toCharArray());
+
+                // Initialise context...
+                context.init(kmFactory.getKeyManagers(), tsFactory.getTrustManagers(), new java.security.SecureRandom());
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SSL_CONTEXT, context);
+                HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+            } catch (Exception exc) {
+                throw exc;
+            }
         } catch(Exception e) {
             // LOG: Issue setting up key stores. Exception message: %s\nStack trace:\n%s
             ROOT_LOGGER.warn(resolveTextKey(LOG_ISSUE_SETTING_UP_KEYSTORE, e.getMessage(),
@@ -258,6 +288,37 @@ public class ZipLauncher {
             } catch(Exception e) {
             }
         });
+
+        ////////////////////////////////////////////
+        ///// Store Repository Load ///////////////
+        //////////////////////////////////////////
+
+        Path repoPath = STORE_ROOT.toAbsolutePath().resolve("repository");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .setAdditionalConfig(CK_REPO_ROOT, repoPath);
+
+        if (!Files.exists(repoPath)) {
+            Files.createDirectories(repoPath);
+        }
+
+        // Load default repository and overwrite file
+        Path defaultRepoFile = repoPath.resolve("default");
+
+        StoreRepoDetails storeRepoDetails = new StoreRepoDetails(ResourceConstants.DEFAULT, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+        com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(storeRepoDetails, defaultRepoFile);
+
+        // Load persisted repository files
+        Files.list(repoPath).filter(p -> {
+            try {
+                return !Files.isHidden(p);
+            } catch(IOException e) {
+                return false;
+            }
+        })
+        .forEach(com.ntak.pearlzip.ui.util.internal.JFXUtil::loadStoreRepoDetails);
+
+        // Read in repository files into in-memory map
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().put(ResourceConstants.DEFAULT, storeRepoDetails);
 
         ////////////////////////////////////////////
         ///// Named Query Load ////////////////////
