@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.profile.component.ReadServiceComponent;
 import com.ntak.pearlzip.archive.pub.profile.component.WriteServiceComponent;
+import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.ClearCacheRunnable;
@@ -37,6 +38,10 @@ import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +49,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -51,10 +57,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_CUSTOM_RES_BUNDLE;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.CNS_RES_BUNDLE;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
+import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
+import static com.ntak.pearlzip.archive.constants.LoggingConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_FXID_OPTIONS;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.PATTERN_TEXTFIELD_TABLE_CELL_STYLE;
@@ -81,6 +85,9 @@ public class FrmOptionsController {
 
     @FXML
     private Button btnClearCache;
+
+    @FXML
+    private Button btnRefreshKeystore;
 
     @FXML
     private ComboBox<String> comboDefaultFormat;
@@ -557,6 +564,95 @@ public class FrmOptionsController {
             }
         });
 
+        btnRefreshKeystore.setOnAction((e) -> {
+            try {
+                btnRefreshKeystore.setDisable(true);
+                long sessionId = System.currentTimeMillis();
+                // TITLE: Confirmation: Refresh Keystore
+                // HEADER: Do you wish to reset PearlZip's keystore to default settings?
+                // BODY: ress 'Yes' to reset the keystores otherwise press 'No'.
+                Optional<ButtonType> response = raiseAlert(Alert.AlertType.CONFIRMATION,
+                                                           resolveTextKey(TITLE_REFRESH_KEYSTORE),
+                                                           resolveTextKey(HEADER_REFRESH_KEYSTORE),
+                                                           resolveTextKey(BODY_REFRESH_KEYSTORE),
+                                                           null, stage,
+                                                           ButtonType.YES, ButtonType.NO);
+
+                if (response.isPresent() && response.get()
+                                                    .getButtonData()
+                                                    .equals(ButtonBar.ButtonData.YES)) {
+                    executeBackgroundProcess(sessionId, stage, () -> {
+                                                    ////////////////////////////////////////////
+                                                    ///// KeyStore Setup //////////////////////
+                                                    //////////////////////////////////////////
+
+                                                    Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                            .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                                                            .get();
+
+                                                    // Root store folder
+                                                    Path storePath = Paths.get(STORE_ROOT.toString(), ".store");
+                                                    if (Files.notExists(storePath)) {
+                                                        Files.createDirectories(storePath);
+                                                    }
+
+                                                    // Key Stores
+                                                    // Load key store and trust store
+                                                    try(InputStream kis = ZipLauncher.class.getClassLoader().getResourceAsStream("keystore");
+                                                        InputStream tis = ZipLauncher.class.getClassLoader().getResourceAsStream("truststore")) {
+
+                                                        // Copy KeyStore files only if it does not exist already
+                                                        String keystorePathString = Paths.get(storePath.toString(), "keystore.jks")
+                                                                                         .toString();
+                                                        final Path keystorePath = Paths.get(keystorePathString);
+                                                        Files.deleteIfExists(keystorePath);
+                                                        Files.copy(kis, keystorePath);
+
+                                                        // Copy truststore files only if it does not exist already
+                                                        String truststorePathString = Paths.get(storePath.toString(), "truststore.jks")
+                                                                                           .toString();
+                                                        final Path truststorePath = Paths.get(truststorePathString);
+                                                        Files.deleteIfExists(truststorePath);
+                                                        Files.copy(tis, truststorePath);
+
+                                                        try(InputStream ist = Files.newInputStream(truststorePath);
+                                                            InputStream isk = Files.newInputStream(keystorePath)) {
+
+                                                            // Initialise Trust Stores...
+                                                            SSLContext context = SSLContext.getInstance("SSL");
+                                                            TrustManagerFactory tsFactory = TrustManagerFactory
+                                                                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                                                            KeyStore ts = KeyStore.getInstance(System.getProperty(CNS_JAVAX_NET_SSL_TRUSTSTORETYPE));
+                                                            ts.load(ist, System.getProperty(CNS_NTAK_PEARL_ZIP_TRUSTSTORE_PASSWORD).toCharArray());
+                                                            tsFactory.init(ts);
+
+                                                            // Initialise Key Stores...
+                                                            KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                                                            KeyStore ks = KeyStore.getInstance(System.getProperty(CNS_JAVAX_NET_SSL_KEYSTORETYPE));
+                                                            ks.load(isk, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD).toCharArray());
+                                                            kmFactory.init(ks, System.getProperty(CNS_NTAK_PEARL_ZIP_KEYSTORE_PASSWORD).toCharArray());
+
+                                                            // Initialise context...
+                                                            context.init(kmFactory.getKeyManagers(), tsFactory.getTrustManagers(), new java.security.SecureRandom());
+                                                            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SSL_CONTEXT, context);
+                                                            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+                                                        } catch (Exception exc) {
+                                                            throw exc;
+                                                        }
+                                                    } catch(Exception ex) {
+                                                        // LOG: Issue setting up key stores. Exception message: %s\nStack trace:\n%s
+                                                        ROOT_LOGGER.warn(resolveTextKey(LOG_ISSUE_SETTING_UP_KEYSTORE, ex.getMessage(),
+                                                                                        LoggingUtil.getStackTraceFromException(ex)));
+                                                    }
+                                             },
+                                             LOGGER::error,
+                                             (s) -> {});
+                }
+            } finally {
+                btnRefreshKeystore.setDisable(false);
+            }
+        });
+
         // Theme related functionality
         final Path themesPath = Paths.get(InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                                                               .<Path>getAdditionalConfig(CK_STORE_ROOT)
@@ -753,7 +849,7 @@ public class FrmOptionsController {
         });
 
         ///// Store Properties /////
-        tblStore.setItems(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).map(m -> m.values()).orElse(Collections.emptyList())));
+        tblStore.setItems(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).map(Map::values).orElse(Collections.emptyList())));
         colStore.setCellValueFactory((o) -> new SimpleStringProperty(o.getValue().name()));
         btnAddStore.setOnAction((e) -> {
             try {

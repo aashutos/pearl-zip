@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.constants;
 
@@ -277,6 +277,11 @@ public class ZipConstants {
     public static final String TITLE_CLEAR_CACHE = "title.ntak.pearl-zip.clear-cache";
     public static final String HEADER_CLEAR_CACHE = "header.ntak.pearl-zip.clear-cache";
     public static final String BODY_CLEAR_CACHE = "body.ntak.pearl-zip.clear-cache";
+
+    // Refresh keystore confirmation
+    public static final String TITLE_REFRESH_KEYSTORE = "title.ntak.pearl-zip.refresh-keystore";
+    public static final String HEADER_REFRESH_KEYSTORE = "header.ntak.pearl-zip.refresh-keystore";
+    public static final String BODY_REFRESH_KEYSTORE = "body.ntak.pearl-zip.refresh-keystore";
 
     // Issue loading library
     public static final String LOG_ISSUE_LOAD_LIB = "logging.ntak.pearl-zip.issue-load-lib";

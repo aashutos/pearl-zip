@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -256,6 +257,37 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         Assertions.assertFalse(Files.exists(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar")),
                                "temp file in pz ephemeral storage was not deleted");
 
+    }
+
+    @Test
+    @DisplayName("Test: Refresh keystore recreates keystore and truststore in .store directory")
+    public void testFX_RefreshKeystore_MatchExpectations() throws IOException {
+        // Obtain initial state
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                .get();
+        Path keystorePath = STORE_ROOT.resolve(Path.of(".store","keystore.jks"));
+        Path truststorePath = STORE_ROOT.resolve(Path.of(".store","truststore.jks"));
+        long ksTime = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
+        long tsTime = ((FileTime) Files.getAttribute(truststorePath, "creationTime")).toMillis();
+
+        // Navigate to the clear cache option
+        this.clickOn(Point2D.ZERO.add(160, 10))
+            .clickOn(Point2D.ZERO.add(160, 30))
+            .clickOn("#tabGeneral")
+            .clickOn("#btnRefreshKeystore")
+            .sleep(200, MILLISECONDS);
+
+        DialogPane dialogPane = lookup(".dialog-pane").query();
+        clickOn(dialogPane.lookupButton(ButtonType.YES));
+        sleep(250, MILLISECONDS);
+
+        // Check the outcomes are as expected
+        long ksTimeAfter = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
+        long tsTimeAfter = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
+
+        Assertions.assertTrue(ksTimeAfter > ksTime, "Keystore was not refreshed");
+        Assertions.assertTrue(tsTimeAfter > tsTime, "Truststore was not refreshed");
     }
 
     @Test
