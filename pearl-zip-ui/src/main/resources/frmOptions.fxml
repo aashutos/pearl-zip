@@ -1,33 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2022 92AK
+  ~ Copyright © 2023 92AK
   -->
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="415.0" prefWidth="428.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ntak.pearlzip.ui.pub.FrmOptionsController">
-    <TabPane fx:id="tabPaneOptions" prefHeight="364.0" prefWidth="428.0" tabClosingPolicy="UNAVAILABLE">
+    <TabPane fx:id="tabPaneOptions" prefHeight="431.0" prefWidth="428.0" tabClosingPolicy="UNAVAILABLE">
         <Tab fx:id="tabGeneral" text="%options.general.text">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="331.0" prefWidth="451.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="450.0" prefWidth="428.0">
                 <VBox>
                     <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="14.0" prefWidth="391.0" text="%options.general.description.text" wrapText="true">
                   <VBox.margin>
                      <Insets bottom="10.0" top="5.0" />
                   </VBox.margin></Label>
-                    <Button fx:id="btnClearCache" layoutX="23.0" layoutY="91.0" mnemonicParsing="false" text="%options.general.btnClearCache.text" />
+                    <Button fx:id="btnClearCache" mnemonicParsing="false" text="%options.general.btnClearCache.text">
+                  <VBox.margin>
+                     <Insets top="5.0" />
+                  </VBox.margin></Button>
+                    <Button fx:id="btnRefreshKeystore" mnemonicParsing="false" text="%options.general.btnRefreshKeystore.text">
+                  <VBox.margin>
+                     <Insets bottom="10.0" top="10.0" />
+                  </VBox.margin>
+               </Button>
                <padding>
                   <Insets left="15.0" right="15.0" />
                </padding>
                 </VBox>
-            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="13.0" layoutY="178.0" prefHeight="148.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
-                <Label fx:id="lblDefaultFormat" layoutX="23.0" layoutY="222.0" text="%options.general.defaultFormat.text" />
-                      <ComboBox fx:id="comboDefaultFormat" layoutX="264.0" layoutY="217.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
-                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="262.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
-                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="292.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
-            <CheckBox fx:id="checkShowTargetFolderExtractAll" layoutX="14.0" layoutY="147.0" mnemonicParsing="false" text="%options.general.checkShowTargetFolderExtractAll.text" />
-            <CheckBox fx:id="checkShowTargetFolderExtractSelected" layoutX="14.0" layoutY="118.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="370.0" text="%options.general.checkShowTargetFolderExtractSelected.text" wrapText="true" />
+            <TitledPane fx:id="titlePaneStartUpOptions" collapsible="false" layoutX="13.0" layoutY="254.0" prefHeight="128.0" prefWidth="403.0" text="%options.general.startUpOptions.text" />
+                <Label fx:id="lblDefaultFormat" layoutX="24.0" layoutY="225.0" text="%options.general.defaultFormat.text" />
+                      <ComboBox fx:id="comboDefaultFormat" layoutX="265.0" layoutY="220.0" prefHeight="27.0" prefWidth="142.0" promptText="zip" />
+                      <CheckBox fx:id="checkShowNotification" layoutX="23.0" layoutY="288.0" mnemonicParsing="false" text="%options.general.checkShowNotifications.text" />
+                <CheckBox fx:id="checkSafeMode" layoutX="23.0" layoutY="318.0" mnemonicParsing="false" text="%options.general.checkSafeMode.text" />
+            <CheckBox fx:id="checkShowTargetFolderExtractAll" layoutX="15.0" layoutY="195.0" mnemonicParsing="false" text="%options.general.checkShowTargetFolderExtractAll.text" />
+            <CheckBox fx:id="checkShowTargetFolderExtractSelected" layoutX="15.0" layoutY="166.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="370.0" text="%options.general.checkShowTargetFolderExtractSelected.text" wrapText="true" />
             </AnchorPane>
         </Tab>
         <Tab fx:id="tabBootstrap" text="%options.bootstrap-properties.text">
@@ -107,7 +115,7 @@
             </AnchorPane>
         </Tab>
     </TabPane>
-    <ButtonBar layoutY="364.0" prefHeight="51.0" prefWidth="428.0">
+    <ButtonBar layoutY="429.0" prefHeight="45.0" prefWidth="428.0">
         <buttons>
             <Button fx:id="btnOk" mnemonicParsing="false" text="%options.btnOk.text" />
             <Button fx:id="btnApply" mnemonicParsing="false" text="%options.btnApply.text" translateX="-3.0" />
