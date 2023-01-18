@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.mac;
 
@@ -8,7 +8,7 @@ import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
-import com.ntak.pearlzip.ui.pub.ZipLauncher;
+import com.ntak.pearlzip.ui.util.AbstractStartupStage;
 import de.jangassen.MenuToolkit;
 import de.jangassen.model.AppearanceMode;
 import de.jangassen.platform.NativeAdapter;
@@ -116,7 +116,10 @@ public class MacPearlZipApplication extends PearlZipApplication {
 
     public static void main(String[] args) {
         try {
-            ZipLauncher.initialize();
+            for (AbstractStartupStage stage : STARTUP_STAGE) {
+                stage.execute();
+            }
+
             LoggingConstants.ROOT_LOGGER.debug(Arrays.toString(args));
             launch(args);
         } catch(Exception e) {
@@ -124,5 +127,4 @@ public class MacPearlZipApplication extends PearlZipApplication {
             LoggingConstants.ROOT_LOGGER.error(LoggingUtil.getStackTraceFromException(e));
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -11,9 +11,11 @@ import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.ErrorAlertConsumer;
+import com.ntak.pearlzip.ui.stages.jfx.JFXInMemoryCacheStartupStage;
+import com.ntak.pearlzip.ui.stages.jfx.JFXThemesStartupStage;
+import com.ntak.pearlzip.ui.util.AbstractJFXStartupStage;
+import com.ntak.pearlzip.ui.util.AbstractStartupStage;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.ProgressMessageTraceLogger;
 import com.ntak.pearlzip.ui.util.internal.ArchiveUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -38,7 +40,6 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.*;
@@ -121,76 +122,27 @@ public abstract class PearlZipApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         try {
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, this);
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
-            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_HOST_SERVICES, this.getHostServices());
-            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PARAMETERS, this.getParameters());
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)() -> System.exit(0));
-
             CountDownLatch readyLatch = new CountDownLatch(1);
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, this);
 
-            // Loading additional EventBus consumers
-            ProgressMessageTraceLogger MESSAGE_TRACE_LOGGER = ProgressMessageTraceLogger.getMessageTraceLogger();
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MESSAGE_TRACE_LOGGER, MESSAGE_TRACE_LOGGER);
-            ArchiveService.DEFAULT_BUS.register(MESSAGE_TRACE_LOGGER);
+            /////////////////////////////////
+            ///// JFX STAGES ////////////////
+            /////////////////////////////////
 
-            ErrorAlertConsumer ERROR_ALERT_CONSUMER = ErrorAlertConsumer.getErrorAlertConsumer();
-            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_ERROR_ALERT_CONSUMER, ERROR_ALERT_CONSUMER);
-            ArchiveService.DEFAULT_BUS.register(ERROR_ALERT_CONSUMER);
+            List<AbstractJFXStartupStage> JFX_STARTUP_STAGE = Arrays.asList(new JFXInMemoryCacheStartupStage(),
+                                                                            new JFXThemesStartupStage());
 
-            ////////////////////////////////////////////
-            ///// Create files and dir structure //////
-            //////////////////////////////////////////
+            for (AbstractJFXStartupStage startupStage : JFX_STARTUP_STAGE) {
+                startupStage.execute();
+            }
 
-            // Create temporary store folder
-            Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                                                  .<Path>getAdditionalConfig(CK_STORE_ROOT)
+            /////////////////////////////////
+            ///// JAVAFX STARTUP ////////////
+            /////////////////////////////////
+
+            Path STORE_TEMP = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                                                  .<Path>getAdditionalConfig(CK_STORE_TEMP)
                                                   .get();
-            Path STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                          .toString(), "temp");
-            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP, STORE_TEMP);
-
-            if (!Files.exists(STORE_TEMP)) {
-                Files.createDirectories(STORE_TEMP);
-            }
-
-            // Providers
-            Path providerPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                    .toString(), "providers");
-            Files.createDirectories(providerPath);
-
-            // Themes
-            Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                  .toString(), "themes");
-
-            // Copy over and overwrite core themes...
-            for (String theme : CORE_THEMES) {
-                Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                        .toString(), "themes", theme);
-                String moduleName = "com.ntak.pearlzip.ui";
-                com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defThemePath, moduleName, theme);
-            }
-
-            // Initialise theme...
-            String themeName = System.getProperty(CNS_THEME_NAME, "modena");
-            com.ntak.pearlzip.ui.util.internal.JFXUtil.initialiseTheme(themesPath, themeName);
-
-            // Initialise drag out constants...
-            try {
-                long maxSize = Long.parseLong(System.getProperty(CNS_NTAK_PEARL_ZIP_DEFAULT_MAX_SIZE_DRAG_OUT));
-                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MAX_SIZE_DRAG_OUT, maxSize);
-            } catch (Exception e) {
-
-            }
-
-            // Recent files
-            Path RECENT_FILE = Paths.get(STORE_ROOT.toAbsolutePath()
-                                              .toString(), "rf");
-            InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, RECENT_FILE);
-            if (!Files.exists(RECENT_FILE)) {
-                Files.createFile(RECENT_FILE);
-            }
 
             // Setting about form...
             Stage aboutStage = genFrmAbout();
@@ -371,7 +323,10 @@ public abstract class PearlZipApplication extends Application {
 
     public static void main(String[] args) {
         try {
-            ZipLauncher.initialize();
+            for (AbstractStartupStage stage : STARTUP_STAGE) {
+                stage.execute();
+            }
+
             LoggingConstants.ROOT_LOGGER.debug(Arrays.toString(args));
             launch(args);
         } catch(Exception e) {
