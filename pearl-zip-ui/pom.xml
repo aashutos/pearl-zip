@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2022 92AK
+  ~ Copyright © 2023 92AK
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -23,7 +23,6 @@
         <pearlzip.sign.store.password>SET STORE PASSWORD</pearlzip.sign.store.password>
         <pearlzip.sign.key.password>SET KEY PASSWORD</pearlzip.sign.key.password>
         <deploy.settings.loc>${project.basedir}/scripts/settings.properties</deploy.settings.loc>
-        <git.commit.id>HASH-GEN</git.commit.id>
     </properties>
 
     <licenses>
