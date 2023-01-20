@@ -3,17 +3,14 @@
  */
 package com.ntak.pearlzip.ui.testfx;
 
-import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
-import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
+import com.ntak.pearlzip.ui.util.OptionTab;
 import com.ntak.pearlzip.ui.util.StoreRepoDetails;
 import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.FormUtil;
@@ -46,8 +43,7 @@ import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.lookupArchiveInfo;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
@@ -56,8 +52,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class OptionsTestFX extends AbstractPearlZipTestFX {
     private Path tempOSDir;
     private Path tempPZDir;
-    private Path STORE_ROOT;
-    private Path STORE_TEMP;
+    private Path STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
+    private Path STORE_TEMP = STORE_ROOT.resolve("temp");
 
     /*
      *  Test cases:
@@ -81,48 +77,23 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
-        STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
-        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
+        super.start(stage);
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)() -> {});
+
         Path LOCAL_TEMP =
                 Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
                                   .orElse(STORE_ROOT.toString()));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
-        STORE_TEMP = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP, STORE_TEMP);
-
-        Files.list(STORE_TEMP)
-             .filter(Files::isRegularFile)
-             .forEach(f -> {
-                 try {
-                     Files.deleteIfExists(f);
-                 } catch(IOException e) {
-                 }
-             });
-
-        PearlZipFXUtil.initialise(stage,
-                                  List.of(new CommonsCompressArchiveWriteService()),
-                                  List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService()),
-                                  Paths.get(STORE_TEMP.toAbsolutePath().toString(), String.format("a%d.zip",
-                                                                                                  System.currentTimeMillis()))
-        );
-
         tempOSDir = Paths.get(LOCAL_TEMP.toAbsolutePath()
                                         .toString(), String.format("pz%d", System.currentTimeMillis()));
         sleep(250);
         tempPZDir = Paths.get(STORE_TEMP.toAbsolutePath()
                                         .toString(), String.format("pz%d", System.currentTimeMillis()));
 
-        Files.createFile(Paths.get(STORE_TEMP.toAbsolutePath().toString(), "a1234567890.zip"));
 
         Files.createDirectories(tempOSDir);
         Files.createDirectories(tempPZDir);
 
+        Files.createFile(Paths.get(STORE_TEMP.toAbsolutePath().toString(), "a1234567890.zip"));
         Files.createFile(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar"));
         Files.createFile(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar"));
 
@@ -580,9 +551,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             // Change language pack via options
             this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn(Point2D.ZERO.add(925, 200))
-                .clickOn(Point2D.ZERO.add(925, 350));
+                .clickOn(Point2D.ZERO.add(160, 30));
+
+            simSelectOptionsAdditionalTab(this, OptionTab.LANGUAGES.getIndex());
 
             final TableView<Pair<String,Locale>> tbl = this.lookup("#tblLang")
                                             .queryAs(TableView.class);
@@ -654,10 +625,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
             // Check available themes via options
             this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn(Point2D.ZERO.add(925, 200))
-                .clickOn(Point2D.ZERO.add(925, 320))
-                .sleep(200,MILLISECONDS);
+                .clickOn(Point2D.ZERO.add(160, 30));
+
+            simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
 
             Assertions.assertTrue(this.lookup("#tblTheme").queryAs(TableView.class).getItems().contains("modena-orange"));
 
@@ -1035,13 +1005,13 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         try {
             // Navigate to Store Options...
             this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn(Point2D.ZERO.add(925, 200))
-                .clickOn(Point2D.ZERO.add(925, 380))
-                .sleep(300, MILLISECONDS)
+                .clickOn(Point2D.ZERO.add(160, 30));
+
+            // Click to obtain Option tab
+            simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
 
                 // Click on add store
-                .clickOn("#btnAddStore")
+            this.clickOn("#btnAddStore")
                 .sleep(300, MILLISECONDS);
 
             // Enter default details
@@ -1065,6 +1035,13 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     }
 
     @Test
+    public void test() {
+        this.clickOn(Point2D.ZERO.add(160, 10))
+            .clickOn(Point2D.ZERO.add(160, 30));
+        simSelectOptionsAdditionalTab( this, 7);
+    }
+
+    @Test
     @DisplayName("Test: Edit store repository successfully")
     public void testFX_EditStore_Success() throws IOException {
         // Copy test repository file...
@@ -1079,10 +1056,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         try {
             // Navigate to Store Options...
             this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn(Point2D.ZERO.add(925, 200))
-                .clickOn(Point2D.ZERO.add(925, 380))
-                .sleep(300, MILLISECONDS);
+                .clickOn(Point2D.ZERO.add(160, 30));
+
+            simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
 
             // Navigate to appropriate row
             TableView<StoreRepoDetails> tblRepo = this.lookup("#tblStore").queryTableView();

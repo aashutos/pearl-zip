@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.testfx.api.FxRobot;
 
 import java.util.Optional;
@@ -102,5 +103,9 @@ public class FormUtil {
                     .get()
                     .getScene()
                     .lookup(id);
+    }
+
+    public static Optional<Stage> lookupStage(String regExPattern) {
+        return Window.getWindows().stream().map(Stage.class::cast).filter(s -> s.getTitle().matches(regExPattern)).findFirst();
     }
 }

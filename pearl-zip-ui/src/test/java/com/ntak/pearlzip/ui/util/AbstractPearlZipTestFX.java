@@ -1,16 +1,16 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
-import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.testfx.api.FxToolkit;
@@ -21,29 +21,50 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeoutException;
-
-import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
 
-    Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
+    static Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
+    static Path localWorkspace = Path.of(System.getProperty("user.home"), ".pz");
+    static Path applicationProps = localWorkspace.resolve("application.properties");
+    static Path backupLocalWorkspace = Path.of(System.getProperty("user.home"), ".pz-backup");
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-        PearlZipFXUtil.initialise(stage,
-                                  List.of(new CommonsCompressArchiveWriteService()),
-                                  List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService())
-        );
-        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT).get();
-        LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                       .orElse(STORE_ROOT.toString()));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
-                                                                            Paths.get(System.getProperty("user.home"), ".pz", "temp"));
+        //System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
+
+        Path STORE_TEMP = localWorkspace.resolve("temp");
+
+        // Setup workspace prior to launch
+        if (Files.exists(backupLocalWorkspace)) {
+            ArchiveUtil.deleteDirectory(backupLocalWorkspace, (p)->false);
+        }
+        if (Files.exists(localWorkspace)) {
+            Files.move(localWorkspace, backupLocalWorkspace);
+        }
+
+        // Initialise PearlZip Application
+        PearlZipFXUtil.initialise(stage, List.of(new CommonsCompressArchiveWriteService()), List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService()), Paths.get(STORE_TEMP.toAbsolutePath().toString(), String.format("a%d.zip", System.currentTimeMillis())));
+
+        // Save Properties...
+        if (!Files.exists(applicationProps)) {
+            Files.createFile(applicationProps);
+        }
+        System.getProperties().store(Files.newBufferedWriter(applicationProps), "PearlZip Automated Test");
+    }
+
+    @AfterAll
+    public static void tearDownLast() throws IOException {
+        // Restore previous workspace
+        if (Files.exists(localWorkspace)) {
+            ArchiveUtil.deleteDirectory(localWorkspace, (p)->false);
+        }
+
+        if (Files.exists(backupLocalWorkspace)) {
+            Files.move(backupLocalWorkspace, localWorkspace);
+        }
     }
 
     @AfterEach

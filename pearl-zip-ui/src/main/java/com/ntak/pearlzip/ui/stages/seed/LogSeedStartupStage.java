@@ -52,8 +52,12 @@ public class LogSeedStartupStage extends AbstractSeedStartupStage {
             } catch(Exception e) {
             }
         }
-        ConfigurationSource source = new ConfigurationSource(new FileInputStream(log4jPath.toString()));
-        Configurator.initialize(null, source);
+
+        try {
+            ConfigurationSource source = new ConfigurationSource(new FileInputStream(log4jPath.toString()));
+            Configurator.initialize(null, source);
+        } catch (Exception e) {
+        }
 
         // Setting Locale
         Locale.setDefault(genLocale(System.getProperties()));

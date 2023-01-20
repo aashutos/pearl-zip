@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -62,7 +62,7 @@ public class AboutTestFX extends AbstractPearlZipTestFX {
         Assertions.assertEquals("PearlZip", lblAppName.getText(), "Application Name did not match");
         Assertions.assertTrue(lblVersion.getText().matches(".*\\d\\.\\d\\.\\d\\.\\d.*"),
                               "Application version did not match");
-        Assertions.assertEquals(String.format("\u00A9 %s 92AK\nProgram written by Aashutos Kakshepati",
+        Assertions.assertEquals(String.format("\u00A9 2021-%s 92AK\nProgram written by Aashutos Kakshepati",
                                               LocalDate.now().getYear()),
                                 lblCopyright.getText(),
                                 "Copyright did not match");

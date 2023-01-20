@@ -3,14 +3,10 @@
  */
 package com.ntak.pearlzip.ui.util;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.mac.MacZipConstants;
@@ -18,17 +14,14 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmAboutController;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
-import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
-import com.ntak.pearlzip.ui.rules.*;
-import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
-import com.ntak.pearlzip.ui.util.internal.QueryDefinition;
-import com.ntak.pearlzip.ui.util.internal.QueryResult;
+import com.ntak.pearlzip.ui.stages.jfx.JFXThemesStartupStage;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.NativeFileChooserUtil;
 import de.jangassen.MenuToolkit;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -38,39 +31,27 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
 import org.testfx.util.WaitForAsyncUtils;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.initialiseApplicationSettings;
+import static com.ntak.testfx.FormUtil.lookupStage;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
 import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -443,226 +424,24 @@ public class PearlZipFXUtil {
     }
 
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
-            List<ArchiveReadService> readServices) throws IOException, TimeoutException {
-        initialise(stage, writeServices, readServices, Paths.get(Files.createTempDirectory("pz").toString(), "temp.zip"));
-    }
+            List<ArchiveReadService> readServices, Path initFile) throws IOException, TimeoutException {
 
-    public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
-            List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
-
-        // Set properties
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL,"jdbc:postgresql://free-tier5.gcp-europe-west1.cockroachlabs.cloud:26257/ntaknotify_uat?sslmode=verify-full&options=--cluster%3Dmagic-strider-3882");
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER, "APP");
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD, "f50pwWhdYshxT34UuQ0BNg");
-
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<>());
-
-        Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)()->{});
-        // Set up global constants
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),
-                                                                                  ".pz", "rf"));
-        String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
-        String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-
-        Path APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
-                                                                            APPLICATION_SETTINGS_FILE);
-        Set<String> RK_KEYS = new HashSet<>();
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, RK_KEYS);
-        RK_KEYS.add("configuration.ntak.pearl-zip.app-name");
-        RK_KEYS.add("configuration.ntak.pearl-zip.version");
-        RK_KEYS.add("configuration.ntak.pearl-zip.copyright");
-        RK_KEYS.add("configuration.ntak.pearl-zip.weblink");
-        RK_KEYS.add("configuration.ntak.pearl-zip.license-location");
-        RK_KEYS.add("configuration.ntak.pearl-zip.license-override-location");
-
-        initialiseApplicationSettings();
-
-        // Set local directories...
-        final Path STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
-        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP,
-                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()))
-        );
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
-                                                                            Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp")
-        );
-
-        // Loading plugin manifests...
-        Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_MANIFEST_DIR, LOCAL_MANIFEST_DIR);
-        if (!Files.exists(LOCAL_MANIFEST_DIR)) {
-            Files.createDirectories(LOCAL_MANIFEST_DIR);
+        for (AbstractSeedStartupStage ss : SEED_STARTUP_STAGE) {
+            ss.execute();
         }
 
-        Files.list(LOCAL_MANIFEST_DIR)
-             .filter(m -> m.getFileName()
-                           .toString()
-                           .toUpperCase()
-                           .endsWith(".MF"))
-             .forEach(m -> {
-                 try {
-                     Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
-                     if (optInfo.isPresent()) {
-                         PluginInfo info = optInfo.get();
-                         Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                                       .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
-                                                                                       .get();
-                         synchronized(PLUGINS_METADATA) {
-                             PLUGINS_METADATA.put(info.getName(), info);
-                         }
-                     }
-                 } catch(Exception e) {
-                 }
-             });
-
-        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
-                                                                                       "settings.properties").toString()));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
-        if (!Files.exists(SETTINGS_FILE)) {
-            Files.createFile(SETTINGS_FILE);
-        }
-        try(InputStream settingsIStream = Files.newInputStream(SETTINGS_FILE)) {
-            CURRENT_SETTINGS.load(settingsIStream);
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
-
-            WORKING_SETTINGS.load(settingsIStream);
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
+        for (AbstractStartupStage ss : STARTUP_STAGE) {
+            ss.execute();
         }
 
-        ////////////////////////////////////////////
-        ///// Named Query Load ////////////////////
-        //////////////////////////////////////////
+        MacPearlZipApplication mockApplication = Mockito.mock(MacPearlZipApplication.class);
+        List<AbstractJFXStartupStage> JFX_STARTUP_STAGE = Arrays.asList(new JFXThemesStartupStage(mockApplication));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, mockApplication);
 
-        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
-        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
 
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
-
-        // 1. Extract all files to internal query directory
-        Path defQueryPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "db-cache", ".internal");
-        String resource = "queries";
-        String moduleName = "com.ntak.pearlzip.ui";
-        com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defQueryPath, moduleName, resource);
-
-        // 2. Load query definitions into cache
-        Files.list(defQueryPath).forEach(c -> {
-            XMLInputFactory f = XMLInputFactory.newFactory();
-            try (
-                    InputStream fis = Files.newInputStream(c)
-            ) {
-                XMLStreamReader sr = f.createXMLStreamReader(fis);
-                XmlMapper mapper = new XmlMapper(f);
-                QueryDefinition queryDef = mapper.readValue(sr, QueryDefinition.class);
-                queryDefinitionCache.put(queryDef.getId(), queryDef);
-            } catch(IOException | XMLStreamException e) {
-            }
-        });
-
-        // Themes
-
-        // Copy over and overwrite core themes...
-        for (String theme : CORE_THEMES) {
-            Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                    .toString(), "themes", theme);
-            Files.createDirectories(defThemePath);
-            Stream<Path> themeFiles;
-            try {
-                themeFiles = Files.list(Paths.get(PearlZipFXUtil.class.getClassLoader()
-                                                            .getResource(theme)
-                                                            .getPath()));
-            } catch (Exception e) {
-                try {
-                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
-                                                                .get()
-                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
-                                                                .toAbsolutePath());
-                } catch(Exception exc) {
-                    final String themePath = PearlZipFXUtil.class.getClassLoader()
-                                                            .getResource(theme)
-                                                            .getPath();
-                    Path jarArchive =
-                        Paths.get(themePath.substring(0, themePath.indexOf('!'))
-                                        .replaceAll("file:",""));
-
-                    Path tempDir = Files.createTempDirectory("pz");
-                    Path srcThemePath =
-                            Paths.get(tempDir.toAbsolutePath().toString(),
-                                      themePath.substring(themePath.indexOf('!')+1));
-
-                    try (JarFile jar = new JarFile(jarArchive.toFile())) {
-                        for (JarEntry entry : jar.stream().toList()) {
-                            if (entry.isDirectory()) {
-                                Path entryDest = tempDir.resolve(entry.getName());
-
-                                if (entry.isDirectory()) {
-                                    Files.createDirectory(entryDest);
-                                    continue;
-                                }
-
-                                Files.copy(jar.getInputStream(entry), entryDest);
-                            }
-                        }
-                    }
-
-                    themeFiles = Files.list(srcThemePath);
-                }
-            }
-
-            themeFiles.forEach(f -> {
-                                   try {
-                                       Files.copy(f,
-                                                  Paths.get(defThemePath.toAbsolutePath()
-                                                                        .toString(),
-                                                            f.getFileName()
-                                                             .toString()
-                                                  ),
-                                                  StandardCopyOption.REPLACE_EXISTING);
-                                   } catch(IOException e) {
-                                   }
-                               }
-            );
+        for (AbstractJFXStartupStage startupStage : JFX_STARTUP_STAGE) {
+            startupStage.execute();
         }
-
-        // Loading rules...
-        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
-        MANIFEST_RULES.add(new MinVersionManifestRule());
-        MANIFEST_RULES.add(new MaxVersionManifestRule());
-        MANIFEST_RULES.add(new LicenseManifestRule());
-        MANIFEST_RULES.add(new CheckLibManifestRule());
-        MANIFEST_RULES.add(new RemovePatternManifestRule());
-        MANIFEST_RULES.add(new ThemeManifestRule());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
-
-        // Setting Locale
-        Locale.setDefault(genLocale(new Properties()));
-        LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                                    Locale.getDefault());
-        CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                       System.getProperty(CNS_RES_BUNDLE,"custom"),
-                                                       Locale.getDefault());
 
         // Load services
         for (ArchiveReadService readService : readServices) {
@@ -673,41 +452,7 @@ public class PearlZipFXUtil {
             ZipState.addArchiveProvider(writeService);
         }
 
-        initialiseMenu();
-
-        ////////////////////////////////////////////
-        ///// Store Repository Load ///////////////
-        //////////////////////////////////////////
-
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
-
-        Path repoPath = STORE_ROOT.toAbsolutePath().resolve("repository");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                .setAdditionalConfig(CK_REPO_ROOT, repoPath);
-
-        if (!Files.exists(repoPath)) {
-            Files.createDirectories(repoPath);
-        }
-
-        // Load default repository and overwrite file
-        Path defaultRepoFile = repoPath.resolve("default");
-
-        StoreRepoDetails storeRepoDetails = new StoreRepoDetails(ResourceConstants.DEFAULT, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
-        com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(storeRepoDetails, defaultRepoFile);
-
-        // Load persisted repository files
-        Files.list(repoPath).filter(p -> {
-                 try {
-                     return !Files.isHidden(p);
-                 } catch(IOException e) {
-                     return false;
-                 }
-             })
-             .forEach(com.ntak.pearlzip.ui.util.internal.JFXUtil::loadStoreRepoDetails);
-
-        // Read in repository files into in-memory map
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().put(ResourceConstants.DEFAULT, storeRepoDetails);
-
+        PearlZipFXUtil.initialiseMenu();
         // Load main form
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(MacPearlZipApplication.class.getResource("/frmMain.fxml"));
@@ -719,15 +464,22 @@ public class PearlZipFXUtil {
         FrmMainController controller = loader.getController();
 
         // Set up initial archive
-        FXArchiveInfo fxArchiveInfo = initFxArchiveInfo(initialFile);
+        FXArchiveInfo fxArchiveInfo = initFxArchiveInfo(initFile);
         controller.initData(stage, fxArchiveInfo);
         fxArchiveInfo.setMainController(controller);
-        stage.setTitle(resolveTextKey(TITLE_FILE_PATTERN, appName, version,
+        stage.setTitle(resolveTextKey(TITLE_FILE_PATTERN, "PearlZip", "0.0.0.0",
                                       fxArchiveInfo.getArchivePath()));
         stage.show();
         stage.toFront();
 
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, stage.showingProperty());
+
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT).get();
+        Path LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                       .orElse(STORE_ROOT.toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                            Paths.get(System.getProperty("user.home"), ".pz", "temp"));
     }
 
     public static void initialiseMenu() throws IOException {
@@ -851,5 +603,25 @@ public class PearlZipFXUtil {
         } else {
             return false;
         }
+    }
+
+    public static Stage lookupStageChecked(String regExPattern) {
+        Optional<Stage> optStage = lookupStage(regExPattern);
+        Assertions.assertTrue(optStage.isPresent(), String.format("Dialog matching %s not found", regExPattern));
+
+        return optStage.get();
+    }
+
+    public static void simSelectOptionsAdditionalTab(FxRobot fxRobot, int i) {
+        Stage frmOptions = lookupStageChecked("PearlZip Options");
+
+        double x = frmOptions.getX();
+        double y = frmOptions.getY();
+        double width = frmOptions.getWidth();
+
+        fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + 50));
+
+        fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + (22 * (i)) + 62))
+                     .sleep(300, MILLISECONDS);
     }
 }
