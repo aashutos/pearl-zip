@@ -26,15 +26,13 @@ import java.util.concurrent.TimeoutException;
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
 
-    static Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
-    static Path localWorkspace = Path.of(System.getProperty("user.home"), ".pz");
-    static Path applicationProps = localWorkspace.resolve("application.properties");
-    static Path backupLocalWorkspace = Path.of(System.getProperty("user.home"), ".pz-backup");
+    public static final Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
+    public static final Path localWorkspace = Path.of(System.getProperty("user.home"), ".pz");
+    public static final Path applicationProps = localWorkspace.resolve("application.properties");
+    public static final Path backupLocalWorkspace = Path.of(System.getProperty("user.home"), ".pz-backup");
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
-        //System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-
         Path STORE_TEMP = localWorkspace.resolve("temp");
 
         // Setup workspace prior to launch

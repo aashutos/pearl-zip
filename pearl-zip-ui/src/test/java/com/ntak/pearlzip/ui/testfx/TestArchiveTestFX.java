@@ -1,10 +1,16 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
+import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
+import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
+import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
+import com.ntak.pearlzip.ui.util.ArchiveUtil;
+import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import javafx.scene.control.DialogPane;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -27,6 +35,31 @@ public class TestArchiveTestFX extends AbstractPearlZipTestFX {
      *  + Failure on integrity check of archive
      *  + Successful integrity check of empty tar (Bug: PZ-97)
      */
+
+    @Override
+    public void start(Stage stage) throws IOException, TimeoutException {
+        Path STORE_TEMP = localWorkspace.resolve("temp");
+
+        // Setup workspace prior to launch
+        if (Files.exists(backupLocalWorkspace)) {
+            ArchiveUtil.deleteDirectory(backupLocalWorkspace, (p)->false);
+        }
+        if (Files.exists(localWorkspace)) {
+            Files.move(localWorkspace, backupLocalWorkspace);
+        }
+
+        // Initialise PearlZip Application
+        final var file = Files.createTempDirectory("pz").resolve("temp.tar");
+        Files.createDirectories(file.getParent());
+        Files.createFile(file);
+        PearlZipFXUtil.initialise(stage, List.of(new CommonsCompressArchiveWriteService()), List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService()), file);
+
+        // Save Properties...
+        if (!Files.exists(applicationProps)) {
+            Files.createFile(applicationProps);
+        }
+        System.getProperties().store(Files.newBufferedWriter(applicationProps), "PearlZip Automated Test");
+    }
 
     @AfterEach
     public void tearDown() throws IOException {
