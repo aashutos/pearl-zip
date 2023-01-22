@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
@@ -81,7 +81,6 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     @AfterEach
     public void tearDown() {
         try {
-            super.tearDown();
             for (Path dir :
                     Files.list(dir.getParent()
                                   .getParent())
@@ -740,7 +739,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     public void testFX_OpenTarZipFolderInZipArchive_Success() throws IOException {
         // Create archive
         final Path tempDirectory = Files.createTempDirectory("pz");
-        Path archive = Path.of(JFXUtil.lookupArchiveInfo("temp.zip")
+        Path archive = Path.of(JFXUtil.lookupArchiveInfo(".zip.*")
                                       .get()
                                       .getArchivePath());
 
@@ -796,7 +795,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
         try {
             // Set up archive information
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("temp.zip")
+            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
                                                .get();
             Path archive = Paths.get(archiveInfo.getArchivePath());
 
@@ -912,7 +911,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     @DisplayName("Test: Adding nested .tgz can be added successfully and opened as an archive")
     public void testFX_AddNestedTgzArchive_Success() {
         // Archive set up
-        FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("temp.zip")
+        FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
                                            .get();
         Path tgzArchive = Paths.get("src", "test", "resources", "empty.tgz").toAbsolutePath();
 
@@ -975,7 +974,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
         try {
             // Archive setup
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("temp.zip")
+            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
                                                .get();
 
             // Add folders
