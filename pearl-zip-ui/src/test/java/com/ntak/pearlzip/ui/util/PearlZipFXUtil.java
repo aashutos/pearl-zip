@@ -405,7 +405,20 @@ public class PearlZipFXUtil {
                      .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window")));
         Button response = (Button)buttonLookup.get(inNewWindow).get(0);
         robot.clickOn(response);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(1000, MILLISECONDS);
+
+        try {
+            robot.clickOn(robot.lookup(".button-bar")
+                               .queryAs(ButtonBar.class)
+                               .getButtons()
+                               .stream()
+                               .filter(b -> ((Button) b).getText()
+                                                        .equals("No"))
+                               .findFirst()
+                               .get());
+        } catch (Exception e) {
+            // ignore...
+        }
     }
 
     public static void simTestArchive(FxRobot robot) {
