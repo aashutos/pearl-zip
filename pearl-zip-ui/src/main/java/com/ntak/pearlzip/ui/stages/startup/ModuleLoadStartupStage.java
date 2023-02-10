@@ -89,8 +89,8 @@ public class ModuleLoadStartupStage extends AbstractStartupStage {
                                                 modulePath.toAbsolutePath().toString()));
                 ModuleUtil.loadModulesDynamic(modulePath.toAbsolutePath());
             }
-        } else {
-            ModuleUtil.loadModulesStatic();
         }
+
+        ModuleUtil.loadModulesStatic();
     }
 }
