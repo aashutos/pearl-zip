@@ -53,6 +53,11 @@ public class PrimarySeedStartupStage extends AbstractSeedStartupStage {
             Files.createDirectories(STORE_ROOT);
         }
 
+        String defaultModulePath = STORE_ROOT.resolve("providers").toString();
+        Path RUNTIME_MODULE_PATH =
+                Paths.get(System.getProperty(CNS_NTAK_PEARL_ZIP_MODULE_PATH, defaultModulePath)).toAbsolutePath();
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
+
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                 .setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT
                 );

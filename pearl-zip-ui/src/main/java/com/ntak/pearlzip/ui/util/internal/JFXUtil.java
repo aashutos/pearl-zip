@@ -293,11 +293,6 @@ public class JFXUtil {
 
         initialiseApplicationSettings();
 
-        String defaultModulePath = Path.of(storeRoot.toAbsolutePath().toString(), "providers").toString();
-        Path RUNTIME_MODULE_PATH =
-                Paths.get(System.getProperty(CNS_NTAK_PEARL_ZIP_MODULE_PATH, defaultModulePath)).toAbsolutePath();
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
-
         // Overwrite with external properties file
         // Reserved properties are kept as per internal key definition
         Map<String,String> reservedKeyMap = new HashMap<>();
