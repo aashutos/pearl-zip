@@ -106,6 +106,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add folder to zip archive and verify contents")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN folder added to archive
+    // THEN archive contents structure match expectations
     public void testFX_AddFolderToZipArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -116,6 +119,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add folder using context menu to zip archive and verify contents")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN folder added using context menu to archive
+    // THEN archive contents structure match expectations
     public void testFX_AddFolderCtxMenuToZipArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -126,6 +132,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add folder to tar archive and verify contents")
+    // GIVEN a new tar archive has been created in PearlZip
+    // WHEN folder added to archive
+    // THEN archive contents structure match expectations
     public void testFX_AddFolderToTarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "tar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -136,6 +145,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add folder to jar archive and verify contents")
+    // GIVEN a new jar archive has been created in PearlZip
+    // WHEN folder added to archive
+    // THEN archive contents structure match expectations
     public void testFX_AddFolderToJarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "jar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -146,6 +158,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add symbolic soft link file to zip archive and verify contents")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN file added to archive (symbolic link)
+    // THEN ensure symbolic link is followed and original file is stored in the archive
     public void testFX_AddSymSoftLinkFileToZipArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -186,6 +201,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add symbolic hard link and document file to tar archive and verify contents")
+    // GIVEN a new tar archive has been created in PearlZip
+    // WHEN file added to archive (hard link)
+    //     AND file added to archive (docx)
+    // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddSymHardLinkFileToTarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "tar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -234,7 +253,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     }
 
     @Test
-    @DisplayName("Test: Add image file using context menu to tar archive and verify contents")
+    @DisplayName("Test: Add image file using context menu to jar archive and verify contents")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN file added to archive (image)
+    // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddImageFileCtxMenuToZipArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "jar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -276,6 +298,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add image file to jar archive and verify contents")
+    // GIVEN a new jar archive has been created in PearlZip
+    // WHEN file added to archive (image)
+    // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddImageFileToJarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "jar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -317,6 +342,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add long name file to tar archive and verify contents")
+    // GIVEN a new tar archive has been created in PearlZip
+    // WHEN file added to archive (long filename)
+    // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddLongNameFileToTarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "tar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -367,6 +395,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add file to a non-existent archive will raise the appropriate exception alert")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN archive is deleted
+    //     AND file added to archive
+    // THEN a dialog appears with message like "Archive .* does not exist. PearlZip will now close the instance."
     public void testFX_AddFileNonExistentArchive_Fail() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -389,6 +421,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add folder to a non-existent archive will raise the appropriate exception alert")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN archive is deleted
+    //     AND folder added to archive
+    // THEN a dialog appears with message like "Archive .* does not exist. PearlZip will now close the instance."
     public void testFX_AddFolderNonExistentArchive_Fail() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -411,6 +447,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add self to archive raises warning")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN file added to archive (self)
+    // THEN a dialog appears with message like "Ignoring the addition of file .* into the archive .*"
     public void testFX_AddSelfToArchive_Warn() throws IOException {
         // Set up archive information
         final Path tempDirectory = Files.createTempDirectory("pz")
@@ -442,6 +481,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add directory with self to archive. Ignores self on addition")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN folder added to archive (including self)
+    // THEN ensure file (self) is not included in archive
     public void testFX_AddDirectoryWithSelf_Ignore() throws IOException {
         final String archiveFormat = "zip";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -462,6 +504,14 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Nest zip archive into the parent zip archive and verify contents is as expected")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN file added to archive (another zip archive)
+    //     AND nested file (nested-archive.zip) opened from PearlZip
+    // THEN ensure the number of files in archive = 1
+    // WHEN file added to archive (temp file)
+    //     AND close nested archive and save = true
+    //     AND nested file (nested-archive.zip) opened from PearlZip
+    // THEN ensure files (temp file, 1) is included in the archive
     public void testFX_CreateZipArchiveAndUpdateNestedZipArchive_Success() throws IOException {
         // Create archive
         String archiveFormat = "zip";
@@ -533,6 +583,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add nested empty directory to tar archive one after the other")
+    // GIVEN a new tar archive has been created in PearlZip
+    // WHEN folder added to archive (empty directory)
+    //     AND traverse archive (empty)
+    //     AND folder added to archive (empty directory)
+    //     AND traverse archive (empty)
+    //     AND folder added to archive (empty directory)
+    //     AND traverse up to root folder in archive
+    //     AND traverse archive (empty/empty/empty)
+    // THEN ensure the number of files in archive = 3
     public void testFX_AddNestedEmptyDirectoryTarArchive_MatchExpectations() throws IOException {
         final String archiveFormat = "tar";
         final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
@@ -588,6 +647,31 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add identical nested archives on sister directories. Ensure changes to each archive are independent")
+    // GIVEN a new (outer-archive.zip) zip archive has been created in PearlZip
+    // WHEN folder added to archive (tempA)
+    //      AND folder added to archive (tempB)
+    //      AND traverse archive (tempA)
+    //      AND file added to archive (empty-archive.tar)
+    //      AND traverse up to root folder in archive
+    //      AND traverse archive (tempB)
+    //      AND file added to archive (empty-archive.tar)
+    //      AND traverse up to root folder in archive
+    //      AND traverse archive (tempA)
+
+    //      AND nested file (tempA/empty-archive.tar) opened from PearlZip
+    //      AND folder added to archive (tempA)
+    //      AND close nested archive and save = true
+    //      AND nested file (tempA/empty-archive.tar) opened from PearlZip
+    // THEN ensure the number of files in archive = 1
+    //      AND ensure files (tempA) is included in the archive
+
+    //      AND traverse up to root folder in archive
+    //      AND nested file (tempB/empty-archive.tar) opened from PearlZip
+    //      AND folder added to archive (tempB)
+    //      AND close nested archive and save = true
+    //      AND nested file (tempA/empty-archive.tar) opened from PearlZip
+    // THEN ensure the number of files in archive = 1
+    //      AND ensure files (tempB) is included in the archive
     public void testFX_IdenticalNestedArchivesSisterDirectories_MatchExpectations() throws IOException {
         // Create archive
         final Path tempDirectory = Files.createTempDirectory("pz");
@@ -736,6 +820,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Open tar or zip directory in zip archive (processing as folder and not an archive)")
+    // GIVEN a new zip archive has been created in PearlZip
+    //      AND directories (zip,tar) have been created
+    // WHEN folder added to archive (zip)
+    //      AND folder added to archive (tar)
+    //      AND traverse archive (zip)
+    //      AND traverse up to root folder in archive
+    //      AND traverse archive (tar)
+    //      AND traverse up to root folder in archive
+    // THEN ensure only 1 main stage instances are open
     public void testFX_OpenTarZipFolderInZipArchive_Success() throws IOException {
         // Create archive
         final Path tempDirectory = Files.createTempDirectory("pz");
@@ -786,6 +879,28 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Nesting archives one after the other in a chain works in the expected manner")
+    // GIVEN a new zip archive has been created in PearlZip
+    //      AND files (temp) have been created
+    // WHEN file added to archive (test.tar.gz)
+    //      AND nested file (test.tar.gz) opened from PearlZip
+    //      AND nested file (test.tar) opened from PearlZip
+    //      AND file added to archive (empty-archive.tar)
+    //      AND nested file (empty-archive.tar) opened from PearlZip
+    //      AND file added to archive (temp)
+    //      AND close nested archive and save = true
+    //      AND close nested archive and save = true
+    //      AND close nested archive and save = true
+
+    // THEN ensure files (test.tar.gz) is included in the archive
+
+    // WHEN nested file (test.tar.gz) opened from PearlZip
+    // THEN ensure files (test.tar) is included in the archive
+
+    // WHEN nested file (test.tar) opened from PearlZip
+    // THEN ensure files (empty-archive.tar) is included in the archive
+
+    // WHEN nested file (empty-archive.tar) opened from PearlZip
+    // THEN ensure files (temp) is included in the archive
     public void testFX_NestedArchiveChain_MatchExpectations() throws IOException {
         // Create temp file
         final Path tempDirectory = Files.createTempDirectory("pz");
@@ -909,6 +1024,11 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Adding nested .tgz can be added successfully and opened as an archive")
+    // GIVEN a new zip archive has been created in PearlZip
+    // WHEN file added to archive (empty.tgz)
+    //     AND nested file (empty.tgz) opened from PearlZip
+    // THEN ensure only 2 main stage instances are open
+    //     AND A main stage instance name exists like '.*empty.tgz.*'
     public void testFX_AddNestedTgzArchive_Success() {
         // Archive set up
         FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
@@ -933,6 +1053,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Open a single file (non-tarball) compressor archive successfully")
+    // GIVEN an archive (test.txt.xz) has been created in PearlZip
+    // THEN ensure the number of files in archive = 1
+    //     AND ensure files (test.txt) is included in the archive
     public void testFX_OpenSingleFileCompressor_Success() {
         // Archive set up
         Path xzArchive = Paths.get("src", "test", "resources", "test.txt.xz").toAbsolutePath();
@@ -955,6 +1078,17 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Add file and directory using off-row context menu")
+    // GIVEN a new zip archive has been created in PearlZip
+    //      AND directories (foo,bar) have been created
+    //      AND files (boom,baa) have been created
+    // WHEN folder added to archive (foo) using context menu
+    //      AND traverse archive (foo)
+    //      AND folder added to archive (boom) using context menu
+    //      AND traverse up to root folder in archive
+    //      AND folder added to archive (bar) using context menu
+    //      AND traverse archive (bar)
+    //      AND folder added to archive (baa) using context menu
+    // THEN nsure the number of files in archive = 4
     public void testFX_AddFileAddFolderContextMenu_MatchExpectations() throws IOException {
         // Create temp file
         final Path tempDirectory = Files.createTempDirectory("pz");
