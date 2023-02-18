@@ -21,7 +21,7 @@ import org.testfx.api.FxRobot;
 
 import java.time.LocalDate;
 
-import static com.ntak.testfx.specifications.CommonSpecificationsUtil.*;
+import static com.ntak.testfx.specifications.CommonSpecifications.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class AboutTestFX extends AbstractPearlZipTestFX {

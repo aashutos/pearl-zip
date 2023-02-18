@@ -53,39 +53,40 @@ import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.testfx.FormUtil.lookupStage;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
-import static com.ntak.testfx.TestFXConstants.PLATFORM;
+import static com.ntak.testfx.TestFXConstants.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PearlZipFXUtil {
     public static void simUp(FxRobot robot) {
         robot.clickOn("#btnUp", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
     
     public static void simNewArchive(FxRobot robot, Path archive) throws IOException {
         simNewArchive(robot, archive, true);
     }
+
     public static void simNewArchive(FxRobot robot, Path archive, boolean init) throws IOException {
         if (init) {
             robot.clickOn("#btnNew", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
             robot.clickOn("#mnuNewArchive", MouseButton.PRIMARY);
         }
 
         final String[] nameSplit = DSV.split(archive.getFileName()
                                                    .toString());
         final String archiveFormat = nameSplit[nameSplit.length-1];
-        robot.sleep(100, MILLISECONDS);
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
         ComboBox<String> cmbArchiveFormat = FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat");
         FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, archiveFormat);
 
         robot.clickOn("#btnCreate", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         Files.deleteIfExists(archive);
         chooseFile(PLATFORM, robot, archive);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
     }
@@ -93,24 +94,28 @@ public class PearlZipFXUtil {
     public static void simAddFolder(FxRobot robot, Path folder, boolean useContextMenu, String archiveName) {
         if (!useContextMenu) {
             robot.clickOn("#btnAdd", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddDir", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(folder)) {
+                NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         } else {
             TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s->s.getTitle().contains(archiveName),
                                                                        "#fileContentsView");
             robot.clickOn(fileContentsView, MouseButton.SECONDARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddDir");
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(folder)) {
+                NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         }
     }
 
@@ -125,24 +130,28 @@ public class PearlZipFXUtil {
     public static void simAddFile(FxRobot robot, Path file, boolean useContextMenu, String archiveName) {
         if (!useContextMenu) {
             robot.clickOn("#btnAdd", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddFile", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            chooseFile(PLATFORM, robot, file);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(file)) {
+                chooseFile(PLATFORM, robot, file);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         } else {
             TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s->s.getTitle().contains(archiveName),
                                                                        "#fileContentsView");
             robot.clickOn(fileContentsView, MouseButton.SECONDARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddFile");
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFile(PLATFORM, robot, file);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(file)) {
+                NativeFileChooserUtil.chooseFile(PLATFORM, robot, file);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         }
     }
 
@@ -203,29 +212,41 @@ public class PearlZipFXUtil {
     }
 
     public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
+            String tableName, Consumer<TableRow<FileInfo>> callback, boolean selectLast, String... identifiers) {
+        Optional<TableRow<FileInfo>> row = simTraversalArchive(robot, archiveName, tableName, "", callback, identifiers);
+
+        if (selectLast) {
+            robot.sleep(MEDIUM_PAUSE, MILLISECONDS).doubleClickOn(MouseButton.PRIMARY);
+        }
+
+        return row;
+    }
+
+    public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
             String tableName, Consumer<TableRow<FileInfo>> callback, String... identifiers) {
         return simTraversalArchive(robot, archiveName, tableName, "", callback, identifiers);
     }
 
     public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
             String tableName, String root, Consumer<TableRow<FileInfo>> callback, String... identifiers) {
+        String archivePath = lookupArchiveInfo(archiveName).get().getArchivePath();
         for (int i = 0; i < identifiers.length; i++) {
             Optional<TableRow<FileInfo>> selectedRow = FormUtil.selectTableViewEntry(robot,
                                                                                      FormUtil.lookupNode((s) -> s.getScene()
-                                                                                                                 .lookup(tableName) != null && s.getTitle().contains(archiveName),
+                                                                                                                 .lookup(tableName) != null && s.getTitle().contains(archivePath),
                                                                                                          tableName),
                                                                                      FileInfo::getFileName,
                                                                                      String.format("%s%s", root,
                                                                                                    identifiers[i]));
             Assertions.assertTrue(selectedRow.isPresent(), "No row was selected");
             if (identifiers.length == i+1) {
-                robot.sleep(50, MILLISECONDS);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
                 callback.accept(selectedRow.get());
                 return selectedRow;
             }
             robot.doubleClickOn(selectedRow.get(), MouseButton.PRIMARY);
             root += String.format("%s/",identifiers[i]);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
         }
 
         return Optional.empty();
@@ -233,24 +254,24 @@ public class PearlZipFXUtil {
 
     public static void simExtractFile(FxRobot robot, Path file) {
         robot.clickOn("#btnExtract", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         robot.clickOn("#mnuExtractSelectedFile", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         chooseFile(PLATFORM, robot, file);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simExtractAll(FxRobot robot, Path targetDir) {
         robot.clickOn("#btnExtract", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         robot.clickOn("#mnuExtractAll", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         chooseFile(PLATFORM, robot, targetDir);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simCopyFile(FxRobot robot, boolean useContextMenu, String archiveName, String tableName,
@@ -394,7 +415,7 @@ public class PearlZipFXUtil {
     public static void simOpenArchive(FxRobot robot, Path archive, boolean init, boolean inNewWindow) {
         if (init) {
             robot.clickOn("#btnOpen");
-            robot.sleep(5, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
         }
         chooseFile(PLATFORM, robot, archive);
 
@@ -405,7 +426,7 @@ public class PearlZipFXUtil {
                      .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window")));
         Button response = (Button)buttonLookup.get(inNewWindow).get(0);
         robot.clickOn(response);
-        robot.sleep(1000, MILLISECONDS);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
 
         try {
             robot.clickOn(robot.lookup(".button-bar")
@@ -423,17 +444,17 @@ public class PearlZipFXUtil {
 
     public static void simTestArchive(FxRobot robot) {
         robot.clickOn("#btnTest");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simDelete(FxRobot robot) {
         robot.clickOn("#btnDelete");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simFileInfo(FxRobot robot) {
         robot.clickOn("#btnInfo");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
@@ -608,10 +629,10 @@ public class PearlZipFXUtil {
                                                .orElse(""));
         if (index >= 0) {
             robot.clickOn(200, 0)
-                 .sleep(100, MILLISECONDS)
+                 .sleep(MEDIUM_PAUSE, MILLISECONDS)
                  .clickOn(200,
                           ((1 + index) * 30));
-            robot.sleep(250, MILLISECONDS);
+            robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
             return true;
         } else {
             return false;
@@ -635,6 +656,6 @@ public class PearlZipFXUtil {
         fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + 50));
 
         fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + (22 * (i)) + 62))
-                     .sleep(300, MILLISECONDS);
+                     .sleep(MEDIUM_PAUSE, MILLISECONDS);
     }
 }

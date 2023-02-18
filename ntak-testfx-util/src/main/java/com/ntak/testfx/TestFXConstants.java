@@ -10,6 +10,8 @@ public class TestFXConstants {
     public static final long SHORT_PAUSE = 50;
     public static final long MEDIUM_PAUSE = 300;
     public static final long LONG_PAUSE = 1000;
+    public static final long RETRIEVAL_TIMEOUT_MILLIS = 600000;
+    public static final long POLLING_TIMEOUT = 2000;
 
     public enum Platform {
         WIN,LINUX,MAC

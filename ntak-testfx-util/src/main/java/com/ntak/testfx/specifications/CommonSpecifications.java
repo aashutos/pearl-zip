@@ -6,28 +6,27 @@ package com.ntak.testfx.specifications;
 import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.internal.TestFXUtil;
 import javafx.scene.AccessibleAttribute;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class CommonSpecificationsUtil {
-    // Common Test Util Method
+public class CommonSpecifications {
+
     public static <T,R> void thenPropertyEqualsValue(T objectToTest, Function<T,R> extractor, R expectation) {
         R actual = extractor.apply(objectToTest);
         Assertions.assertEquals(expectation, actual, String.format("Property value %s does not match expected value %s", actual, expectation));
     }
 
-    // Common Test Util Method
     public static <T> TableRow<T> thenSelectEntryFromTableView(FxRobot fxRobot, TableView<T> tableView, int i) throws InterruptedException {
         tableView.getSelectionModel()
                    .select(i);
@@ -52,13 +51,11 @@ public class CommonSpecificationsUtil {
         return row;
     }
 
-    // Common Test Util Method
     public static void thenLabelOnActiveFormHasValue(FxRobot fxRobot, String labelId, String value) {
         Label label = fxRobot.lookup(labelId).queryAs(Label.class);
         Assertions.assertEquals(value, label.getText(), String.format("%s did not equal expected value: %s", labelId, value));
     }
 
-    // Common Test Util Method
     public static void thenLabelOnActiveFormMatchesPattern(FxRobot fxRobot, String labelId, String pattern) {
         Label label = fxRobot.lookup(labelId).queryAs(Label.class);
         Assertions.assertTrue(label.getText().matches(pattern), String.format("%s did not match expected pattern: %s", labelId, pattern));
@@ -77,4 +74,32 @@ public class CommonSpecificationsUtil {
         fxRobot.sleep(TestFXConstants.MEDIUM_PAUSE, MILLISECONDS);
     }
 
+    public static void thenExpectDialogWithMatchingMessage(FxRobot robot, String regExMessage) {
+        DialogPane dialogPane = retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> robot.lookup(".dialog-pane").queryAs(DialogPane.class));
+
+        Assertions.assertTrue(dialogPane.getContentText()
+                                        .matches(regExMessage),
+                              "The text in warning dialog was not matched as expected");
+    }
+
+    public static <T> T retryRetrievalForDuration(long timeoutMillis, Supplier<T> supplier) {
+        long startTime = System.currentTimeMillis();
+        int attempt = 1;
+        while ((System.currentTimeMillis() - startTime) < timeoutMillis) {
+            try {
+                Thread.sleep(TestFXConstants.POLLING_TIMEOUT);
+                System.out.printf("Attempt %d to execute retryable process%n", attempt);
+                T value = supplier.get();
+
+                Objects.requireNonNull(value, "Dialog was not retrieved");
+                return value;
+            } catch (Exception e) {
+                attempt++;
+            }
+        }
+
+        fail("Could not retrieve object in a timely manner.");
+
+        return null;
+    }
 }

@@ -3,40 +3,27 @@
  */
 package com.ntak.pearlzip.ui.testfx;
 
-import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.CompressUtil;
 import com.ntak.pearlzip.ui.UITestFXSuite;
 import com.ntak.pearlzip.ui.UITestSuite;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
-import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
-import com.ntak.testfx.FormUtil;
-import com.ntak.testfx.NativeFileChooserUtil;
-import javafx.geometry.Point2D;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
+import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_LOCAL_TEMP;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
-import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Tag("fx-test")
@@ -110,11 +97,17 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN folder added to archive
     // THEN archive contents structure match expectations
     public void testFX_AddFolderToZipArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Preparation
+        Map<Integer,Map<String,String[]>> expectations = genArchiveContentsExpectationsAuto(dir);
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simAddDirectoryToNewNonCompressorArchive(this, archive, dir, false);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
+
+        // When
+        simAddFolder(this, dir, false, archiveName.toAbsolutePath().toString());
+
+        // Then
+        checkArchiveFileHierarchy(this, expectations, archiveName.toAbsolutePath().toString());
     }
 
     @Test
@@ -123,11 +116,17 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN folder added using context menu to archive
     // THEN archive contents structure match expectations
     public void testFX_AddFolderCtxMenuToZipArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Preparation
+        Map<Integer,Map<String,String[]>> expectations = genArchiveContentsExpectationsAuto(dir);
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simAddDirectoryToNewNonCompressorArchive(this, archive, dir, true);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
+
+        // When
+        simAddFolder(this, dir, true, archiveName.toAbsolutePath().toString());
+
+        // Then
+        checkArchiveFileHierarchy(this, expectations, archiveName.toAbsolutePath().toString());
     }
 
     @Test
@@ -136,11 +135,17 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN folder added to archive
     // THEN archive contents structure match expectations
     public void testFX_AddFolderToTarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Preparation
+        Map<Integer,Map<String,String[]>> expectations = genArchiveContentsExpectationsAuto(dir);
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simAddDirectoryToNewNonCompressorArchive(this, archive, dir, false);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "tar");
+
+        // When
+        simAddFolder(this, dir, false, archiveName.toAbsolutePath().toString());
+
+        // Then
+        checkArchiveFileHierarchy(this, expectations, archiveName.toAbsolutePath().toString());
     }
 
     @Test
@@ -149,54 +154,42 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN folder added to archive
     // THEN archive contents structure match expectations
     public void testFX_AddFolderToJarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "jar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Preparation
+        Map<Integer,Map<String,String[]>> expectations = genArchiveContentsExpectationsAuto(dir);
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simAddDirectoryToNewNonCompressorArchive(this, archive, dir, false);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "jar");
+
+        // When
+        simAddFolder(this, dir, false, archiveName.toAbsolutePath().toString());
+
+        // Then
+        checkArchiveFileHierarchy(this, expectations, archiveName.toAbsolutePath().toString());
     }
 
     @Test
     @DisplayName("Test: Add symbolic soft link file to zip archive and verify contents")
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN file added to archive (symbolic link)
-    // THEN ensure symbolic link is followed and original file is stored in the archive
+    // THEN ensure expected file exists in archive (symbolic link is followed and persisted in archive)
+    //     AND hash is consistent (between original and new file)
     public void testFX_AddSymSoftLinkFileToZipArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
-
+        // Preparation
         Path file = Paths.get("src", "test", "resources", "test.lnk")
                          .toAbsolutePath();
         final long sourceHash = CompressUtil.crcHashFile(file.toFile());
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
+        Path targetFile = dir.getParent().resolve("test.zip").toAbsolutePath();
+
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
+
+        // When
         simAddFile(this, file);
         push(KeyCode.ENTER);
-        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
-                                                                         .contains(archiveName),
-                                                                   "#fileContentsView");
-        Assertions.assertEquals("test.zip",
-                                fileContentsView.getItems()
-                                                .get(0)
-                                                .getFileName(),
-                                "Shortcut was not followed to original file");
 
-        // Extract file and check consistency
-        Path targetFile = Paths.get(dir.getParent()
-                                       .toAbsolutePath()
-                                       .toString(),
-                                    file.getFileName()
-                                        .toString())
-                               .toAbsolutePath();
-        FormUtil.selectTableViewEntry(this,
-                                      fileContentsView,
-                                      FileInfo::getFileName,
-                                      file.getFileName()
-                                          .toString());
-        simExtractFile(this, targetFile);
-        final long targetHash = CompressUtil.crcHashFile(targetFile.toFile());
-
-        Assertions.assertEquals(sourceHash, targetHash, "File hashes were not identical");
+        // Then
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, targetFile.getFileName().toString());
+        PearlZipSpecifications.thenExpectCRCHashFileEntryMatches(this, sourceHash, archiveName, targetFile.getFileName());
     }
 
     @Test
@@ -206,94 +199,47 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //     AND file added to archive (docx)
     // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddSymHardLinkFileToTarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
-
+        // Preparation
         Path fileHardLink = Paths.get("src", "test", "resources", "test-hard.lnk")
                                  .toAbsolutePath();
         Path fileDoc = Paths.get("src", "test", "resources", "test.docx")
                             .toAbsolutePath();
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
+        Path[] refPaths = {fileHardLink, fileDoc};
+        Path[] entries = {fileHardLink.getFileName(), fileDoc.getFileName()};
+
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "tar");
+
+        // When
         simAddFile(this, fileHardLink);
         push(KeyCode.ENTER);
         simAddFile(this, fileDoc);
         push(KeyCode.ENTER);
 
-        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
-                                                                         .contains(archiveName),
-                                                                   "#fileContentsView");
-        final List<String> files = fileContentsView.getItems()
-                                                   .stream()
-                                                   .map(FileInfo::getFileName)
-                                                   .collect(Collectors.toList());
-        Assertions.assertTrue(files.contains("test-hard.lnk"),
-                              "Hard link was not found in archive");
-        Assertions.assertTrue(files.contains("test.docx"), "Document was not found in archive");
-
-        // Extract file and check consistency
-        for (Path file : Arrays.asList(fileDoc, fileHardLink)) {
-            final long sourceHash = CompressUtil.crcHashFile(file.toFile());
-            Path targetFile = Paths.get(dir.getParent()
-                                           .toAbsolutePath()
-                                           .toString(),
-                                        file.getFileName()
-                                            .toString())
-                                   .toAbsolutePath();
-            FormUtil.selectTableViewEntry(this,
-                                          fileContentsView,
-                                          FileInfo::getFileName,
-                                          file.getFileName()
-                                              .toString());
-            simExtractFile(this, targetFile);
-            final long targetHash = CompressUtil.crcHashFile(targetFile.toFile());
-
-            Assertions.assertEquals(sourceHash, targetHash, "File hashes were not identical");
-        }
+        // Then
+        PearlZipSpecifications.thenCheckIntegrityOfExpectedFiles(this, refPaths, archiveName, entries);
     }
 
     @Test
-    @DisplayName("Test: Add image file using context menu to jar archive and verify contents")
+    @DisplayName("Test: Add image file using context menu to zip archive and verify contents")
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN file added to archive (image)
     // THEN ensure files are stored in the archive and integrity has been maintained
-    public void testFX_AddImageFileCtxMenuToZipArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "jar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
-
+   public void testFX_AddImageFileCtxMenuToZipArchive_MatchExpectations() throws IOException {
+        // Preparation
         Path file = Paths.get("src", "test", "resources", "img.png")
                          .toAbsolutePath();
         final long sourceHash = CompressUtil.crcHashFile(file.toFile());
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        simAddFile(this, file, true, archiveName);
 
-        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
-                                                                         .contains(archiveName),
-                                                                   "#fileContentsView");
-        final List<String> files = fileContentsView.getItems()
-                                                   .stream()
-                                                   .map(FileInfo::getFileName)
-                                                   .collect(Collectors.toList());
-        Assertions.assertTrue(files.contains("img.png"),
-                              "Image was not found in archive");
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-        // Extract file and check consistency
-        Path targetFile = Paths.get(dir.getParent()
-                                       .toAbsolutePath()
-                                       .toString(),
-                                    file.getFileName()
-                                        .toString())
-                               .toAbsolutePath();
-        FormUtil.selectTableViewEntry(this,
-                                      fileContentsView,
-                                      FileInfo::getFileName,
-                                      file.getFileName()
-                                          .toString());
-        simExtractFile(this, targetFile);
-        final long targetHash = CompressUtil.crcHashFile(targetFile.toFile());
+        // When
+        simAddFile(this, file, true, archiveName.toString());
 
-        Assertions.assertEquals(sourceHash, targetHash, "File hashes were not identical");
+        // Then
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, file.getFileName().toString());
+        PearlZipSpecifications.thenExpectCRCHashFileEntryMatches(this, sourceHash, archiveName, file.getFileName());
     }
 
     @Test
@@ -302,42 +248,21 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN file added to archive (image)
     // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddImageFileToJarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "jar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
-
+        // Preparation
         Path file = Paths.get("src", "test", "resources", "img.png")
                          .toAbsolutePath();
         final long sourceHash = CompressUtil.crcHashFile(file.toFile());
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        simAddFile(this, file);
 
-        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
-                                                                         .contains(archiveName),
-                                                                   "#fileContentsView");
-        final List<String> files = fileContentsView.getItems()
-                                                   .stream()
-                                                   .map(FileInfo::getFileName)
-                                                   .collect(Collectors.toList());
-        Assertions.assertTrue(files.contains("img.png"),
-                              "Image was not found in archive");
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "jar");
 
-        // Extract file and check consistency
-        Path targetFile = Paths.get(dir.getParent()
-                                       .toAbsolutePath()
-                                       .toString(),
-                                    file.getFileName()
-                                        .toString())
-                               .toAbsolutePath();
-        FormUtil.selectTableViewEntry(this,
-                                      fileContentsView,
-                                      FileInfo::getFileName,
-                                      file.getFileName()
-                                          .toString());
-        simExtractFile(this, targetFile);
-        final long targetHash = CompressUtil.crcHashFile(targetFile.toFile());
+        // When
+        simAddFile(this, file, false, archiveName.toString());
 
-        Assertions.assertEquals(sourceHash, targetHash, "File hashes were not identical");
+        // Then
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, file.getFileName().toString());
+        PearlZipSpecifications.thenExpectCRCHashFileEntryMatches(this, sourceHash, archiveName, file.getFileName());
+
     }
 
     @Test
@@ -346,51 +271,21 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN file added to archive (long filename)
     // THEN ensure files are stored in the archive and integrity has been maintained
     public void testFX_AddLongNameFileToTarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
-
-        Path file =
-                Paths.get(ZipConstants.GLOBAL_INTERNAL_CACHE
-                                      .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
-                                      .get()
-                                      .toAbsolutePath()
-                                      .toString(),
-                          "QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890");
-        Files.deleteIfExists(file);
+        // Preparation
+        Path file = Files.createTempDirectory("pz")
+                         .resolve("QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890_QuickBrownFoxJumpsOverTheLazyDog01234567890");
         Files.createFile(file);
         final long sourceHash = CompressUtil.crcHashFile(file.toFile());
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
+
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "tar");
+
+        // When
         simAddFile(this, file);
 
-        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
-                                                                         .contains(archiveName),
-                                                                   "#fileContentsView");
-        final List<String> files = fileContentsView.getItems()
-                                                   .stream()
-                                                   .map(FileInfo::getFileName)
-                                                   .collect(Collectors.toList());
-        Assertions.assertTrue(files.contains(file.getFileName()
-                                                 .toString()),
-                              "File was not found in archive");
-
-        // Extract file and check consistency
-        Path targetFile = Paths.get(dir.getParent()
-                                       .toAbsolutePath()
-                                       .toString(),
-                                    file.getFileName()
-                                        .toString())
-                               .toAbsolutePath();
-        FormUtil.selectTableViewEntry(this,
-                                      fileContentsView,
-                                      FileInfo::getFileName,
-                                      file.getFileName()
-                                          .toString()
-                                          .substring(0, 100));
-        simExtractFile(this, targetFile);
-        final long targetHash = CompressUtil.crcHashFile(targetFile.toFile());
-
-        Assertions.assertEquals(sourceHash, targetHash, "File hashes were not identical");
+        // Then
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, file.getFileName().toString());
+        PearlZipSpecifications.thenExpectCRCHashFileEntryMatches(this, sourceHash, archiveName, file.getFileName());
     }
 
     @Test
@@ -400,23 +295,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //     AND file added to archive
     // THEN a dialog appears with message like "Archive .* does not exist. PearlZip will now close the instance."
     public void testFX_AddFileNonExistentArchive_Fail() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        Files.deleteIfExists(archive);
+        // When
+        Files.deleteIfExists(archiveName);
+        simAddFile(this, null, false, archiveName.toString());
 
-        clickOn("#btnAdd", MouseButton.PRIMARY);
-        sleep(50, MILLISECONDS);
-
-        clickOn("#mnuAddFile", MouseButton.PRIMARY);
-        sleep(50, MILLISECONDS);
-
-        DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-        Assertions.assertTrue(dialogPane.getContentText()
-                                        .matches("Archive .* does not exist. PearlZip will now close the instance."),
-                              "The text in warning dialog was not matched as expected");
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Archive .* does not exist. PearlZip will now close the instance.");
     }
 
     @Test
@@ -426,23 +313,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //     AND folder added to archive
     // THEN a dialog appears with message like "Archive .* does not exist. PearlZip will now close the instance."
     public void testFX_AddFolderNonExistentArchive_Fail() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        Files.deleteIfExists(archive);
+        // When
+        Files.deleteIfExists(archiveName);
+        simAddFolder(this, null, false, archiveName.toString());
 
-        clickOn("#btnAdd", MouseButton.PRIMARY);
-        sleep(50, MILLISECONDS);
-
-        clickOn("#mnuAddDir", MouseButton.PRIMARY);
-        sleep(50, MILLISECONDS);
-
-        DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-        Assertions.assertTrue(dialogPane.getContentText()
-                                        .matches("Archive .* does not exist. PearlZip will now close the instance."),
-                              "The text in warning dialog was not matched as expected");
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Archive .* does not exist. PearlZip will now close the instance.");
     }
 
     @Test
@@ -450,33 +329,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN file added to archive (self)
     // THEN a dialog appears with message like "Ignoring the addition of file .* into the archive .*"
-    public void testFX_AddSelfToArchive_Warn() throws IOException {
-        // Set up archive information
-        final Path tempDirectory = Files.createTempDirectory("pz")
-                                        .toAbsolutePath();
-        try {
-            Path archive = Paths.get(tempDirectory.toString(), "empty.zip");
-            simNewArchive(this, archive);
+    public void testFX_AddSelfToArchive_Warn() {
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("empty.zip")
-                                               .get();
-            simAddFile(this, archive);
-            sleep(250, MILLISECONDS);
+        // When
+        simAddFile(this, archiveName, false, archiveName.toString());
 
-            // Check failure
-            DialogPane dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .matches("Ignoring the addition of file .* into the archive .*"),
-                                  "The text in warning dialog was not matched as expected");
-            clickOn(dialogPane.lookupButton(ButtonType.OK));
-            sleep(250, MILLISECONDS);
-            Assertions.assertEquals(0,
-                                    archiveInfo.getFiles()
-                                               .size(),
-                                    "Archive was not empty");
-        } finally {
-            UITestSuite.clearDirectory(tempDirectory);
-        }
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Ignoring the addition of file .* into the archive .*");
     }
 
     @Test
@@ -484,22 +345,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN folder added to archive (including self)
     // THEN ensure file (self) is not included in archive
-    public void testFX_AddDirectoryWithSelf_Ignore() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+    public void testFX_AddDirectoryWithSelf_Ignore(){
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        simAddFolder(this, archive.getParent());
-        sleep(100, MILLISECONDS);
+        // When
+        simAddFolder(this, archiveName.getParent(), false, archiveName.toString());
 
-        Optional<FXArchiveInfo> optArchiveInfo = lookupArchiveInfo(archiveName);
-        Assertions.assertTrue(optArchiveInfo.isPresent(), "Archive window not open");
-        Assertions.assertTrue(optArchiveInfo.get()
-                                            .getFiles()
-                                            .stream()
-                                            .noneMatch(f -> f.getFileName()
-                                                             .endsWith(archiveName)), "Archive was added unexpectedly");
+        // Then
+        PearlZipSpecifications.thenExpectFileNotExistsInCurrentWindow(archiveName, archiveName.getParent().getFileName().resolve(archiveName.getFileName()).toString());
     }
 
     @Test
@@ -507,78 +361,42 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN file added to archive (another zip archive)
     //     AND nested file (nested-archive.zip) opened from PearlZip
-    // THEN ensure the number of files in archive = 1
+    // THEN ensure the number of files in archive = 1 (nested archive is in correct initial state)
     // WHEN file added to archive (temp file)
     //     AND close nested archive and save = true
     //     AND nested file (nested-archive.zip) opened from PearlZip
     // THEN ensure files (temp file, 1) is included in the archive
     public void testFX_CreateZipArchiveAndUpdateNestedZipArchive_Success() throws IOException {
-        // Create archive
-        String archiveFormat = "zip";
-        final String archiveName = String.format("nest-test.%s", archiveFormat);
-        Path archivePath = Paths.get(tempDirRoot.toAbsolutePath()
-                                                .toString(), archiveName);
-        final String nestedArchiveName = "nested-archive.zip";
-        final Path nestedArchivePath = Paths.get("src", "test", "resources", nestedArchiveName)
+        // Preparation
+        final Path nestedArchivePath = Paths.get("src", "test", "resources", "nested-archive.zip")
                                             .toAbsolutePath();
         final Path file = Files.createTempFile("", "");
         Files.deleteIfExists(file);
         Files.createFile(file);
-        PearlZipFXUtil.simNewArchive(this, archivePath);
 
-        // Add nested archive
-        PearlZipFXUtil.simAddFile(this, nestedArchivePath);
-        sleep(50, MILLISECONDS);
+        // Given
+        Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-        // Open nested zip archive
-        TableRow row = PearlZipFXUtil.simTraversalArchive(this, archiveName, "#fileContentsView", (r) -> {},
-                                                          nestedArchiveName)
-                                     .get();
-        sleep(250, MILLISECONDS);
-        doubleClickOn(row);
+        // When
+        simAddFile(this, nestedArchivePath, false, archiveName.toString());
+        PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), nestedArchivePath.getFileName().toString());
 
-        // Verify nested archive is empty
-        FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(nestedArchiveName)
-                                                  .get();
-        Assertions.assertEquals(1,
-                                archiveInfo.getFiles()
-                                           .size(),
-                                "The nested archive was not in the expected state");
+        // Then
+        PearlZipSpecifications.thenExpectNumberOfFilesInCurrentWindow(nestedArchivePath.getFileName(), 1);
 
-        // Add file and folder to archive
+        // When
         PearlZipFXUtil.simAddFile(this, file);
-        sleep(50, MILLISECONDS);
 
-        // Exit nested archive and save archive into parent archive
-        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-        sleep(50, MILLISECONDS);
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText()
-                                        .startsWith(
-                                                "Please specify if you wish to persist the changes of the nested archive"));
-        clickOn(dialogPane.lookupButton(ButtonType.YES));
-        sleep(250, MILLISECONDS);
+        // Then
+        PearlZipSpecifications.whenCloseNestedArchive(this, true);
 
-        // Open nested archive and verify existence of files/folders
-        doubleClickOn(row);
-        Assertions.assertEquals(2,
-                                archiveInfo.getFiles()
-                                           .size(),
-                                "The nested archive has not stored the expected files");
-        Assertions.assertTrue(archiveInfo.getFiles()
-                                         .stream()
-                                         .anyMatch(f -> f.getLevel() == 0 && f.getFileName()
-                                                                              .equals(file.getFileName()
-                                                                                          .toString()) && !f.isFolder()),
-                              "Expected top-level file was not found");
-        Assertions.assertTrue(archiveInfo.getFiles()
-                                         .stream()
-                                         .anyMatch(f -> f.getLevel() == 0 && f.getFileName()
-                                                                              .equals("1") && !f.isFolder()),
-                              "Expected pre-existing top-level file was not found");
-        sleep(50, MILLISECONDS);
+        // When
+        PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), nestedArchivePath.getFileName().toString());
 
-        Files.deleteIfExists(file);
+        // Then
+        PearlZipSpecifications.thenExpectNumberOfFilesInCurrentWindow(nestedArchivePath.getFileName(), 2);
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(nestedArchivePath.getFileName(), "1");
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(nestedArchivePath.getFileName(), file.getFileName().toString());
     }
 
     @Test
@@ -593,53 +411,55 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //     AND traverse archive (empty/empty/empty)
     // THEN ensure the number of files in archive = 3
     public void testFX_AddNestedEmptyDirectoryTarArchive_MatchExpectations() throws IOException {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Preparation
         final Path emptyDir = Files.createTempDirectory("empty");
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
+
         try {
-            simNewArchive(this, archive);
+            // Given
+            Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "tar");
+
+            // When
             simAddFolder(this, emptyDir);
             sleep(100, MILLISECONDS).clickOn("#fileContentsView")
                                     .sleep(100, MILLISECONDS);
+
             simTraversalArchive(this,
-                                archiveName,
+                                archiveName.toString(),
                                 "#fileContentsView",
                                 (r) -> {},
+                                true,
                                 emptyDir.getFileName()
                                         .toString());
-            sleep(100, MILLISECONDS).doubleClickOn(MouseButton.PRIMARY);
             simAddFolder(this, emptyDir);
             simUp(this);
+
             simTraversalArchive(this,
-                                archiveName,
+                                archiveName.toString(),
                                 "#fileContentsView",
                                 (r) -> {},
+                                true,
                                 emptyDir.getFileName()
                                         .toString(),
                                 emptyDir.getFileName()
                                         .toString());
-            sleep(100, MILLISECONDS).doubleClickOn(MouseButton.PRIMARY);
             simAddFolder(this, emptyDir);
             simUp(this);
             simUp(this);
+
             simTraversalArchive(this,
-                                archiveName,
+                                archiveName.toString(),
                                 "#fileContentsView",
                                 (r) -> {},
+                                true,
                                 emptyDir.getFileName()
                                         .toString(),
                                 emptyDir.getFileName()
                                         .toString(),
                                 emptyDir.getFileName()
                                         .toString());
-            sleep(100, MILLISECONDS).doubleClickOn(MouseButton.PRIMARY);
-            Optional<FXArchiveInfo> optArchiveInfo = lookupArchiveInfo(archiveName);
-            Assertions.assertEquals(3,
-                                    optArchiveInfo.get()
-                                                  .getFiles()
-                                                  .size(),
-                                    "The expected number of files was not added");
+
+            // Then
+            PearlZipSpecifications.thenexpectNumberOfFilesInArchive(archiveName, 3);
         } finally {
             Files.deleteIfExists(emptyDir);
         }
@@ -673,13 +493,8 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // THEN ensure the number of files in archive = 1
     //      AND ensure files (tempB) is included in the archive
     public void testFX_IdenticalNestedArchivesSisterDirectories_MatchExpectations() throws IOException {
-        // Create archive
+        // Preparation
         final Path tempDirectory = Files.createTempDirectory("pz");
-        Path archive = Paths.get(tempDirectory.toAbsolutePath()
-                                              .toString(), "outer-archive.zip");
-        simNewArchive(this, archive);
-
-        // Create temp folders
         Path tempADir = Paths.get(tempDirectory.toAbsolutePath()
                                                .toString(), "tempA");
         Path tempBDir = Paths.get(tempDirectory.toAbsolutePath()
@@ -687,18 +502,20 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
         Files.createDirectories(tempADir);
         Files.createDirectories(tempBDir);
 
+        Path emptyArchive = Paths.get("src", "test", "resources", "empty-archive.tar")
+                                 .toAbsolutePath();
+
         try {
-            // Add temp folders
+            // Given
+            Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip", "outer-archive");
+
+            // When
             simAddFolder(this, tempADir);
             simAddFolder(this, tempBDir);
 
-            // Create temp files
-            Path emptyArchive = Paths.get("src", "test", "resources", "empty-archive.tar")
-                                     .toAbsolutePath();
-
             // Add archive to each folder
             TableRow row = simTraversalArchive(this,
-                                               archive.toAbsolutePath()
+                                               archiveName.toAbsolutePath()
                                                       .toString(),
                                                "#fileContentsView",
                                                (r) -> {},
@@ -706,8 +523,9 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             doubleClickOn(row);
             simAddFile(this, emptyArchive);
             simUp(this);
+
             row = simTraversalArchive(this,
-                                      archive.toAbsolutePath()
+                                      archiveName.toAbsolutePath()
                                              .toString(),
                                       "#fileContentsView",
                                       (r) -> {},
@@ -716,111 +534,40 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             simAddFile(this, emptyArchive);
             simUp(this);
 
-            // Open each nested directory and add unique file
-
-            // FIRST ARCHIVE
-            row = simTraversalArchive(this,
-                                      archive.toAbsolutePath()
-                                             .toString(),
-                                      "#fileContentsView",
-                                      (r) -> {},
-                                      "tempA",
-                                      "empty-archive.tar").get();
-            doubleClickOn(row);
+            // Add tempA to first nested archive
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "tempA", emptyArchive.getFileName().toString());
             simAddFolder(this, tempADir);
-
-            // Exit tarball instance and save archive into compressor
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            DialogPane dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
-
-            // Open nested tarball archive and verify existence of files/folders
-            doubleClickOn(row);
-            sleep(250, MILLISECONDS);
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("empty-archive.tar")
-                                               .get();
-            Assertions.assertEquals(1,
-                                    archiveInfo.getFiles()
-                                               .size(),
-                                    "The nested archive has not stored the expected files");
-            Assertions.assertEquals("tempA",
-                                    archiveInfo.getFiles()
-                                               .get(0)
-                                               .getFileName(),
-                                    "Folder added was not as expected");
-
-            // Exit tarball instance and save archive into compressor
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
-
-            // Traverse to root
+            PearlZipSpecifications.whenCloseNestedArchive(this, true);
             simUp(this);
 
-            // SECOND ARCHIVE
-            row = simTraversalArchive(this,
-                                      archive.toAbsolutePath()
-                                             .toString(),
-                                      "#fileContentsView",
-                                      (r) -> {},
-                                      "tempB",
-                                      "empty-archive.tar").get();
-            doubleClickOn(row);
+            // Then
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "tempA", emptyArchive.getFileName().toString());
+            PearlZipSpecifications.thenExpectNumberOfFilesInCurrentWindow(emptyArchive.getFileName(), 1);
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(emptyArchive.getFileName(), "tempA");
+            PearlZipSpecifications.whenCloseNestedArchive(this, false);
+            simUp(this);
+
+            // Add tempB to second nested archive
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "tempB", emptyArchive.getFileName().toString());
             simAddFolder(this, tempBDir);
+            PearlZipSpecifications.whenCloseNestedArchive(this, true);
+            simUp(this);
 
-            // Exit tarball instance and save archive into compressor
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
-
-            // Open nested tarball archive and verify existence of files/folders
-            doubleClickOn(row);
-            sleep(250, MILLISECONDS);
-            archiveInfo = JFXUtil.lookupArchiveInfo("empty-archive.tar")
-                                 .get();
-            Assertions.assertEquals(1,
-                                    archiveInfo.getFiles()
-                                               .size(),
-                                    "The nested archive has not stored the expected files");
-            Assertions.assertEquals("tempB",
-                                    archiveInfo.getFiles()
-                                               .get(0)
-                                               .getFileName(),
-                                    "Folder added was not as expected");
-
-            // Exit tarball instance and save archive into compressor
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
+            // Then
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "tempB", emptyArchive.getFileName().toString());
+            PearlZipSpecifications.thenExpectNumberOfFilesInCurrentWindow(emptyArchive.getFileName(), 1);
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(emptyArchive.getFileName(), "tempB");
+            PearlZipSpecifications.whenCloseNestedArchive(this, false);
+            simUp(this);
         } finally {
             // Clean up
             UITestSuite.clearDirectory(tempDirectory);
         }
     }
 
-
     @Test
     @DisplayName("Test: Open tar or zip directory in zip archive (processing as folder and not an archive)")
-    // GIVEN a new zip archive has been created in PearlZip
+    // GIVEN the default zip archive in PearlZip
     //      AND directories (zip,tar) have been created
     // WHEN folder added to archive (zip)
     //      AND folder added to archive (tar)
@@ -830,48 +577,31 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //      AND traverse up to root folder in archive
     // THEN ensure only 1 main stage instances are open
     public void testFX_OpenTarZipFolderInZipArchive_Success() throws IOException {
-        // Create archive
-        final Path tempDirectory = Files.createTempDirectory("pz");
-        Path archive = Path.of(JFXUtil.lookupArchiveInfo(".zip.*")
-                                      .get()
-                                      .getArchivePath());
-
-        // Create temp folders
-        Path zipDir = Paths.get(tempDirectory.toAbsolutePath()
-                                             .toString(), "zip");
-        Path tarDir = Paths.get(tempDirectory.toAbsolutePath()
-                                             .toString(), "tar");
-        Files.createDirectories(zipDir);
-        Files.createDirectories(tarDir);
+            // Preparation
+            final Path tempDirectory = Files.createTempDirectory("pz");
+            Path zipDir = Paths.get(tempDirectory.toAbsolutePath()
+                                                 .toString(), "zip");
+            Path tarDir = Paths.get(tempDirectory.toAbsolutePath()
+                                                 .toString(), "tar");
+            Files.createDirectories(zipDir);
+            Files.createDirectories(tarDir);
 
         try {
-            // Add directories zip and tar
+            // Given
+            String archiveName = PearlZipSpecifications.givenDefaultArchiveDetails();
+
+            // When
             simAddFolder(this, zipDir);
             simAddFolder(this, tarDir);
 
-            // Navigate into each and ensure no new archive window is raised
-            TableRow row = simTraversalArchive(this,
-                                               archive.toAbsolutePath()
-                                                      .toString(),
-                                               "#fileContentsView",
-                                               (r) -> {},
-                                               "tar").get();
-            doubleClickOn(row);
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), zipDir.getFileName().toString());
             simUp(this);
 
-            row = simTraversalArchive(this,
-                                      archive.toAbsolutePath()
-                                             .toString(),
-                                      "#fileContentsView",
-                                      (r) -> {},
-                                      "zip").get();
-            doubleClickOn(row);
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), tarDir.getFileName().toString());
             simUp(this);
 
-            Assertions.assertEquals(1,
-                                    JFXUtil.getMainStageInstances()
-                                           .size(),
-                                    "New main windows instance unexpectedly created");
+            // Then
+            PearlZipSpecifications.thenExpectNumberOfMainInstances(1);
         } finally {
             UITestSuite.clearDirectory(tempDirectory);
         }
@@ -902,121 +632,44 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // WHEN nested file (empty-archive.tar) opened from PearlZip
     // THEN ensure files (temp) is included in the archive
     public void testFX_NestedArchiveChain_MatchExpectations() throws IOException {
-        // Create temp file
+        // Preparation
         final Path tempDirectory = Files.createTempDirectory("pz");
         final Path tempFile = Paths.get(tempDirectory.toAbsolutePath()
                                                      .toString(), "temp");
         Files.createFile(tempFile);
 
+        final Path nestTarGZ = Paths.get("src", "test", "resources", "test.tar.gz")
+                                    .toAbsolutePath();
+
+        final Path nestTar = Paths.get("src", "test", "resources", "empty-archive.tar")
+                                  .toAbsolutePath();
+
         try {
-            // Set up archive information
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
-                                               .get();
-            Path archive = Paths.get(archiveInfo.getArchivePath());
+            // Given
+            Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip", "outer-archive");
 
-            // Nest compressor archive
-            final Path nestTarGZ = Paths.get("src", "test", "resources", "test.tar.gz")
-                                        .toAbsolutePath();
+            // When
             simAddFile(this, nestTarGZ);
-            TableRow row = simTraversalArchive(this,
-                                               archive.toAbsolutePath()
-                                                      .toString(),
-                                               "#fileContentsView",
-                                               (r) -> {},
-                                               "test.tar.gz").get();
-            doubleClickOn(row).sleep(250, MILLISECONDS);
-            TableRow rowGZTar = simTraversalArchive(this,
-                                                    nestTarGZ.getFileName()
-                                                             .toString(),
-                                                    "#fileContentsView",
-                                                    (r) -> {},
-                                                    "test.tar").get();
-            doubleClickOn(rowGZTar).sleep(250, MILLISECONDS);
-
-            // Nest non-compressor archive
-            final Path nestTar = Paths.get("src", "test", "resources", "empty-archive.tar")
-                                      .toAbsolutePath();
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "test.tar.gz");
+            PearlZipSpecifications.whenOpenNestedEntry(this, "test.tar.gz", "test.tar");
             simAddFile(this, nestTar);
-            FXArchiveInfo nestedGZArchiveInfo = lookupArchiveInfo("test.tar").get();
-            TableRow rowTar = simTraversalArchive(this,
-                                                  nestedGZArchiveInfo.getArchivePath(),
-                                                  "#fileContentsView",
-                                                  (r) -> {},
-                                                  "empty-archive.tar").get();
-            doubleClickOn(rowTar).sleep(250, MILLISECONDS);
-
-            // Add arbitrary file
+            PearlZipSpecifications.whenOpenNestedEntry(this, "test.tar", "empty-archive.tar");
             simAddFile(this, tempFile);
-            sleep(250, MILLISECONDS);
+            PearlZipSpecifications.whenCloseNestedArchive(this, true);
+            PearlZipSpecifications.whenCloseNestedArchive(this, true);
+            PearlZipSpecifications.whenCloseNestedArchive(this, true);
 
-            // Save down all changes...
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            DialogPane dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
+            // Then
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, "test.tar.gz");
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), "test.tar.gz");
 
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(Paths.get("test.tar.gz"), "test.tar");
+            PearlZipSpecifications.whenOpenNestedEntry(this, "test.tar.gz", "test.tar");
 
-            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-            sleep(50, MILLISECONDS);
-            dialogPane = lookup(".dialog-pane").query();
-            Assertions.assertTrue(dialogPane.getContentText()
-                                            .startsWith(
-                                                    "Please specify if you wish to persist the changes of the nested archive"));
-            clickOn(dialogPane.lookupButton(ButtonType.YES));
-            sleep(250, MILLISECONDS);
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(Paths.get("test.tar"), "empty-archive.tar");
+            PearlZipSpecifications.whenOpenNestedEntry(this, "test.tar", "empty-archive.tar");
 
-            // Check hierarchy (temp.zip -> test.tar.gz -> test.tar -> empty-archive.tar)
-            // 1) temp.zip - Check to ensure gzip file is present
-            Assertions.assertTrue(archiveInfo.getFiles()
-                                             .stream()
-                                             .anyMatch(f -> f.getFileName()
-                                                             .contains("test.tar.gz")),
-                                  "G-Zip archive is not present");
-            doubleClickOn(row);
-            sleep(250, MILLISECONDS);
-            rowGZTar = simTraversalArchive(this,
-                                           nestTarGZ.getFileName()
-                                                    .toString(),
-                                           "#fileContentsView",
-                                           (r) -> {},
-                                           "test.tar").get();
-            doubleClickOn(rowGZTar);
-            sleep(250, MILLISECONDS);
-
-            // 2) temp.tar - Check to ensure tar is present
-            nestedGZArchiveInfo = lookupArchiveInfo("test.tar").get();
-            Assertions.assertTrue(nestedGZArchiveInfo.getFiles()
-                                                     .stream()
-                                                     .anyMatch(f -> f.getFileName()
-                                                                     .contains("empty-archive.tar")),
-                                  "Tar archive is not present");
-            rowTar = simTraversalArchive(this,
-                                         nestedGZArchiveInfo.getArchivePath(),
-                                         "#fileContentsView",
-                                         (r) -> {},
-                                         "empty-archive.tar").get();
-            doubleClickOn(rowTar);
-
-            // 3) empty-archive.tar - Check to ensure temp file is persisted
-            FXArchiveInfo nestedTarArchiveInfo = JFXUtil.lookupArchiveInfo("empty-archive.tar")
-                                                        .get();
-            Assertions.assertTrue(nestedTarArchiveInfo.getFiles()
-                                                      .stream()
-                                                      .anyMatch(f -> f.getFileName()
-                                                                      .contains("temp")),
-                                  "temp file archive is not present");
+            PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(Paths.get("empty-archive.tar"), tempFile.getFileName().toString());
         } finally {
             UITestSuite.clearDirectory(tempDirectory);
         }
@@ -1024,31 +677,25 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Adding nested .tgz can be added successfully and opened as an archive")
-    // GIVEN a new zip archive has been created in PearlZip
+    // GIVEN the default zip archive in PearlZip
     // WHEN file added to archive (empty.tgz)
     //     AND nested file (empty.tgz) opened from PearlZip
     // THEN ensure only 2 main stage instances are open
     //     AND A main stage instance name exists like '.*empty.tgz.*'
     public void testFX_AddNestedTgzArchive_Success() {
-        // Archive set up
-        FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
-                                           .get();
+        // Preparation
         Path tgzArchive = Paths.get("src", "test", "resources", "empty.tgz").toAbsolutePath();
 
-        // add tgz archive
+        // Given
+        String archiveName = PearlZipSpecifications.givenDefaultArchiveDetails();
+
+        // When
         simAddFile(this, tgzArchive);
-        sleep(250, MILLISECONDS);
+        PearlZipSpecifications.whenOpenNestedEntry(this, archiveName, tgzArchive.getFileName().toString());
 
-        TableRow archive = simTraversalArchive(this, archiveInfo.getArchivePath(), "#fileContentsView", (r)->{},
-                                              "empty.tgz").get();
-        sleep(250, MILLISECONDS)
-                .doubleClickOn(archive)
-                .sleep(250, MILLISECONDS);
-
-        // Checks
-        Assertions.assertEquals(2, JFXUtil.getMainStageInstances().size(), "Two archive instances are not open");
-        Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().anyMatch((f)->f.getTitle().contains("empty.tgz")),
-                              "The tgz archive was not opened successfully by PearlZip");
+        // Then
+        PearlZipSpecifications.thenExpectNumberOfMainInstances(2);
+        PearlZipSpecifications.thenMainInstanceExistsWithName(tgzArchive.getFileName().toString());
     }
 
     @Test
@@ -1057,23 +704,15 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // THEN ensure the number of files in archive = 1
     //     AND ensure files (test.txt) is included in the archive
     public void testFX_OpenSingleFileCompressor_Success() {
-        // Archive set up
+        // Preparation
         Path xzArchive = Paths.get("src", "test", "resources", "test.txt.xz").toAbsolutePath();
 
-        // Open archive
+        // Given
         simOpenArchive(this, xzArchive, true, false);
-        sleep(250, MILLISECONDS);
 
-        // Check contents
-        FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo("test.txt.xz")
-                                           .get();
-        Assertions.assertEquals(1, archiveInfo.getFiles().size(), "Not a compressor archive");
-        Assertions.assertTrue(archiveInfo.getFiles().get(0).getFileName().equals("test.txt"),
-                              "Not the expected text file compressor");
-
-        // Close archive...
-        clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-        sleep(250, MILLISECONDS);
+        // Then
+        PearlZipSpecifications.thenexpectNumberOfFilesInArchive(xzArchive, 1);
+        PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(xzArchive, "test.txt");
     }
 
     @Test
@@ -1083,14 +722,14 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     //      AND files (boom,baa) have been created
     // WHEN folder added to archive (foo) using context menu
     //      AND traverse archive (foo)
-    //      AND folder added to archive (boom) using context menu
+    //      AND file added to archive (boom) using context menu
     //      AND traverse up to root folder in archive
     //      AND folder added to archive (bar) using context menu
     //      AND traverse archive (bar)
-    //      AND folder added to archive (baa) using context menu
-    // THEN nsure the number of files in archive = 4
+    //      AND file added to archive (baa) using context menu
+    // THEN ensure the number of files in archive = 4
     public void testFX_AddFileAddFolderContextMenu_MatchExpectations() throws IOException {
-        // Create temp file
+        // Preparation
         final Path tempDirectory = Files.createTempDirectory("pz");
         final Path emptyDirFoo = Paths.get(tempDirectory.toAbsolutePath()
                                                         .toString(), "foo");
@@ -1107,40 +746,22 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
         Files.createFile(emptyFileBaa);
 
         try {
-            // Archive setup
-            FXArchiveInfo archiveInfo = JFXUtil.lookupArchiveInfo(".zip.*")
-                                               .get();
+            // Given
+            Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
-            // Add folders
-            clickOn(archiveInfo.getController().get().getFileContentsView(), MouseButton.SECONDARY)
-               .clickOn("#mnuAddDir");
-            NativeFileChooserUtil.chooseFile(PLATFORM, this, emptyDirFoo);
-            sleep(250,MILLISECONDS);
-            simAddFolder(this, emptyDirBar);
-
-            // Add file boom
-            TableRow selectedRow = simTraversalArchive(this,
-                                                       archiveInfo.getArchivePath(),
-                                                       "#fileContentsView",
-                                                       (r) -> {},
-                                                       "foo").get();
-
-            doubleClickOn(selectedRow).sleep(250, MILLISECONDS)
-                                      .clickOn(selectedRow.getTableView(), MouseButton.SECONDARY)
-                                      .clickOn("#mnuAddFile");
-            NativeFileChooserUtil.chooseFile(PLATFORM, this, emptyFileBoom);
-
-            // Navigate back to root
+            // When
+            simAddFolder(this, emptyDirFoo, true, archiveName.toString());
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), emptyDirFoo.getFileName().toString());
+            simAddFile(this, emptyFileBoom);
             simUp(this);
 
-            // Add file baa
-            selectedRow = simTraversalArchive(this, archiveInfo.getArchivePath(), "#fileContentsView", (r) -> {},
-                                              "bar").get();
+            simAddFolder(this, emptyDirBar, true, archiveName.toString());
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), emptyDirBar.getFileName().toString());
+            simAddFile(this, emptyFileBaa);
+            simUp(this);
 
-            doubleClickOn(selectedRow).sleep(250, MILLISECONDS)
-                                      .clickOn(selectedRow.getTableView(), MouseButton.SECONDARY)
-                                      .clickOn("#mnuAddFile");
-            NativeFileChooserUtil.chooseFile(PLATFORM, this, emptyFileBaa);
+            // Then
+            PearlZipSpecifications.thenexpectNumberOfFilesInArchive(archiveName, 4);
         } finally {
             Files.deleteIfExists(emptyDirFoo);
             Files.deleteIfExists(emptyDirBar);
@@ -1148,4 +769,5 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             Files.deleteIfExists(emptyFileBaa);
         }
     }
+
 }
