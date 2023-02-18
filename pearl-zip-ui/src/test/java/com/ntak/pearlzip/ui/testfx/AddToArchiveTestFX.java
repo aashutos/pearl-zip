@@ -10,6 +10,7 @@ import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
+import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.scene.control.TableRow;
 import javafx.scene.input.KeyCode;
@@ -514,22 +515,22 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             simAddFolder(this, tempBDir);
 
             // Add archive to each folder
-            TableRow row = simTraversalArchive(this,
-                                               archiveName.toAbsolutePath()
+            TableRow row = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> simTraversalArchive(this,
+                                                                                                                                              archiveName.toAbsolutePath()
                                                       .toString(),
-                                               "#fileContentsView",
-                                               (r) -> {},
-                                               "tempA").get();
+                                                                                                                                              "#fileContentsView",
+                                                                                                                                              (r) -> {},
+                                                                                                                                              "tempA").get());
             doubleClickOn(row);
             simAddFile(this, emptyArchive);
             simUp(this);
 
-            row = simTraversalArchive(this,
+            row = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> simTraversalArchive(this,
                                       archiveName.toAbsolutePath()
                                              .toString(),
                                       "#fileContentsView",
                                       (r) -> {},
-                                      "tempB").get();
+                                      "tempB").get());
             doubleClickOn(row);
             simAddFile(this, emptyArchive);
             simUp(this);
