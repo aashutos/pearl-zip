@@ -30,7 +30,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Tag("fx-test")
 public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
-    private static Path tempDirRoot;
+
     private static Path dir;
 
     /*
@@ -60,7 +60,6 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     @BeforeEach
     public void setUp() {
         try {
-            tempDirRoot = Files.createTempDirectory("pz");
             dir = UITestFXSuite.genSourceDataSet();
         } catch(IOException e) {
         }
@@ -346,7 +345,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
     // GIVEN a new zip archive has been created in PearlZip
     // WHEN folder added to archive (including self)
     // THEN ensure file (self) is not included in archive
-    public void testFX_AddDirectoryWithSelf_Ignore(){
+    public void testFX_AddDirectoryWithSelf_Ignore() {
         // Given
         Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
 
@@ -372,8 +371,6 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
         final Path nestedArchivePath = Paths.get("src", "test", "resources", "nested-archive.zip")
                                             .toAbsolutePath();
         final Path file = Files.createTempFile("", "");
-        Files.deleteIfExists(file);
-        Files.createFile(file);
 
         // Given
         Path archiveName = PearlZipSpecifications.givenCreateNewArchive(this, "zip");
@@ -595,10 +592,10 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             simAddFolder(this, zipDir);
             simAddFolder(this, tarDir);
 
-            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), zipDir.getFileName().toString());
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName, zipDir.getFileName().toString());
             simUp(this);
 
-            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), tarDir.getFileName().toString());
+            PearlZipSpecifications.whenOpenNestedEntry(this, archiveName, tarDir.getFileName().toString());
             simUp(this);
 
             // Then
@@ -753,12 +750,12 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             // When
             simAddFolder(this, emptyDirFoo, true, archiveName.toString());
             PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), emptyDirFoo.getFileName().toString());
-            simAddFile(this, emptyFileBoom);
+            simAddFile(this, emptyFileBoom, true, archiveName.toString());
             simUp(this);
 
             simAddFolder(this, emptyDirBar, true, archiveName.toString());
             PearlZipSpecifications.whenOpenNestedEntry(this, archiveName.toString(), emptyDirBar.getFileName().toString());
-            simAddFile(this, emptyFileBaa);
+            simAddFile(this, emptyFileBaa, true, archiveName.toString());
             simUp(this);
 
             // Then
