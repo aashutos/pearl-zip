@@ -457,7 +457,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
                                         .toString());
 
             // Then
-            PearlZipSpecifications.thenexpectNumberOfFilesInArchive(archiveName, 3);
+            PearlZipSpecifications.thenExpectNumberOfFilesInArchive(archiveName, 3);
         } finally {
             Files.deleteIfExists(emptyDir);
         }
@@ -709,7 +709,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
         simOpenArchive(this, xzArchive, true, false);
 
         // Then
-        PearlZipSpecifications.thenexpectNumberOfFilesInArchive(xzArchive, 1);
+        PearlZipSpecifications.thenExpectNumberOfFilesInArchive(xzArchive, 1);
         PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(xzArchive, "test.txt");
     }
 
@@ -759,7 +759,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
             simUp(this);
 
             // Then
-            PearlZipSpecifications.thenexpectNumberOfFilesInArchive(archiveName, 4);
+            PearlZipSpecifications.thenExpectNumberOfFilesInArchive(archiveName, 4);
         } finally {
             Files.deleteIfExists(emptyDirFoo);
             Files.deleteIfExists(emptyDirBar);

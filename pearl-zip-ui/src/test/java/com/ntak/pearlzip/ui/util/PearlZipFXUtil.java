@@ -632,7 +632,7 @@ public class PearlZipFXUtil {
                  .sleep(MEDIUM_PAUSE, MILLISECONDS)
                  .clickOn(200,
                           ((1 + index) * 30));
-            robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
+            robot.sleep(LONG_PAUSE, MILLISECONDS);
             return true;
         } else {
             return false;

@@ -5,15 +5,13 @@ package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.CompressUtil;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.geometry.Point2D;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
 
@@ -22,7 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
+import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
+import static com.ntak.testfx.TestFXConstants.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -73,19 +74,24 @@ public class PearlZipSpecifications {
 
     public static void whenOpenNestedEntry(FxRobot robot, String archiveName, String... nestedArchivePath) {
         TableRow row = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> PearlZipFXUtil.simTraversalArchive(robot, archiveName, "#fileContentsView", (r) -> {}, nestedArchivePath).get());
-        robot.sleep(250, MILLISECONDS);
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
         robot.doubleClickOn(row);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
     }
 
     public static void whenCloseNestedArchive(FxRobot robot, boolean saveArchive) {
-        robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
-        robot.sleep(50, MILLISECONDS);
+        whenCloseArchive(robot);
         DialogPane dialogPane = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> robot.lookup(".dialog-pane").query());
         Assertions.assertTrue(dialogPane.getContentText()
                                         .startsWith(
                                                 "Please specify if you wish to persist the changes of the nested archive"));
         robot.clickOn(dialogPane.lookupButton(saveArchive? ButtonType.YES:ButtonType.NO));
-        robot.sleep(250, MILLISECONDS);
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
+    }
+
+    public static void whenCloseArchive(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     ////////////////
@@ -143,11 +149,11 @@ public class PearlZipSpecifications {
         FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(archiveName.toString()).orElse(null);
         Assertions.assertNotNull(archiveInfo, "Expected archive was not found and so no metadata could be retrieved");
         Assertions.assertEquals(fileName,
-                                archiveInfo.getFiles().stream().filter(e -> e.getLevel() == depth && Objects.equals(e.getFileName(), fileName)).findFirst().map(f -> f.getFileName()).orElse(""),
+                                archiveInfo.getFiles().stream().filter(e -> e.getLevel() == depth && Objects.equals(e.getFileName(), fileName)).findFirst().map(FileInfo::getFileName).orElse(""),
                                 String.format("Expected file %s (at depth %d) was not found in archive %s", fileName, depth, archiveName));
     }
 
-    public static void thenexpectNumberOfFilesInArchive(Path archiveName, int expectedCount) {
+    public static void thenExpectNumberOfFilesInArchive(Path archiveName, int expectedCount) {
         FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(archiveName.toString()).orElse(null);
         Assertions.assertNotNull(archiveInfo, "Expected archive was not found and so no metadata could be retrieved");
         Assertions.assertEquals(expectedCount,
@@ -192,5 +198,47 @@ public class PearlZipSpecifications {
 
     public static void thenMainInstanceExistsWithName(String archiveName) {
         Assertions.assertTrue(lookupArchiveInfo(archiveName).isPresent());
+    }
+
+    public static void thenExpectedArchiveWindowIsSelected(String archiveName) {
+        Assertions.assertTrue(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                                      .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                                      .get().getItems()
+                                      .stream()
+                                      .anyMatch(s -> s.getText()
+                                                      .contains(String.format("%s%s", archiveName, " • "))
+                                      ), String.format("Expected archive path %s not found as active", archiveName));
+    }
+
+    public static void thenExpectFileHierarchyInTargetDirectory(Path tempDir, Path... files) {
+        for (Path file : files) {
+            Assertions.assertTrue(Files.exists(tempDir.resolve(file)), String.format("File: %s does not exist.", file.toAbsolutePath()));
+        }
+    }
+
+    public static Path givenNewSingleFileCompressorArchive(FxRobot robot, String format, Path nestedFile, Path targetDir, boolean useMainMenu) {
+        // New single file compressor archive
+        if (useMainMenu) {
+            robot.clickOn(Point2D.ZERO.add(110, 10))
+                 .clickOn(Point2D.ZERO.add(110, 60));
+        } else {
+            robot.clickOn("#btnNew").clickOn("#mnuNewSingleFileCompressor");
+        }
+
+        // Set archive format
+        ComboBox<String> cmbArchiveFormat = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat"));
+        FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, format);
+
+        // Select file to archive
+        robot.clickOn("#btnSelectFile");
+        simOpenArchive(robot, nestedFile, false, false);
+        robot.clickOn("#btnCreate").sleep(SHORT_PAUSE, MILLISECONDS);
+        Path pathArchive = targetDir.toAbsolutePath().resolve(String.format("arbitrary-file.txt.%s", format));
+        chooseFile(PLATFORM, robot, pathArchive.getParent().toAbsolutePath());
+
+        // Check archive exists
+        Assertions.assertTrue(Files.exists(pathArchive), String.format("Path: %s does not exist", pathArchive));
+
+        return pathArchive;
     }
 }
