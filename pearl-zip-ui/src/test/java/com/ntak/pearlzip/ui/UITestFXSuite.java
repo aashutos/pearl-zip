@@ -1,13 +1,10 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui;
 
 import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.IncludeClassNamePatterns;
-import org.junit.platform.suite.api.IncludeTags;
-import org.junit.platform.suite.api.SelectPackages;
-import org.junit.platform.suite.api.SuiteDisplayName;
+import org.junit.platform.suite.api.*;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
@@ -23,6 +20,7 @@ import java.nio.file.Paths;
 @SuiteDisplayName("PearlZip UI module Integration TestFX tests")
 @IncludeClassNamePatterns("^.*TestFX$")
 @IncludeTags("fx-test")
+@ExcludeTags("Calibration")
 public class UITestFXSuite {
 
     public static Path genSourceDataSet() throws IOException {

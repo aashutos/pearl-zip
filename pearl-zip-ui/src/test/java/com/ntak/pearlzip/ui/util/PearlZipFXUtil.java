@@ -628,13 +628,20 @@ public class PearlZipFXUtil {
                                                .findFirst()
                                                .orElse(""));
         if (index >= 0) {
+            System.out.println(String.format("Clicking on file: %s. Index = %d...", archive.getFileName().toString(), index));
+            TableView view = FormUtil.lookupNode(s->s.getTitle().contains(archive.toString()),
+                                                 "#fileContentsView");
             robot.clickOn(200, 0)
                  .sleep(MEDIUM_PAUSE, MILLISECONDS)
-                 .clickOn(200,
-                          ((1 + index) * 30));
-            robot.sleep(LONG_PAUSE, MILLISECONDS);
+                 .moveTo(200,
+                          (25 + ((index+1) * 17)))
+                .sleep(LONG_PAUSE, MILLISECONDS)
+                .clickOn(MouseButton.PRIMARY)
+                .clickOn(view);
+
             return true;
         } else {
+            System.out.println("Index < 0...");
             return false;
         }
     }

@@ -201,13 +201,14 @@ public class PearlZipSpecifications {
     }
 
     public static void thenExpectedArchiveWindowIsSelected(String archiveName) {
-        Assertions.assertTrue(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                      .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
-                                      .get().getItems()
-                                      .stream()
-                                      .anyMatch(s -> s.getText()
-                                                      .contains(String.format("%s%s", archiveName, " • "))
-                                      ), String.format("Expected archive path %s not found as active", archiveName));
+        String value = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                .get().getItems()
+                .stream()
+                .filter(s -> s.getText()
+                                .contains(String.format("%s%s", archiveName, " • "))
+                ).findFirst().map(MenuItem::getText).orElse(""));
+        Assertions.assertFalse(value.isEmpty(), String.format("Expected archive path %s not found as active.", archiveName));
     }
 
     public static void thenExpectFileHierarchyInTargetDirectory(Path tempDir, Path... files) {

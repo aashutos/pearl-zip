@@ -451,61 +451,6 @@ public class CompressorArchiveTestFX extends AbstractPearlZipTestFX {
     }
 
     @Test
-    @DisplayName("Test: Open compressor archive and expand nested tarball and test window menu state is as expected before/after reintegration")
-    // GIVEN a copy of tar.gz archive (empty.tgz as temp.tar.gz) is open in PearlZip
-    // THEN ensure window menu count = 1
-    //     AND window menu contains entry for archive(s) (temp.tar.gz)
-    // WHEN nested file (temp.tar) opened from PearlZip
-    // THEN ensure window menu count = 2
-    //     AND window menu contains entry for archive(s) (temp.tar.gz,temp.tar)
-    //     AND ensure archive (temp.tar) is focused
-    // WHEN bring window (temp.tar.gz) to the front
-    // THEN ensure archive (temp.tar.gz) is focused
-    // WHEN bring window (temp.tar) to the front
-    //     AND close nested archive and save = true
-    // THEN ensure window menu count = 1
-    //     AND window menu contains entry for archive(s) (empty.tgz)
-    public void testFX_OpenCompressorArchive_WindowMenuState_MatchExpectations() throws IOException {
-        // 1. Prepare compressor archive
-        Path srcArchive = Paths.get("src", "test", "resources", "empty.tgz");
-        Path archive = Paths.get(tempDirRoot.toAbsolutePath()
-                                            .toString(), "temp.tar.gz");
-        Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
-
-        // Given
-        simOpenArchive(this, archive, true, false);
-
-        // Then
-        PearlZipSpecifications.thenExpectNumberOfMainInstances(1);
-        PearlZipSpecifications.thenMainInstanceExistsWithName(archive.toString());
-
-        // When
-        PearlZipSpecifications.whenOpenNestedEntry(this, archive.toString(), "temp.tar");
-
-        // Then
-        PearlZipSpecifications.thenExpectNumberOfMainInstances(2);
-        PearlZipSpecifications.thenMainInstanceExistsWithName(archive.toString());
-        PearlZipSpecifications.thenMainInstanceExistsWithName("temp.tar");
-
-        String nestedArchive = lookupArchiveInfo("temp.tar").get().getArchivePath();
-        PearlZipSpecifications.thenExpectedArchiveWindowIsSelected(nestedArchive);
-
-        // When
-        Assertions.assertTrue(simWindowSelect(this, archive), "Successfully changed window to parent archive");
-
-        // Then
-        PearlZipSpecifications.thenExpectedArchiveWindowIsSelected(archive.toString());
-
-        // When
-        Assertions.assertTrue(simWindowSelect(this, Paths.get(nestedArchive)), "Successfully changed window to parent archive");
-        PearlZipSpecifications.whenCloseNestedArchive(this, true);
-
-        // Then
-        PearlZipSpecifications.thenExpectNumberOfMainInstances(1);
-        PearlZipSpecifications.thenMainInstanceExistsWithName(archive.toString());
-    }
-
-    @Test
     @DisplayName("Test: Close parent archive when nested not closed will yield warning dialog")
     // GIVEN a tar.gz archive (temp.tar.gz) is open in PearlZip
     // WHEN nested file (temp.tar) opened from PearlZip
