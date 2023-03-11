@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -76,9 +78,9 @@ public class CommonSpecifications {
 
     public static void thenExpectDialogWithMatchingMessage(FxRobot robot, String regExMessage) {
         DialogPane dialogPane = retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> robot.lookup(".dialog-pane").queryAs(DialogPane.class));
+        Matcher matcher = Pattern.compile(regExMessage).matcher(dialogPane.getContentText());
 
-        Assertions.assertTrue(dialogPane.getContentText()
-                                        .matches(regExMessage),
+        Assertions.assertTrue(matcher.find(),
                               "The text in warning dialog was not matched as expected");
     }
 

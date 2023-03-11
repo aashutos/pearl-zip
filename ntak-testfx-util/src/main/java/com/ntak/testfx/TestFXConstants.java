@@ -3,6 +3,7 @@
  */
 package com.ntak.testfx;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 public class TestFXConstants {
@@ -18,7 +19,7 @@ public class TestFXConstants {
     }
 
     public static final Platform PLATFORM = getPlatform();
-    public static final Pattern SSV = Pattern.compile(Pattern.quote("/"));
+    public static final Pattern SSV = Pattern.compile(Pattern.quote(File.separator));
 
     private static Platform getPlatform() {
         String os = System.getProperty("os.name");

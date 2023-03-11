@@ -242,4 +242,19 @@ public class PearlZipSpecifications {
 
         return pathArchive;
     }
+
+    public static void whenFileCopiedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simCopyFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
+    public static void thenExpectNumberOfFileMatchingPattern(Path archive, int count, String regEx) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+        Assertions.assertEquals(count, info.getFiles().stream().filter(f -> f.getFileName().matches(regEx)).count());
+    }
 }

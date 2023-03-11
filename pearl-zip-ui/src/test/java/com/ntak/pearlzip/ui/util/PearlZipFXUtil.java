@@ -229,14 +229,15 @@ public class PearlZipFXUtil {
 
     public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
             String tableName, String root, Consumer<TableRow<FileInfo>> callback, String... identifiers) {
-        String archivePath = lookupArchiveInfo(archiveName).get().getArchivePath();
+        final FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
+        String archivePath = archiveInfo.getArchivePath();
         for (int i = 0; i < identifiers.length; i++) {
             Optional<TableRow<FileInfo>> selectedRow = FormUtil.selectTableViewEntry(robot,
                                                                                      FormUtil.lookupNode((s) -> s.getScene()
                                                                                                                  .lookup(tableName) != null && s.getTitle().contains(archivePath),
                                                                                                          tableName),
                                                                                      FileInfo::getFileName,
-                                                                                     String.format("%s%s", root,
+                                                                                     (archiveInfo.getDepth().get() == 0)?identifiers[i]:String.format("%s%s", root,
                                                                                                    identifiers[i]));
             Assertions.assertTrue(selectedRow.isPresent(), "No row was selected");
             if (identifiers.length == i+1) {
@@ -291,9 +292,9 @@ public class PearlZipFXUtil {
             }
 
             FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
-            String root = String.format("%s/", archiveInfo.getPrefix());
 
             for (String transition : transitions) {
+                String root = String.format("%s/", archiveInfo.getPrefix());
                 switch (transition) {
                     case "..":  simUp(robot);
                                 break;
