@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
@@ -92,6 +93,11 @@ public class PearlZipSpecifications {
     public static void whenCloseArchive(FxRobot robot) {
         robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
         robot.sleep(SHORT_PAUSE, MILLISECONDS);
+    }
+
+    public static void whenDeleteFromArchive(FxRobot robot, Path archive, Path file) {
+        PearlZipFXUtil.simTraversalArchive(robot, archive.toString(),"#fileContentsView", (r)->{}, SSV.split(file.toString()));
+        PearlZipFXUtil.simDelete(robot);
     }
 
     ////////////////
