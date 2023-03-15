@@ -6,6 +6,7 @@ package com.ntak.pearlzip.ui.util;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService;
 import com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService;
 import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -20,8 +21,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
+
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_REPO;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_ROOT;
 
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
@@ -51,6 +58,19 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
             Files.createFile(applicationProps);
         }
         System.getProperties().store(Files.newBufferedWriter(applicationProps), "PearlZip Automated Test");
+
+        if (Arrays.stream(this.getClass().getAnnotations())
+                  .anyMatch(a -> (Tag.class.isInstance(a)) && ((Tag)a).value().equals("UATExtensionStore"))) {
+            Path repoPath = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                    .get()
+                    .resolve("repository").resolve("default");
+            Path testRepoPath = Paths.get("src", "test", "resources", "default").toAbsolutePath();
+            Files.copy(repoPath, repoPath.getParent().resolve("default_backup"),
+                       StandardCopyOption.REPLACE_EXISTING);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails(testRepoPath);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().get("default"), repoPath);
+        }
     }
 
     @AfterAll
@@ -85,5 +105,18 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
             } catch(IOException e) {
             }
         });
+
+        if (Arrays.stream(this.getClass().getAnnotations())
+                  .anyMatch(a -> (Tag.class.isInstance(a)) && ((Tag)a).value().equals("UATExtensionStore"))) {
+            Path repoPath = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                    .get()
+                    .resolve("repository")
+                    .resolve("default");
+            Files.copy(repoPath.getParent()
+                               .resolve("default_backup"), repoPath, StandardCopyOption.REPLACE_EXISTING);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails(repoPath);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().get("default"), repoPath);
+        }
     }
 }

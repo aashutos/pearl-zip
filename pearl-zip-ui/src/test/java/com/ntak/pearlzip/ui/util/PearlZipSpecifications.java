@@ -69,6 +69,12 @@ public class PearlZipSpecifications {
         return archiveName;
     }
 
+    public static void givenExtensionStoreOpened(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(160, 10))
+             .clickOn(Point2D.ZERO.add(160, 60))
+             .sleep(LONG_PAUSE, MILLISECONDS);
+    }
+
     ////////////////
     ///// WHEN /////
     ////////////////

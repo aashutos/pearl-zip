@@ -12,6 +12,7 @@ import javafx.stage.WindowEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
@@ -82,6 +83,11 @@ public class CommonSpecifications {
 
         Assertions.assertTrue(matcher.find(),
                               "The text in warning dialog was not matched as expected");
+    }
+
+    public static <T> List<T> thenExtractEntriesFromTable(FxRobot robot, String tblName) {
+        TableView<T> tableView = robot.lookup(tblName).queryTableView();
+        return tableView.getItems();
     }
 
     public static <T> T retryRetrievalForDuration(long timeoutMillis, Supplier<T> supplier) {
