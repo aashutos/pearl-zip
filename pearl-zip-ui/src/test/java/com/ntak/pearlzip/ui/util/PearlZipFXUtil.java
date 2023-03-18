@@ -19,6 +19,7 @@ import com.ntak.pearlzip.ui.stages.jfx.JFXThemesStartupStage;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.NativeFileChooserUtil;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import de.jangassen.MenuToolkit;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -420,11 +421,11 @@ public class PearlZipFXUtil {
         }
         chooseFile(PLATFORM, robot, archive);
 
-        Map<Boolean,List<Node>> buttonLookup =
+        Map<Boolean,List<Node>> buttonLookup = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () ->
                 robot.lookup(".button-bar")
                      .queryAs(ButtonBar.class).getButtons()
                      .stream()
-                     .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window")));
+                     .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window"))));
         Button response = (Button)buttonLookup.get(inNewWindow).get(0);
         robot.clickOn(response);
         robot.sleep(LONG_PAUSE, MILLISECONDS);

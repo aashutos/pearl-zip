@@ -3,14 +3,11 @@
  */
 package com.ntak.pearlzip.ui.testfx;
 
-import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.UITestSuite;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
-import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import org.junit.jupiter.api.*;
 
@@ -365,10 +362,9 @@ public class CopyInArchiveTestFX extends AbstractPearlZipTestFX {
 
         // When
         // Select file to copy...
-        TableView<FileInfo> fileContentsView = lookup("#fileContentsView").queryAs(TableView.class);
         sleep(100, MILLISECONDS);
-        FormUtil.selectTableViewEntry(this, fileContentsView, FileInfo::getFileName,
-                                      "first-file").get();
+        PearlZipSpecifications.whenEntrySelectedInCurrentWindow(this, "first-file");
+
 
         // Delete archive...
         Files.deleteIfExists(archivePath);

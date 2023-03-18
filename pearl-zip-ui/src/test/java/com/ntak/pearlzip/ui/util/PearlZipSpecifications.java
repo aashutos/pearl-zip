@@ -269,4 +269,17 @@ public class PearlZipSpecifications {
         FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
         Assertions.assertEquals(count, info.getFiles().stream().filter(f -> f.getFileName().matches(regEx)).count());
     }
+
+    public static void whenFileExtracted(FxRobot robot, Path targetLocation) throws IOException {
+        if (Files.isRegularFile(targetLocation)) {
+            Files.deleteIfExists(targetLocation);
+        }
+        simExtractFile(robot, targetLocation);
+    }
+
+    public static void whenEntrySelectedInCurrentWindow(FxRobot robot, String entryName) {
+        TableView<FileInfo> fileContentsView = robot.lookup("#fileContentsView").queryAs(TableView.class);
+        FormUtil.selectTableViewEntry(robot, fileContentsView, FileInfo::getFileName,
+                                      entryName).get();
+    }
 }
