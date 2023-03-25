@@ -6,8 +6,11 @@ package com.ntak.testfx.specifications;
 import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.internal.TestFXUtil;
 import javafx.scene.AccessibleAttribute;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
@@ -15,15 +18,31 @@ import org.testfx.api.FxRobot;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.ntak.testfx.TestFXConstants.LONG_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CommonSpecifications {
+
+    public static void whenWindowResized(FxRobot robot, Window window, int xOffset, int yOffset) {
+        double x = (window.getX() + window.getWidth());
+        double y = (window.getY() + window.getHeight());
+
+        robot.moveTo(0,0)
+             .moveTo(x,y)
+             .sleep(LONG_PAUSE, TimeUnit.MILLISECONDS)
+             .press(MouseButton.PRIMARY)
+             .moveBy(xOffset,yOffset)
+             .sleep(LONG_PAUSE,TimeUnit.MILLISECONDS)
+             .release(MouseButton.PRIMARY)
+             .sleep(LONG_PAUSE,TimeUnit.MILLISECONDS);
+    }
 
     public static <T,R> void thenPropertyEqualsValue(T objectToTest, Function<T,R> extractor, R expectation) {
         R actual = extractor.apply(objectToTest);
@@ -88,6 +107,18 @@ public class CommonSpecifications {
     public static <T> List<T> thenExtractEntriesFromTable(FxRobot robot, String tblName) {
         TableView<T> tableView = robot.lookup(tblName).queryTableView();
         return tableView.getItems();
+    }
+
+    public static void thenWindowHasDimensions(Window window, double expWidth, double expHeight) {
+        Assertions.assertEquals(expWidth, window.getWidth(),
+                                String.format("Width did not have the expected value. Expected value: %f; Actual value: %f", expWidth, window.getWidth()));
+        Assertions.assertEquals(expHeight, window.getHeight(),
+                                String.format("Height did not have the expected value. Expected value: %f; Actual value: %f", expHeight, window.getHeight()));
+    }
+
+    public static void thenExpectNodeVisibility(FxRobot robot, String nodeQuery, boolean expectedVisibility) {
+        Assertions.assertEquals(expectedVisibility, robot.lookup(nodeQuery).queryAs(Node.class).isVisible(),
+                                String.format("Node %s is not visible", nodeQuery));
     }
 
     public static <T> T retryRetrievalForDuration(long timeoutMillis, Supplier<T> supplier) {
