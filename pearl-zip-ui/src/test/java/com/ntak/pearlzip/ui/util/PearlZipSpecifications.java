@@ -268,6 +268,16 @@ public class PearlZipSpecifications {
         simCopyFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
     }
 
+    public static void whenFileMovedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simMoveFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
     public static void thenExpectNumberOfFileMatchingPattern(Path archive, int count, String regEx) {
         FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
         Assertions.assertEquals(count, info.getFiles().stream().filter(f -> f.getFileName().matches(regEx)).count());

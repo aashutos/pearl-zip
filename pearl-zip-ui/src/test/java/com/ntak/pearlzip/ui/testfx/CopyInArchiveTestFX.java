@@ -196,8 +196,8 @@ public class CopyInArchiveTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Copy file in application within a Gzip archive is blocked (Single file compressor)")
     // GIVEN a new tar.gz archive has been created in PearlZip
-    // WHEN Copy attempted
-    // THEN Ensure copy button is disabled
+    // WHEN copy attempted
+    // THEN ensure copy button is disabled
     public void testFX_copyFileUpByMenuGzip_Blocked() {
         // Given
         Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "gz", "test.tar");
@@ -214,8 +214,8 @@ public class CopyInArchiveTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Copy file in application within a Bzip archive is blocked (Single file compressor)")
     // GIVEN a new tar.bz2 archive has been created in PearlZip
-    // WHEN Copy attempted
-    // THEN Ensure copy button is disabled
+    // WHEN copy attempted
+    // THEN ensure copy button is disabled
     public void testFX_copyFileUpByMenuBzip_Blocked() {
         // Given
         Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "bz2", "test.tar");
@@ -232,8 +232,8 @@ public class CopyInArchiveTestFX extends AbstractPearlZipTestFX {
     @Test
     @DisplayName("Test: Copy file in application within a xz archive is blocked (Single file compressor)")
     // GIVEN a new tar.xz archive has been created in PearlZip
-    // WHEN Copy attempted
-    // THEN Ensure copy button is disabled
+    // WHEN copy attempted
+    // THEN ensure copy button is disabled
     public void testFX_copyFileUpByMenuXz_Blocked() {
         // Given
         Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "xz", "test.tar");

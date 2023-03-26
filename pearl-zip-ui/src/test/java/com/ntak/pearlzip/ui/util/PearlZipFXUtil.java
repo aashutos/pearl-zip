@@ -355,10 +355,14 @@ public class PearlZipFXUtil {
             // Initiate copy
             if (useContextMenu) {
                 robot.clickOn(r, MouseButton.SECONDARY);
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             } else {
                 robot.clickOn("#btnMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMoveSelected");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             }
 
             FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
@@ -399,10 +403,14 @@ public class PearlZipFXUtil {
                         ((TableCell)fileContentsView.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
                                                                               fileContentsView.getSelectionModel().getSelectedIndex(), 0)).getTableRow();
                 robot.clickOn(row, MouseButton.SECONDARY);
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             } else {
                 robot.clickOn("#btnMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMoveSelected");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             }
 
             Assertions.assertTrue(fileContentsView.getItems()
