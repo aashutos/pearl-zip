@@ -150,7 +150,7 @@ public class MoveInArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Move file up by main dialog buttons in application within a zip archive successfully")
-    // GIVEN a new zip archive has been created in PearlZip
+    // GIVEN a copy of zip archive (test.zip) is open in PearlZip
     // WHEN folder added to archive (root)
     //     AND Move file (root/level1c/level1c1/level2b/MOVE_UP.txt) to (root/level1c/level1c1/MOVE_UP.txt) not using context menu
     // THEN ensure files (root/level1c/level1c1/MOVE_UP.txt) is included in the archive at depth (3) respectively
@@ -178,7 +178,7 @@ public class MoveInArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Move file up by context menu and button in application within a zip archive successfully")
-    // GIVEN a new zip archive has been created in PearlZip
+    // GIVEN a copy of zip archive (test.zip) is open in PearlZip
     // WHEN folder added to archive (root)
     //     AND Move file (root/level1c/level1c1/level2b/MOVE_UP.txt) to (root/MOVE_UP.txt) using context menu
     // THEN ensure files (root/MOVE_UP.txt) is included in the archive at depth (1) respectively
@@ -206,7 +206,7 @@ public class MoveInArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Move file up by context menu and button in application within a tar archive successfully")
-    // GIVEN a new tar archive has been created in PearlZip
+    // GIVEN a copy of tar archive (test.tar) is open in PearlZip
     // WHEN folder added to archive (root)
     //     AND Move file (root/level1c/level1c1/level2b/MOVE_UP.txt) to (root/MOVE_UP.txt) not using context menu
     // THEN ensure files (root/MOVE_UP.txt) is included in the archive at depth (1) respectively
@@ -234,7 +234,7 @@ public class MoveInArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Move file up by context menu and button in application within a jar archive successfully")
-    // GIVEN a new jar archive has been created in PearlZip
+    // GIVEN a copy of jar archive (test.jar) is open in PearlZip
     // WHEN folder added to archive (root)
     //     AND Move file (root/level1c/level1c1/level2b/MOVE_UP.txt) to (root/MOVE_UP.txt) not using context menu
     // THEN ensure files (root/MOVE_UP.txt) is included in the archive at depth (1) respectively

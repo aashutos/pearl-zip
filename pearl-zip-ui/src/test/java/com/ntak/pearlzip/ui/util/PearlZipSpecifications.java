@@ -42,6 +42,10 @@ public class PearlZipSpecifications {
     }
 
     public static Path givenCreateNewArchive(FxRobot robot, String extension, String name) {
+        return givenCreateNewArchive(robot, extension, name, false);
+    }
+
+    public static Path givenCreateNewArchive(FxRobot robot, String extension, String name, boolean useSystemMenu) {
         String fileName;
         if (!Objects.isNull(name)) {
             fileName = String.format("%s.%s", name, extension);
@@ -52,7 +56,14 @@ public class PearlZipSpecifications {
         try {
             final var archiveName = Files.createTempDirectory("pz")
                                          .resolve(fileName);
-            simNewArchive(robot, archiveName);
+
+            if (!useSystemMenu) {
+                simNewArchive(robot, archiveName);
+            } else {
+                robot.clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
+                PearlZipFXUtil.simNewArchive(robot, archiveName, false);
+            }
+
             Assertions.assertTrue(lookupArchiveInfo(fileName).isPresent(), "Archive is not open in PearlZip");
 
             return archiveName;
