@@ -9,7 +9,8 @@ import com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.ArchiveUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
-import javafx.scene.control.DialogPane;
+import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -20,12 +21,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class TestArchiveTestFX extends AbstractPearlZipTestFX {
 
@@ -66,239 +67,196 @@ public class TestArchiveTestFX extends AbstractPearlZipTestFX {
 
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////
     ////////// TEST ARCHIVE - SUCCESS //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////
 
     @Test
     @DisplayName("Test: test valid zip archive returns success alert")
+    // GIVEN zip archive (test.zip) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidZipArchive_Alert() {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.zip").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid jar archive returns success alert")
+    // GIVEN zip archive (test.jar) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidJarArchive_Alert() {
-        final String archiveFormat = "jar";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.jar").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid tar archive returns success alert")
+    // GIVEN zip archive (test.tar) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidTarArchive_Alert() {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.tar").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid empty tar archive returns success alert")
+    // GIVEN zip archive (empty-archive.tar) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidEmptyTarArchive_Alert() {
-        final String archiveFormat = "tar";
-        final String archiveName = String.format("empty-archive.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "empty-archive.tar").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid cab archive returns success alert")
+    // GIVEN zip archive (test.cab) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidCabArchive_Alert() {
-        final String archiveFormat = "cab";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.cab").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid iso archive returns success alert")
+    // GIVEN zip archive (test.iso) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidIsoArchive_Alert() {
-        final String archiveFormat = "iso";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.iso").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid rar archive returns success alert")
+    // GIVEN zip archive (test.rar) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidRarArchive_Alert() {
-        final String archiveFormat = "rar";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.rar").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid 7zip archive returns success alert")
+    // GIVEN zip archive (test.7z) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValid7zipArchive_Alert() {
-        final String archiveFormat = "7z";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.7z").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid Bzip archive returns success alert")
+    // GIVEN zip archive (test.tar.bz2) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidBzipArchive_Alert() {
-        final String archiveFormat = "tar.bz2";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.tar.bz2").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
-    @DisplayName("Test: test valid Gzip archive returns failure alert")
+    @DisplayName("Test: test valid Gzip archive returns success alert")
+    // GIVEN zip archive (test.tar.gz) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidGzipArchive_Alert() {
-        final String archiveFormat = "tar.gz";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.tar.gz").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     @Test
     @DisplayName("Test: test valid xz archive returns success alert")
+    // GIVEN zip archive (test.tar.xz) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsed archive .* successfully"
     public void testFX_testValidXZArchive_Alert() {
-        final String archiveFormat = "tar.xz";
-        final String archiveName = String.format("test.%s", archiveFormat);
-
-        final Path archive = Paths.get("src",  "test", "resources", archiveName).toAbsolutePath();
-
-        // Open archive...
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "test.tar.xz").toAbsolutePath();
         simOpenArchive(this, archive, true, false);
 
-        // Test archive
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText().matches("Parsed archive .* successfully"),
-                              "The archive was not valid");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsed archive .* successfully");
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -307,47 +265,48 @@ public class TestArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: test invalid xz archive returns failure alert")
+    // GIVEN zip archive (broken.tar.xz) is open in PearlZip
+    // WHEN test archive is initiated
+    // THEN a dialog appears with message like "Parsing of archive file .* failed. Check log output for more information."
     public void testFX_testInvalidXZArchive_Alert() throws IOException {
-        final String archiveFormat = "tar.xz";
-        final Path tempDir = Files.createTempDirectory("pz");
-        final String archiveName = String.format("broken.%s", archiveFormat);
-        final Path srcArchive = Paths.get("src",  "test", "resources", "test.tar.xz").toAbsolutePath();
-        final Path targetArchive = Paths.get(tempDir.toAbsolutePath().toString(), archiveName).toAbsolutePath();
-        Files.copy(srcArchive,targetArchive);
+        // Given
+        final Path archive = Paths.get("src",  "test", "resources", "broken.tar.xz").toAbsolutePath();
+        Path tmpArchive = PearlZipSpecifications.givenCreateNewArchive(this, "xz", "broken.tar");
+        simOpenArchive(this, tmpArchive, true, false);
+        Files.copy(archive, tmpArchive, StandardCopyOption.REPLACE_EXISTING);
 
-        // Open archive...
-        simOpenArchive(this, targetArchive, true, false);
-
-        // Test archive
-        Files.deleteIfExists(targetArchive);
-        Files.write(targetArchive, new byte[]{0,0,0,0}, StandardOpenOption.CREATE_NEW);
-        sleep(1000, MILLISECONDS);
+        // When
         simTestArchive(this);
 
-        // Interrogate alert dialog
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        Assertions.assertTrue(dialogPane.getContentText()
-                                        .matches("Parsing of archive file .* failed. Check log output for more information."),
-                              "The archive was valid unexpectedly");
-        sleep(50, MILLISECONDS);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Parsing of archive file .* failed. Check log output for more information.");
     }
+
 
     @Test
-    @DisplayName("Test: test invalid xz archive returns success alert")
+    @DisplayName("Test: test invalid zip archive returns success alert")
+    // GIVEN zip archive (test.zip) is open in PearlZip
+    // WHEN archive is deleted
+    //     AND test archive is initiated
+    // THEN a dialog appears with message like "Archive .* does not exist. PearlZip will now close the instance."
     public void testFX_testNonExistentArchive_Alert() throws IOException {
-        final String archiveFormat = "zip";
-        final String archiveName = String.format("test%s.%s", archiveFormat, archiveFormat);
+        // Given
+        final Path srcPath = Paths.get("src", "test", "resources", "test.zip")
+                                  .toAbsolutePath();
+        final Path archivePath = Paths.get(Files.createTempDirectory("pz").toAbsolutePath().toString(), "test.zip")
+                                      .toAbsolutePath();
+        Files.copy(srcPath, archivePath);
 
-        final Path archive = Paths.get(System.getProperty("user.home"), ".pz", "temp", archiveName);
-        simNewArchive(this, archive);
-        Files.deleteIfExists(archive);
+        simOpenArchive(this, archivePath, true, false);
+        sleep(50, TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(), "Expected archive was not present");
 
-        // Test archive
+        // When
+        Files.deleteIfExists(archivePath);
         simTestArchive(this);
 
-        DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-        Assertions.assertTrue(dialogPane.getContentText().matches("Archive .* does not exist. PearlZip will now close the instance."), "The text in warning dialog was not matched as expected");
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Archive .* does not exist. PearlZip will now close the instance.");
     }
-
 
 }
