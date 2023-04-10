@@ -15,8 +15,12 @@ import javafx.stage.WindowEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -42,6 +46,13 @@ public class CommonSpecifications {
              .sleep(LONG_PAUSE,TimeUnit.MILLISECONDS)
              .release(MouseButton.PRIMARY)
              .sleep(LONG_PAUSE,TimeUnit.MILLISECONDS);
+    }
+
+    public static <T> TableColumn<T,?> whenColumnExtractedFromTable(FxRobot robot, String tableName, String colName) {
+        TableView<T> fileContentsView = robot.lookup(tableName).queryAs(TableView.class);
+        Optional<TableColumn<T,?>> optColumn = fileContentsView.getColumns().stream().filter(c -> c.getText().equals(colName)).findFirst();
+        Assertions.assertTrue(optColumn.isPresent());
+        return optColumn.get();
     }
 
     public static <T,R> void thenPropertyEqualsValue(T objectToTest, Function<T,R> extractor, R expectation) {
@@ -119,6 +130,22 @@ public class CommonSpecifications {
     public static void thenExpectNodeVisibility(FxRobot robot, String nodeQuery, boolean expectedVisibility) {
         Assertions.assertEquals(expectedVisibility, robot.lookup(nodeQuery).queryAs(Node.class).isVisible(),
                                 String.format("Node %s is not visible", nodeQuery));
+    }
+
+    public static void thenExpectNumberLinesInFile(Path file, int expectedLineCount) throws IOException {
+        Assertions.assertEquals(expectedLineCount, Files.lines(file).count(), String.format("Expected count %d was not found in file %s", expectedLineCount, file));
+    }
+
+    public static void thenExpectLinePatternInFile(Path file, String regExMessage) throws IOException {
+        Assertions.assertTrue(Files.lines(file).anyMatch(l -> Pattern.compile(regExMessage).matcher(l).find()), String.format("Expected pattern '%s' did not match with a line in file %s", regExMessage, file));
+    }
+
+    public static void thenNotExpectLinePatternInFile(Path file, String regExMessage) throws IOException {
+        Assertions.assertTrue(Files.lines(file).noneMatch(l -> Pattern.compile(regExMessage).matcher(l).find()), String.format("Expected pattern '%s' unexpectedly matched with a line in file %s", regExMessage, file));
+    }
+
+    public static void thenExpectFileExists(Path file) {
+        Assertions.assertTrue(Files.exists(file), String.format("File %s does not exist", file));
     }
 
     public static <T> T retryRetrievalForDuration(long timeoutMillis, Supplier<T> supplier) {

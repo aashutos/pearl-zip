@@ -452,6 +452,18 @@ public class PearlZipFXUtil {
         }
     }
 
+    public static void simOpenArchiveBySysMenu(FxRobot robot, Path archivePath, boolean inNewWindow) {
+        robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+        simOpenArchive(robot, archivePath, false, inNewWindow);
+    }
+
+    public static void simSaveAsBySysMenu(FxRobot robot, Path archivePath) {
+        robot.clickOn(Point2D.ZERO.add(110, 10))
+             .clickOn(Point2D.ZERO.add(110, 140));
+        chooseFile(PLATFORM, robot, archivePath);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
+    }
+
     public static void simTestArchive(FxRobot robot) {
         robot.clickOn("#btnTest");
         robot.sleep(SHORT_PAUSE, MILLISECONDS);

@@ -89,6 +89,32 @@ public class PearlZipSpecifications {
              .sleep(LONG_PAUSE, MILLISECONDS);
     }
 
+    public static Path givenNewSingleFileCompressorArchive(FxRobot robot, String format, Path nestedFile, Path targetDir, boolean useMainMenu) {
+        // New single file compressor archive
+        if (useMainMenu) {
+            robot.clickOn(Point2D.ZERO.add(110, 10))
+                 .clickOn(Point2D.ZERO.add(110, 60));
+        } else {
+            robot.clickOn("#btnNew").clickOn("#mnuNewSingleFileCompressor");
+        }
+
+        // Set archive format
+        ComboBox<String> cmbArchiveFormat = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat"));
+        FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, format);
+
+        // Select file to archive
+        robot.clickOn("#btnSelectFile");
+        simOpenArchive(robot, nestedFile, false, false);
+        robot.clickOn("#btnCreate").sleep(SHORT_PAUSE, MILLISECONDS);
+        Path pathArchive = targetDir.toAbsolutePath().resolve(String.format("arbitrary-file.txt.%s", format));
+        chooseFile(PLATFORM, robot, pathArchive.getParent().toAbsolutePath());
+
+        // Check archive exists
+        Assertions.assertTrue(Files.exists(pathArchive), String.format("Path: %s does not exist", pathArchive));
+
+        return pathArchive;
+    }
+
     ////////////////
     ///// WHEN /////
     ////////////////
@@ -118,6 +144,39 @@ public class PearlZipSpecifications {
     public static void whenDeleteFromArchive(FxRobot robot, Path archive, Path file) {
         PearlZipFXUtil.simTraversalArchive(robot, archive.toString(),"#fileContentsView", (r)->{}, SSV.split(file.toString()));
         PearlZipFXUtil.simDelete(robot);
+    }
+
+    public static void whenFileCopiedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simCopyFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
+    public static void whenFileMovedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simMoveFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
+    public static void whenFileExtracted(FxRobot robot, Path targetLocation) throws IOException {
+        if (Files.isRegularFile(targetLocation)) {
+            Files.deleteIfExists(targetLocation);
+        }
+        simExtractFile(robot, targetLocation);
+    }
+
+    public static TableRow<FileInfo> whenEntrySelectedInCurrentWindow(FxRobot robot, String entryName) {
+        TableView<FileInfo> fileContentsView = robot.lookup("#fileContentsView").queryAs(TableView.class);
+        return FormUtil.selectTableViewEntry(robot, fileContentsView, FileInfo::getFileName,
+                                             entryName).get();
     }
 
     ////////////////
@@ -243,68 +302,9 @@ public class PearlZipSpecifications {
         }
     }
 
-    public static Path givenNewSingleFileCompressorArchive(FxRobot robot, String format, Path nestedFile, Path targetDir, boolean useMainMenu) {
-        // New single file compressor archive
-        if (useMainMenu) {
-            robot.clickOn(Point2D.ZERO.add(110, 10))
-                 .clickOn(Point2D.ZERO.add(110, 60));
-        } else {
-            robot.clickOn("#btnNew").clickOn("#mnuNewSingleFileCompressor");
-        }
-
-        // Set archive format
-        ComboBox<String> cmbArchiveFormat = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat"));
-        FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, format);
-
-        // Select file to archive
-        robot.clickOn("#btnSelectFile");
-        simOpenArchive(robot, nestedFile, false, false);
-        robot.clickOn("#btnCreate").sleep(SHORT_PAUSE, MILLISECONDS);
-        Path pathArchive = targetDir.toAbsolutePath().resolve(String.format("arbitrary-file.txt.%s", format));
-        chooseFile(PLATFORM, robot, pathArchive.getParent().toAbsolutePath());
-
-        // Check archive exists
-        Assertions.assertTrue(Files.exists(pathArchive), String.format("Path: %s does not exist", pathArchive));
-
-        return pathArchive;
-    }
-
-    public static void whenFileCopiedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
-        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
-
-        while (info.getDepth().get() > 0) {
-            simUp(robot);
-        }
-
-        simCopyFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
-    }
-
-    public static void whenFileMovedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
-        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
-
-        while (info.getDepth().get() > 0) {
-            simUp(robot);
-        }
-
-        simMoveFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
-    }
-
     public static void thenExpectNumberOfFileMatchingPattern(Path archive, int count, String regEx) {
         FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
         Assertions.assertEquals(count, info.getFiles().stream().filter(f -> f.getFileName().matches(regEx)).count());
-    }
-
-    public static void whenFileExtracted(FxRobot robot, Path targetLocation) throws IOException {
-        if (Files.isRegularFile(targetLocation)) {
-            Files.deleteIfExists(targetLocation);
-        }
-        simExtractFile(robot, targetLocation);
-    }
-
-    public static TableRow<FileInfo> whenEntrySelectedInCurrentWindow(FxRobot robot, String entryName) {
-        TableView<FileInfo> fileContentsView = robot.lookup("#fileContentsView").queryAs(TableView.class);
-        return FormUtil.selectTableViewEntry(robot, fileContentsView, FileInfo::getFileName,
-                                      entryName).get();
     }
 
     public static void thenFileInfoScreenContentsMatchesFileMetaData(FxRobot robot, FileInfo fileInfo) {
@@ -367,5 +367,15 @@ public class PearlZipSpecifications {
                                                              p.getValue(),
                                                              String.format("Property (%s,%s) did not match",
                                                                            p.getKey(), p.getValue())));
+    }
+
+    public static void thenExpectFilesInOrderInCurrentWindow(String archiveName, List<String> files) {
+        TableView<FileInfo> fileContentsView = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.getTitle()
+                                                                                                                                                                        .contains(archiveName.toString()),
+                                                                                                                                                                  "#fileContentsView"));
+        Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
+        for (int i = 0; i < fileContentsView.getItems().size(); i++) {
+            Assertions.assertEquals(files.get(i), fileContentsView.getItems().get(i).getFileName(), String.format("Expected files were not presented in the anticipated order. Expected: %s; Actual: %s", files.get(i), fileContentsView.getItems().get(i)));
+        }
     }
 }
