@@ -1035,13 +1035,6 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     }
 
     @Test
-    public void test() {
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30));
-        simSelectOptionsAdditionalTab( this, 7);
-    }
-
-    @Test
     @DisplayName("Test: Edit store repository successfully")
     public void testFX_EditStore_Success() throws IOException {
         // Copy test repository file...

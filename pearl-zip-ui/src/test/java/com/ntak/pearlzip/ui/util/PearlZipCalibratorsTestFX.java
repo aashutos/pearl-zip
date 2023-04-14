@@ -4,6 +4,7 @@
 package com.ntak.pearlzip.ui.util;
 
 import com.ntak.pearlzip.ui.UITestSuite;
+import javafx.geometry.Point2D;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -17,8 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simNewArchive;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simWindowSelect;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 
 @Tag("Calibration")
 public class PearlZipCalibratorsTestFX extends AbstractPearlZipTestFX {
@@ -65,5 +65,12 @@ public class PearlZipCalibratorsTestFX extends AbstractPearlZipTestFX {
             sleep(10000, TimeUnit.MILLISECONDS);
 
         }
+    }
+
+    @Test
+    public void calibrate_OptionAdditionalTabs() {
+        this.clickOn(Point2D.ZERO.add(160, 10))
+            .clickOn(Point2D.ZERO.add(160, 30));
+        simSelectOptionsAdditionalTab( this, 7);
     }
 }
