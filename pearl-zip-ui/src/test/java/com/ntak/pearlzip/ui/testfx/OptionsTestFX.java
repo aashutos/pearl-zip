@@ -7,18 +7,17 @@ import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
-import com.ntak.pearlzip.ui.model.ZipState;
-import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
-import com.ntak.pearlzip.ui.util.JFXUtil;
-import com.ntak.pearlzip.ui.util.OptionTab;
-import com.ntak.pearlzip.ui.util.StoreRepoDetails;
+import com.ntak.pearlzip.ui.util.*;
 import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.TypeUtil;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ComboBoxBase;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -30,23 +29,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_APPLICATION_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
 import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simSelectOptionsAdditionalTab;
 import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails;
+import static com.ntak.testfx.FormUtil.selectComboBoxEntry;
+import static com.ntak.testfx.FormUtil.selectTableViewEntry;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
-import static com.ntak.testfx.TestFXConstants.PLATFORM;
+import static com.ntak.testfx.TestFXConstants.MEDIUM_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class OptionsTestFX extends AbstractPearlZipTestFX {
@@ -97,6 +96,12 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         Files.createFile(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar"));
         Files.createFile(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar"));
 
+        Assertions.assertEquals(2,
+                                Files.list(STORE_TEMP)
+                                     .filter(Files::isRegularFile)
+                                     .count(),
+                                "Initial files have not been setup");
+
         // Test query result data...
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE
                 .<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE)
@@ -121,22 +126,27 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Clear cache with an open temporary archive. Temporary files except for open archive is removed")
+    // GIVEN ~/.pz/db-cache directory has been initialised
+    //      AND ensure directory (temporary) exists
+    //      AND ensure file (nestedFile.jar) exists
+    // WHEN Options dialog opened
+    //      AND node (#tabGeneral) clicked
+    //      AND node (#btnClearCache) clicked
+    //      AND click Yes on confirmation dialog
+    // THEN ensure file (temporary) exists
+    //     AND ensure file (a1234567890.zip) does not exist
+    //     AND ensure folder (temporary) does not exist
+    //     AND ensure file (nestedFile.jar) does not exist
+    //     AND ensure folder (db-cache) does not exist
+    //     AND ensure map (CK_QUERY_RESULT_CACHE) is empty
     public void testFX_ClearCacheTemporaryArchiveOpen_MatchExpectations() throws IOException {
-        // Verify initial state
+        // Given
         Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
                 .<Path>getAdditionalConfig(CK_STORE_ROOT)
                 .get();
         final var dbCacheDir = STORE_ROOT.toAbsolutePath()
-                                         .resolve("db-cache");
-        if (!Files.exists(dbCacheDir)) {
-             Files.createDirectories(dbCacheDir);
-        }
-
-        Assertions.assertEquals(2,
-                                Files.list(STORE_TEMP)
-                                     .filter(Files::isRegularFile)
-                                     .count(),
-                                "Initial files have not been setup");
+                                                .resolve("db-cache");
+        CommonSpecifications.givenDirectoryHasBeenCreated(dbCacheDir);
 
         Path fileToBeKept =
                 Files.list(STORE_TEMP)
@@ -149,50 +159,42 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                      .filter(f->f.getFileName().toString().endsWith("a1234567890.zip"))
                      .findFirst()
                      .get();
+        CommonSpecifications.thenExpectFileExists(fileToBeKept);
+        CommonSpecifications.thenExpectFileExists(fileToBeDeleted);
 
-        Assertions.assertTrue(Files.exists(tempOSDir), "Temp directory was not initialised");
-        Assertions.assertTrue(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
-                              "Temp file was not initialised");
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabGeneral");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnClearCache");
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.YES);
 
-        // Navigate to the clear cache option
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30))
-            .clickOn("#tabGeneral")
-            .clickOn("#btnClearCache");
-
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        clickOn(dialogPane.lookupButton(ButtonType.YES));
-        sleep(50, MILLISECONDS);
-
-        // Check the outcomes are as expected
-        Assertions.assertTrue(Files.exists(fileToBeKept), String.format("File %s was deleted unexpectedly", fileToBeKept));
-        Assertions.assertFalse(Files.exists(fileToBeDeleted), String.format("File %s was kept unexpectedly", fileToBeDeleted));
-        Assertions.assertFalse(Files.exists(tempOSDir), "Temporary directory in OS ephemeral store was not deleted");
-        Assertions.assertFalse(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
-                               "temp file in OS ephemeral storage was not deleted");
-
-        // DB definitions do not exist and cache is cleared
-        Assertions.assertFalse(Files.exists(dbCacheDir),
-                               "DB cache not deleted");
+        // Then
+        CommonSpecifications.thenExpectFileExists(fileToBeKept);
+        CommonSpecifications.thenNotExpectFileExists(fileToBeDeleted);
+        CommonSpecifications.thenNotExpectFileExists(tempOSDir);
+        CommonSpecifications.thenNotExpectFileExists(tempOSDir.resolve("nestedFile.tar"));
+        CommonSpecifications.thenNotExpectFileExists(dbCacheDir);
         Assertions.assertEquals(0, InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,QueryResult>>getAdditionalConfig(CK_QUERY_RESULT_CACHE).get().size(), "In-memory cache was not emptied");
     }
 
     @Test
     @DisplayName("Test: Clear cache with a saved archive. All temp files are removed")
+    // GIVEN zip archive (src/test/resources/test.zip) is open in PearlZip
+    //      AND ensure no files from directory (~/.pz/temp) is open in PearlZip
+    //      AND ensure no files from directory (OS temporary) is open in PearlZip
+    //      AND ensure file (nestedFile.jar) exists
+    //      AND ensure file (anotherNestedFile.tar) exists
+    // WHEN Options dialog opened
+    //      AND node (#tabGeneral) clicked
+    //      AND node (#btnClearCache) clicked
+    //      AND click Yes on confirmation dialog
+    // THEN ensure folder (OS temporary) does not exist
+    //     AND ensure file (nestedFile.jar) does not exist
+    //     AND ensure folder (temporary) does not exist
+    //     AND ensure file (anotherNestedFile.jar) does not exist
+    //     AND ensure file (test.zip) exists
     public void testFX_ClearCacheSavedArchiveOpen_MatchExpectations() throws IOException {
-        // Verify initial state
-        final List<Path> filesToBeDeleted = new LinkedList<>();
-        filesToBeDeleted.addAll(Files.list(STORE_TEMP).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
-        filesToBeDeleted.addAll(Files.list(tempPZDir).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
-        Assertions.assertEquals(2, filesToBeDeleted.size(), "Initial files have not been setup");
-
-        Assertions.assertTrue(Files.exists(tempOSDir), "Temp directory was not initialised");
-        Assertions.assertTrue(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
-                              "Temp file was not initialised");
-        Assertions.assertTrue(Files.exists(tempPZDir), "Temp directory (.pz) was not initialised");
-        Assertions.assertTrue(Files.exists(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar")),
-                              "Temp file (.pz) was not initialised");
-
+        // Given
         // Open existing archive in current window
         clickOn(Point2D.ZERO.add(110, 10))
                 .clickOn(Point2D.ZERO.add(110, 80));
@@ -200,880 +202,547 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
                                       .toAbsolutePath();
         // Via Sys menu
         simOpenArchive(this, archivePath, false, false);
-        sleep(500, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(lookupArchiveInfo(archivePath.getFileName().toString()).isPresent(),"Expected archive " +
-                "was not present");
 
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        clickOn(dialogPane.lookupButton(ButtonType.NO));
+        // Check initial state...
+        final List<Path> filesToBeDeleted = new LinkedList<>();
+        filesToBeDeleted.addAll(Files.list(STORE_TEMP).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
+        filesToBeDeleted.addAll(Files.list(tempPZDir).filter(Files::isRegularFile).filter(f->JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(f.toAbsolutePath().toString()))).collect(Collectors.toList()));
+
+        for (Path file : filesToBeDeleted) {
+            PearlZipSpecifications.thenExpectArchiveNotOpen(file);
+        }
+
+        CommonSpecifications.thenExpectFileExists(tempOSDir.resolve("nestedFile.tar"));
+        CommonSpecifications.thenExpectFileExists(tempPZDir.resolve("anotherNestedFile.tar"));
+
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabGeneral");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnClearCache");
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.YES);
         sleep(250, MILLISECONDS);
 
-        // Navigate to the clear cache option
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30))
-            .clickOn("#tabGeneral")
-            .clickOn("#btnClearCache");
-
-        dialogPane = lookup(".dialog-pane").query();
-        clickOn(dialogPane.lookupButton(ButtonType.YES));
-        sleep(250, MILLISECONDS);
-
-        // Check the outcomes are as expected
-        Assertions.assertTrue(filesToBeDeleted.stream().noneMatch(Files::exists), "Some temp files were not deleted");
-        Assertions.assertFalse(Files.exists(tempOSDir), "Temporary directory in OS ephemeral store was not deleted");
-        Assertions.assertFalse(Files.exists(Paths.get(tempOSDir.toAbsolutePath().toString(), "nestedFile.tar")),
-                               "temp file in pz ephemeral storage was not deleted");
-        Assertions.assertFalse(Files.exists(tempPZDir), "Temporary directory in OS ephemeral store was not " +
-                "deleted");
-        Assertions.assertFalse(Files.exists(Paths.get(tempPZDir.toAbsolutePath().toString(), "anotherNestedFile.tar")),
-                               "temp file in pz ephemeral storage was not deleted");
+        // Then
+        CommonSpecifications.thenNotExpectFileExists(tempOSDir.resolve("nestedFile.tar"));
+        CommonSpecifications.thenNotExpectFileExists(tempPZDir.resolve("anotherNestedFile.tar"));
+        CommonSpecifications.thenNotExpectFileExists(tempPZDir);
+        CommonSpecifications.thenExpectFileExists(archivePath);
 
     }
 
     @Test
     @DisplayName("Test: Refresh keystore recreates keystore and truststore in .store directory")
+    // GIVEN file (keystore.jks) exists with attribute (creationTime)
+    //      AND file (truststore.jks) exists with attribute (creationTime)
+    // WHEN Options dialog opened
+    //      AND node (#tabGeneral) clicked
+    //      AND node (#btnRefreshKeystore) clicked
+    //      AND click Yes on confirmation dialog
+    // THEN ensure timestamp for file (keystore.jks) has changed to a newer value
+    //      AND ensure timestamp for file (truststore.jks) has changed to a newer value
     public void testFX_RefreshKeystore_MatchExpectations() throws IOException {
-        // Obtain initial state
-        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                .<Path>getAdditionalConfig(CK_STORE_ROOT)
-                .get();
+        // Given
         Path keystorePath = STORE_ROOT.resolve(Path.of(".store","keystore.jks"));
         Path truststorePath = STORE_ROOT.resolve(Path.of(".store","truststore.jks"));
-        long ksTime = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
-        long tsTime = ((FileTime) Files.getAttribute(truststorePath, "creationTime")).toMillis();
+        long ksTime = CommonSpecifications.givenFileHasAttribute(keystorePath, "creationTime", FileTime.class).toMillis();
+        long tsTime = CommonSpecifications.givenFileHasAttribute(truststorePath, "creationTime", FileTime.class).toMillis();
 
-        // Navigate to the clear cache option
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30))
-            .clickOn("#tabGeneral")
-            .clickOn("#btnRefreshKeystore")
-            .sleep(200, MILLISECONDS);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#btnRefreshKeystore");
+        sleep(MEDIUM_PAUSE, MILLISECONDS);
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.YES);
 
-        DialogPane dialogPane = lookup(".dialog-pane").query();
-        clickOn(dialogPane.lookupButton(ButtonType.YES));
-        sleep(250, MILLISECONDS);
-
-        // Check the outcomes are as expected
-        long ksTimeAfter = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
-        long tsTimeAfter = ((FileTime) Files.getAttribute(keystorePath, "creationTime")).toMillis();
+        // Then
+        long ksTimeAfter = CommonSpecifications.givenFileHasAttribute(keystorePath, "creationTime", FileTime.class).toMillis();
+        long tsTimeAfter = CommonSpecifications.givenFileHasAttribute(truststorePath, "creationTime", FileTime.class).toMillis();
 
         Assertions.assertTrue(ksTimeAfter > ksTime, "Keystore was not refreshed");
         Assertions.assertTrue(tsTimeAfter > tsTime, "Truststore was not refreshed");
+
     }
 
     @Test
     @DisplayName("Test: Check reserved keys in Bootstrap properties are as expected")
+    // GIVEN properties file (/application.properties) read into system properties from classpath
+    // WHEN Options dialog opened
+    //      AND node (#tabBootstrap) clicked
+    // THEN expect all values displayed on table (#tblBootstrap) matches Map extracted (application.properties)
     public void testFX_ReservedKeysBootstrapProperties_MatchExpectations() throws IOException {
-        // Initialise properties
-        Properties bootstrap = new Properties();
-        bootstrap.load(OptionsTestFX.class.getResourceAsStream("/application.properties"));
-        bootstrap.entrySet().stream().forEach(e->System.setProperty(e.getKey().toString(), e.getValue().toString()));
+        // Given
+        Properties props = CommonSpecifications.givenClasspathFileReadIntoSystemProperties("/application.properties");
 
-        // Navigate to the Bootstrap properties tab
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30))
-            .clickOn("#tabBootstrap");
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabBootstrap");
 
-        // Retrieve properties TableView
-        TableView<Pair<String,String>> propsGrid = lookup("#tblBootstrap").queryAs(TableView.class);
-        List<Pair<String,String>> props = propsGrid.getItems();
-
-        // Validate keys have expected values
-        Map<String,String> actuals = new HashMap<>();
-        props.stream().forEach(p->actuals.put(p.getKey(), p.getValue()));
-
-        Files.lines(Paths.get(System.getProperty("user.home"), ".pz", "rk"))
-             .forEach(k->Assertions.assertTrue(actuals.containsKey(k), String.format("Key %s does not exist in actuals",
-                                                                                     k)));
-
-        Files.lines(Paths.get(OptionsTestFX.class.getResource("/application.properties").getPath()));
+        // Then
+        CommonSpecifications.thenTableViewHasValuesMatchingExpectation(this, "#tblBootstrap", (Pair<String,String> p) -> props.getOrDefault(p.getKey(), p.getValue()).equals(p.getValue()));
     }
 
     @Test
     @DisplayName("Test: Check the expected providers have been loaded")
+    // GIVEN properties file (application.properties) read into properties object from classpath
+    // WHEN Options dialog opened
+    //      AND node (#tabProviders) clicked
+    // THEN expect table (#tblProviders) has value of type (ReadService & com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService)
+    //      AND expect table (#tblProviders) has value of type (ReadService & com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService)
+    //      AND expect table (#tblProviders) has value of type (WriteService & com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService)
     public void testFX_Providers_MatchExpectations() throws IOException {
-        // Initialise properties
-        Properties bootstrap = new Properties();
-        bootstrap.load(OptionsTestFX.class.getResourceAsStream("/application.properties"));
-        bootstrap.entrySet().stream().forEach(e->System.setProperty(e.getKey().toString(), e.getValue().toString()));
+        // Given
+        Properties props = CommonSpecifications.givenClasspathFileReadIntoSystemProperties("/application.properties");
 
-        // Navigate to the Providers properties tab
-        this.clickOn(Point2D.ZERO.add(160, 10))
-            .clickOn(Point2D.ZERO.add(160, 30))
-            .clickOn("#tabProviders");
-        sleep(50, MILLISECONDS);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabProviders");
+        sleep(MEDIUM_PAUSE, MILLISECONDS);
 
-        // Retrieve properties TableView
-        TableView<Pair<Boolean,ArchiveService>> propsGrid = lookup("#tblProviders").queryAs(TableView.class);
-        List<Pair<Boolean,ArchiveService>> props = propsGrid.getItems();
-
-        // Validate expected services
-        Assertions.assertTrue(props.stream()
-                                   .map(Pair::getValue)
-                                   .anyMatch(s -> s instanceof ArchiveReadService && s.getClass()
-                                                                                      .getCanonicalName()
-                                                                                      .equals("com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService")),
-                              "No 7-Zip Read Service");
-        Assertions.assertTrue(props.stream()
-                                   .map(Pair::getValue)
-                                   .anyMatch(s -> s instanceof ArchiveReadService && s.getClass()
-                                                                                      .getCanonicalName()
-                                                                                      .equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService")),
-                              "No Apache Read Service");
-        Assertions.assertTrue(props.stream()
-                                   .map(Pair::getValue)
-                                   .anyMatch(s -> s instanceof ArchiveWriteService && s.getClass()
-                                                                                       .getCanonicalName()
-                                                                                       .equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService")),
-                              "No Write Service");
+        // Then
+        CommonSpecifications.thenTableViewHasValuesMatchingExpectation(this, "#tblProviders", (Pair<Boolean,ArchiveService> p) -> p.getValue() instanceof ArchiveReadService && p.getValue().getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService"));
+        CommonSpecifications.thenTableViewHasValuesMatchingExpectation(this, "#tblProviders", (Pair<Boolean,ArchiveService> p) -> p.getValue() instanceof ArchiveReadService && p.getValue().getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveReadService"));
+        CommonSpecifications.thenTableViewHasValuesMatchingExpectation(this, "#tblProviders", (Pair<Boolean,ArchiveService> p) -> p.getValue() instanceof ArchiveWriteService && p.getValue().getClass().getCanonicalName().equals("com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService"));
     }
 
     @Test
     @DisplayName("Test: Load PZAX package successfully")
+    // GIVEN system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService) set to (99999)
+    //      AND system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService) set to (0)
+    //      AND system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService) set to (99999)
+    //      AND system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService) set to (0)
+    //      AND system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND delete folder (~/.pz/manifests)
+    //      AND create folder (~/.pz/manifests)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/zip4j-plugin-test.pzax) opened
+    //      AND License accepted
+    //      AND License accepted
+    // THEN a dialog appears with message like "^The library .* has been successfully installed.$"
+    //      AND write archive provider is set to (com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService) for zip files
+    //      AND read archive provider is set to (com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService) for zip files
     public void testFX_LoadPZAXPackage_Success() throws IOException {
-        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub" +
-                                   ".Zip4jArchiveWriteService", "99999");
-        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.acc.pub" +
-                                   ".CommonsCompressArchiveWriteService", "0");
-        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub" +
-                                   ".Zip4jArchiveReadService", "99999");
-        System.setProperty("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService", "0");
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService","99999", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.acc.pub.CommonsCompressArchiveWriteService","0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService","99999", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService","0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-        // Backup providers & manifests directory
-        // providers...
-        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers");
-        Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"providers-backup");
-        Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(providersDir);
+        ArchiveUtil.deleteDirectory(STORE_ROOT.resolve("manifests"), (f) -> false);
+        Files.createDirectories(STORE_ROOT.resolve("manifests"));
 
-        // manifests...
-        Path manifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"manifests");
-        Path backupManifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"manifests-backup");
-        Files.move(manifestsDir, backupManifestsDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(manifestsDir);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile( this, Paths.get("src", "test", "resources", "zip4j-plugin-test.pzax").toAbsolutePath());
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
 
-        try {
-            Path pzaxPackage = Paths.get("src", "test", "resources", "zip4j-plugin-test.pzax")
-                                    .toAbsolutePath();
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "The library .* has been successfully installed.");
 
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabPluginLoader")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#paneDropArea");
+        PearlZipSpecifications.thenExpectActiveWriteService("com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService");
+        PearlZipSpecifications.thenExpectActiveReadService("com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService");
 
-            chooseFile(PLATFORM, this, pzaxPackage);
-
-            this.drag("#webLicense", MouseButton.PRIMARY) // First license agreement
-                .moveBy(0, 400)
-                .sleep(2500, MILLISECONDS)
-                .drop()
-                .clickOn("#btnAccept")
-                .sleep(150, MILLISECONDS)
-                .drag("#webLicense", MouseButton.PRIMARY) // Second license agreement
-                .moveBy(0, 400)
-                .sleep(2500, MILLISECONDS)
-                .drop()
-                .clickOn("#btnAccept")
-                .sleep(300, MILLISECONDS);
-
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            Assertions.assertEquals(dialogPane.getContentText(),
-                                    String.format("The library %s has been successfully installed.",
-                                                  pzaxPackage.toAbsolutePath()));
-
-            // Check loaded providers
-            final String zip4jWriteCanonicalName = "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService";
-            Assertions.assertTrue(
-                    ZipState.getWriteProviders()
-                            .stream()
-                            .map(ArchiveWriteService::getClass)
-                            .anyMatch(k -> k.getCanonicalName()
-                                            .equals(zip4jWriteCanonicalName)),
-                    "New library write service was not detected successfully");
-
-            final String zip4jReadCanonicalName = "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService";
-            Assertions.assertTrue(
-                    ZipState.getReadProviders()
-                            .stream()
-                            .map(ArchiveReadService::getClass)
-                            .anyMatch(k -> k.getCanonicalName()
-                                            .equals(zip4jReadCanonicalName)),
-                    "New library read service was not detected successfully");
-
-            Assertions.assertEquals(zip4jWriteCanonicalName,
-                                    ZipState.getWriteArchiveServiceForFile("arbitrary.zip")
-                                            .get()
-                                            .getClass()
-                                            .getCanonicalName(),
-                                    "Write service priority was not as expected");
-            Assertions.assertEquals(zip4jReadCanonicalName,
-                                    ZipState.getReadArchiveServiceForFile("arbitrary.zip")
-                                            .get()
-                                            .getClass()
-                                            .getCanonicalName(),
-                                    "Read service priority was not as expected");
-
-            // Delete installed libraries
-            Files.list(providersDir)
-                 .filter(f -> f.getFileName()
-                               .toString()
-                               .matches("pearl-zip-archive-zip4j-.*.jar") || f.getFileName()
-                                                                              .toString()
-                                                                              .matches("zip4j-.*.jar"))
-                 .collect(Collectors.toList())
-                 .forEach(p -> {
-                     try {
-                         Files.deleteIfExists(p);
-                     } catch(IOException e) {
-                     }
-                 });
-
-            // Restore original libraries
-            Files.list(providersDir)
-                 .filter(f -> f.getFileName()
-                               .toString()
-                               .matches("pearl-zip-archive-zip4j-.*.jar.backup") || f.getFileName()
-                                                                                     .toString()
-                                                                                     .matches("zip4j-.*.jar.backup"))
-                 .collect(Collectors.toList())
-                 .forEach(p -> {
-                     try {
-                         Files.move(p,
-                                    Paths.get(p.toAbsolutePath()
-                                               .toString()
-                                               .replace(".backup", "")),
-                                    StandardCopyOption.REPLACE_EXISTING);
-                     } catch(IOException e) {
-                     }
-                 });
-        } finally {
-            clearDirectory(providersDir);
-            Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
-            clearDirectory(manifestsDir);
-            Files.move(backupManifestsDir, manifestsDir, StandardCopyOption.REPLACE_EXISTING);
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // Reset
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.0.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.0.0", WORKING_APPLICATION_SETTINGS);
     }
 
     @Test
     @DisplayName("Test: Check application.properties got updated by a change to the default archive format in the Options dialog")
-    public void testFX_ChangeDefaultArchiveFormat_Success() throws IOException {
-        //  Back up existing application.properties file
-        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "application.properties");
-        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                 .toString(), "application.properties.backup");
-        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
+    // GIVEN Options dialog opened
+    // WHEN combo box "#comboDefaultFormat" has value set as "tar"
+    //     AND node (#btnOk) clicked
+    //     AND node (#btnNew) clicked
+    //     AND node (#mnuNewArchive) clicked
+    // THEN expect selected value in combo box (#comboArchiveFormat) is (tar)
+    public void testFX_ChangeDefaultArchiveFormat_Success() {
+        // Given
+        PearlZipSpecifications.whenOptionDialogOpened(this);
 
-        try {
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-            WORKING_APPLICATION_SETTINGS.setProperty("configuration.ntak.pearl-zip.default-format","zip");
-            ComboBox<String> combo = lookup("#comboDefaultFormat").queryAs(ComboBox.class);
-            FormUtil.selectComboBoxEntry(this, combo, "tar");
+        // When
+        selectComboBoxEntry(this, lookup("#comboDefaultFormat").queryAs(ComboBox.class), "tar");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnOk");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnNew");
+        CommonSpecifications.whenNodeClickedByName(this, "#mnuNewArchive");
 
-            this.clickOn("#btnOk")
-                .sleep(250, MILLISECONDS);
-
-            Assertions.assertTrue(Files.readAllLines(appPropsPath)
-                                       .stream()
-                                       .anyMatch(l -> l.equals("configuration.ntak.pearl-zip.default-format=tar")),
-                                  "Properties file was not updated as expected"
-            );
-
-            this.clickOn("#btnNew")
-                .sleep(150, MILLISECONDS)
-                .clickOn("#mnuNewArchive")
-                .sleep(150, MILLISECONDS);
-
-            Assertions.assertEquals("tar",
-                                    this.lookup("#comboArchiveFormat")
-                                        .queryAs(ComboBox.class)
-                                        .getSelectionModel()
-                                        .getSelectedItem(),
-                                    "Tar archive was not selected by default on the new page");
-
-        } finally {
-            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    @Test
-    @DisplayName("Test: Change language pack successfully")
-    public void testFX_ChangeLanguagePack_Success() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-
-        //  Back up existing application.properties file
-        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "application.properties");
-        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                 .toString(), "application.properties.backup");
-        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
-
-        try {
-            // Introduce new language pack (reload plugins if necessary)
-            Path langPack = Paths.get("src/test/resources", "pearl-zip-lang-pack-fr-CA-0.0.4.0.pzax")
-                                 .toAbsolutePath();
-
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabPluginLoader")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#paneDropArea");
-
-            chooseFile(PLATFORM, this, langPack);
-
-            //ScrollBar scroll = (ScrollBar)webView.lookup(".scroll-bar:vertical");
-            this.drag("#webLicense", MouseButton.PRIMARY) // First license agreement
-                .moveBy(0, 400)
-                .sleep(2500, MILLISECONDS)
-                .drop()
-                .clickOn("#btnAccept")
-                .sleep(150, MILLISECONDS);
-
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            Assertions.assertEquals(dialogPane.getContentText(),
-                                    String.format("The library %s has been successfully installed.",
-                                                  langPack.toAbsolutePath()));
-
-            this.clickOn(dialogPane.lookupButton(ButtonType.OK))
-                .sleep(150, MILLISECONDS);
-
-            // Change language pack via options
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
-            simSelectOptionsAdditionalTab(this, OptionTab.LANGUAGES.getIndex());
-
-            final TableView<Pair<String,Locale>> tbl = this.lookup("#tblLang")
-                                            .queryAs(TableView.class);
-            Locale.setDefault(genLocale(new Properties()));
-            tbl.setItems(FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
-            tbl.refresh();
-
-            this.sleep(1000, MILLISECONDS);
-            FormUtil.selectTableViewEntry(this, tbl, Pair::getKey, "French (Canada)");
-            this.sleep(200, MILLISECONDS);
-            this.clickOn("#btnSetLang")
-                .sleep(200, MILLISECONDS)
-                .clickOn(lookup(".dialog-pane").queryAs(DialogPane.class).lookupButton(ButtonType.OK))
-                .sleep(200, MILLISECONDS)
-                .clickOn("#btnApply")
-                .sleep(200, MILLISECONDS)
-            ;
-
-            // Check properties files has been updated with the new language
-            Properties props = new Properties();
-            props.load(Files.newBufferedReader(appPropsPath));
-            Assertions.assertEquals("fr", props.get("configuration.ntak.pearl-zip.locale.lang"), "Language property invalid");
-            Assertions.assertEquals("CA", props.get("configuration.ntak.pearl-zip.locale.country"), "Country property invalid");
-        } finally {
-            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
-            Files.deleteIfExists(Paths.get(STORE_ROOT.toAbsolutePath()
-                                           .toString(), "manifests", "pearl-zip-lang-pack-fr-CA-0.0.4.0.pzax.MF"));
-            Files.deleteIfExists(Paths.get(STORE_ROOT.toAbsolutePath()
-                                                     .toString(), "providers", "pearl-zip-lang-pack-fr-CA-0.0.4.0.jar"));
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
-    }
-
-    @Test
-    @DisplayName("Test: Install theme, switch theme and uninstall successfully")
-    public void testFX_InstallTheme_Success() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-
-        //  Back up existing application.properties file
-        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "application.properties");
-        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                 .toString(), "application.properties.backup");
-        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
-
-        try {
-            // Introduce new theme (reload plugins if necessary)
-            Path themePack = Paths.get("src/test/resources", "modena-orange.pzax")
-                                 .toAbsolutePath();
-
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabPluginLoader")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#paneDropArea");
-
-            chooseFile(PLATFORM, this, themePack);
-
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            Assertions.assertEquals(dialogPane.getContentText(),
-                                    String.format("The library %s has been successfully installed.",
-                                                  themePack.toAbsolutePath()));
-
-            this.clickOn(dialogPane.lookupButton(ButtonType.OK))
-                .sleep(150, MILLISECONDS);
-
-            // Check available themes via options
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
-            simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
-
-            Assertions.assertTrue(this.lookup("#tblTheme").queryAs(TableView.class).getItems().contains("modena-orange"));
-
-            // Update theme
-            FormUtil.selectTableViewEntry(this, this.lookup("#tblTheme").queryAs(TableView.class), (r) -> r,
-                                          "modena-orange");
-
-            this.clickOn("#btnSetTheme")
-                .sleep(200, MILLISECONDS);
-
-            Assertions.assertEquals("modena-orange", WORKING_APPLICATION_SETTINGS.getProperty(CNS_THEME_NAME),
-                                    "Theme not updated in properties");
-
-            // Uninstall theme
-            this.clickOn("#tabProviders")
-                .clickOn("#btnPurgePlugin")
-                .sleep(200, MILLISECONDS);
-
-            FormUtil.selectTableViewEntry(this, this.lookup("#tblManifests").queryAs(TableView.class), r -> r,
-                                          "modena-orange");
-
-            this.clickOn("#btnPurgeSelected")
-                .sleep(200, MILLISECONDS)
-                .clickOn(this.lookup(".dialog-pane")
-                             .queryAs(DialogPane.class)
-                             .lookupButton(ButtonType.YES)
-                )
-                .sleep(300, MILLISECONDS)
-                .clickOn(this.lookup(".dialog-pane")
-                             .queryAs(DialogPane.class)
-                             .lookupButton(ButtonType.OK)
-                )
-                .sleep(300, MILLISECONDS)
-                .clickOn(this.lookup("#tblManifests")
-                             .queryAs(TableView.class)
-                             .getParent()
-                             .lookup("#btnCancel"))
-                .sleep(200, MILLISECONDS)
-                .clickOn("#btnOk")
-                .sleep(300, MILLISECONDS);
-
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn(Point2D.ZERO.add(925, 200))
-                .clickOn(Point2D.ZERO.add(925, 320))
-                .sleep(300,MILLISECONDS);
-
-            Assertions.assertFalse(this.lookup("#tblTheme")
-                                       .queryAs(TableView.class)
-                                       .getItems()
-                                       .contains("modena-orange"),
-                                   "Theme still present unexpectedly");
-            Assertions.assertFalse(Files.exists(Paths.get(STORE_ROOT.toAbsolutePath().toString(),
-                                                          "themes",
-                                                          "modena-orange")), "Theme not removed");
-            Assertions.assertFalse(Files.exists(Paths.get(STORE_ROOT.toAbsolutePath().toString(),
-                                                          "manifests",
-                                                          "modena-orange.pzax")
-                                   ),
-                                   "Theme manifest not removed");
-        } finally {
-            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // Then
+        CommonSpecifications.thenPropertyEqualsValue(lookup("#comboArchiveFormat").queryAs(ComboBox.class), ComboBoxBase::getValue, "tar");
     }
 
     @Test
     @DisplayName("Test: Enable Safe Mode option is updated in properties for next boot up")
-    public void testFX_EnableSafeMode_MatchExpectations() throws IOException {
-        //  Back up existing application.properties file
-        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "application.properties");
-        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                 .toString(), "application.properties.backup");
-        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
+    // GIVEN system property (configuration.ntak.pearl-zip.safe-mode) set to (false)
+    // WHEN Options dialog opened
+    //     AND node (#tabGeneral) clicked
+    //     AND node (#checkSafeMode) clicked on
+    //     AND node (#btnApply) clicked on
+    // THEN expect system property (configuration.ntak.pearl-zip.safe-mode) is set to (true)
+    public void testFX_EnableSafeMode_MatchExpectations() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.safe-mode","false", System.getProperties());
 
-        try {
-            // Navigate and check the safe mode option
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabGeneral");
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabGeneral");
+        CommonSpecifications.whenNodeClickedByName(this, "#checkSafeMode");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnApply");
 
-            CheckBox checkSafeMode = this.lookup("#checkSafeMode")
-                                         .queryAs(CheckBox.class);
-            if (!checkSafeMode.isSelected()) {
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-            } else {
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-                Assertions.assertEquals("false",
-                                        WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE),
-                                        "Safe mode was not reset in properties");
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-            }
-
-            Assertions.assertEquals("true",
-                                    WORKING_APPLICATION_SETTINGS.getProperty(CNS_NTAK_PEARL_ZIP_SAFE_MODE),
-                                    "Safe mode was not enabled in properties");
-        } finally {
-            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
-        }
+        // Then
+        CommonSpecifications.thenPropertyEqualsValue(System.getProperties(), (p) -> p.getProperty("configuration.ntak.pearl-zip.safe-mode"), "true");
     }
 
     @Test
     @DisplayName("Test: Enable Show Notification option is updated in properties for next boot up")
-    public void testFX_EnableShowNotification_MatchExpectations() throws IOException {
-        //  Back up existing application.properties file
-        Path appPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "application.properties");
-        Path tempPropsPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                 .toString(), "application.properties.backup");
-        Files.copy(appPropsPath, tempPropsPath, StandardCopyOption.REPLACE_EXISTING);
+    // GIVEN CURRENT_SETTINGS property (configuration.ntak.pearl-zip.show-notification) set to (false)
+    // WHEN Options dialog opened
+    //     AND node (#tabGeneral) clicked
+    //     AND node (#checkShowNotification) clicked
+    //     AND node (#btnApply) clicked
+    // THEN expect CURRENT_SETTINGS property (configuration.ntak.pearl-zip.show-notification) is set to (true)
+    public void testFX_EnableShowNotification_MatchExpectations() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.show-notification","false", CURRENT_SETTINGS);
 
-        try {
-            // Navigate and check the safe mode option
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabGeneral");
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabGeneral");
+        CommonSpecifications.whenNodeClickedByName(this, "#checkShowNotification");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnApply");
 
-            CheckBox checkSafeMode = this.lookup("#checkShowNotification")
-                                         .queryAs(CheckBox.class);
-            if (!checkSafeMode.isSelected()) {
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-            } else {
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-                Assertions.assertEquals("false",
-                                        WORKING_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
-                                        "Show notification was not reset in properties");
-                this.clickOn(checkSafeMode)
-                    .clickOn("#btnApply");
-            }
+        // Then
+        CommonSpecifications.thenPropertyEqualsValue(CURRENT_SETTINGS, (p) -> p.getProperty("configuration.ntak.pearl-zip.show-notification"), "true");
 
-            Assertions.assertEquals("true",
-                                    WORKING_SETTINGS.getProperty(CNS_SHOW_NOTIFICATION),
-                                    "Show notification was not enabled in properties");
-        } finally {
-            Files.move(tempPropsPath, appPropsPath, StandardCopyOption.REPLACE_EXISTING);
-        }
+    }
+
+    @Test
+    @DisplayName("Test: Change language pack successfully")
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND WORKING_APPLICATION_SETTINGS property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //     AND node (#tabPluginLoader) clicked
+    //     AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/pearl-zip-lang-pack-fr-CA-0.0.4.0.pzax) opened
+    //     AND License accepted
+    // THEN a dialog appears with message like "The library .* has been successfully installed."
+    // WHEN click ok on confirmation dialog
+    //     AND Options dialog opened
+    //     AND select additional Option tab (LANGUAGES)
+    //     AND refresh table (#tblLang) with data
+    //     AND select entry (French (Canada)) from table (#tblLang)
+    //     AND node (#btnSetLang) clicked
+    //     AND click ok on confirmation dialog
+    //     AND node (#btnApply) clicked
+    //     AND refresh Locale
+    // THEN expect system property (configuration.ntak.pearl-zip.locale.lang) is set to (fr)
+    //     AND expect system property (configuration.ntak.pearl-zip.locale.country) is set to (CA)
+    public void testFX_ChangeLanguagePack_Success() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
+
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+
+        chooseFile( this, Paths.get("src", "test", "resources", "pearl-zip-lang-pack-fr-CA-0.0.4.0.pzax").toAbsolutePath());
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "The library .* has been successfully installed.");
+
+        // When
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
+
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        simSelectOptionsAdditionalTab(this, OptionTab.LANGUAGES.getIndex());
+        CommonSpecifications.whenTableViewRefreshedWithData(this, "#tblLang", FXCollections.observableArrayList(FXCollections.observableArrayList(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Set<Pair<String,Locale>>>getAdditionalConfig(CK_LANG_PACKS).get())));
+        FormUtil.selectTableViewEntry(this, (TableView<Pair<String,Locale>>) this.lookup("#tblLang").queryAs(TableView.class), Pair::getKey, "French (Canada)");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnSetLang");
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
+        CommonSpecifications.whenNodeClickedByName(this, "#btnApply");
+        PearlZipSpecifications.whenPearlZipLocaleIsRefreshed();
+
+        // Then
+        CommonSpecifications.thenPropertyEqualsValue(System.getProperties(), (p) -> p.get("configuration.ntak.pearl-zip.locale.lang"), "fr");
+        CommonSpecifications.thenPropertyEqualsValue(System.getProperties(), (p) -> p.get("configuration.ntak.pearl-zip.locale.country"), "CA");
+
+        // Reset
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.0.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.0.0", System.getProperties());
     }
 
     @Test
     @DisplayName("Test: Install plugin with max version less than current version and so fails to install")
-    public void testFX_InstallPlugin_OlderVersionRequired_Fail() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/lib-max-version-breach.pzax) selected
+    // THEN a dialog appears with message like "Please check the exception stack trace below and ensure the plugin has not been corrupted."
+    //      AND dialog exception message contains text like ".*Exception message: PZAX archive requires an older version of PearlZip.*"
+    public void testFX_InstallPlugin_OlderVersionRequired_Fail() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-        // Backup providers directory
-        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                             .toString(),"providers");
-        Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers-backup");
-        Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(providersDir);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile( this, Paths.get("src", "test", "resources", "lib-max-version-breach.pzax").toAbsolutePath());
 
-        Path plugin = Paths.get("src","test", "resources", "lib-max-version-breach.pzax").toAbsolutePath();
-
-        try {
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabPluginLoader")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#paneDropArea");
-
-            chooseFile(PLATFORM, this, plugin);
-
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            Assertions.assertEquals("Please check the exception stack trace below and ensure the plugin has not been corrupted.",
-                                    dialogPane.getContentText());
-            Assertions.assertTrue(((TextArea)dialogPane.lookup(".text-area"))
-                                          .getText()
-                                          .contains("Exception message: PZAX archive requires an older version of PearlZip"),
-                                    "Exception message was not as expected");
-        } finally {
-            Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Please check the exception stack trace below and ensure the plugin has not been corrupted.");
+        CommonSpecifications.thenExpectDialogWithMatchingExceptionMessage(this, ".*Exception message: PZAX archive requires an older version of PearlZip.*");
     }
 
     @Test
     @DisplayName("Test: Install plugin with min version greater than current version and so fails to install")
-    public void testFX_InstallPlugin_NewerVersionRequired_Fail() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (lib-min-version-breach.pzax) selected
+    // THEN a dialog appears with message like "Please check the exception stack trace below and ensure the plugin has not been corrupted."
+    //      AND dialog exception message contains text like ".*Exception message: PZAX archive requires a newer version of PearlZip.*"
+    public void testFX_InstallPlugin_NewerVersionRequired_Fail() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-        // Backup providers directory
-        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers");
-        Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"providers-backup");
-        Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(providersDir);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile( this, Paths.get("src", "test", "resources", "lib-min-version-breach.pzax").toAbsolutePath());
 
-        Path plugin = Paths.get("src","test", "resources", "lib-min-version-breach.pzax").toAbsolutePath();
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "Please check the exception stack trace below and ensure the plugin has not been corrupted.");
+        CommonSpecifications.thenExpectDialogWithMatchingExceptionMessage(this, ".*Exception message: PZAX archive requires a newer version of PearlZip.*");
+    }
 
-        try {
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabPluginLoader")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#paneDropArea");
+    @Test
+    @DisplayName("Test: Install theme, switch theme and uninstall successfully")
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND WORKING_APPLICATION_SETTINGS settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/modena-orange.pzax) opened
+    // THEN a dialog appears with message like "The library .* has been successfully installed."
+    // WHEN click ok on confirmation dialog
+    //      AND Options dialog opened
+    //      AND select additional Option tab (THEMES)
+    //      AND select entry (modena-orange) from table (#tblTheme)
+    //      AND node (#btnSetTheme) clicked
+    // THEN expect system property (configuration.ntak.pearl-zip.theme-name) is set to (modena-orange)
+    // WHEN node (#tabProviders) clicked
+    //      AND node (#btnPurgePlugin) clicked
+    //      AND select entry (modena-orange) from table (#tblManifests)
+    //      AND node (#btnPurgeSelected) clicked
+    //      AND click Yes on confirmation dialog
+    //      AND click ok on confirmation dialog
+    //      AND node (#btnCancel) clicked from Node (FrmManifest)
+    //      AND node (#btnOk) clicked
+    //      AND Options dialog opened
+    //      AND select additional Option tab (THEMES)
+    // THEN ensure table (#tblTheme) does not contain entry (modena-orange)
+    //      AND ensure file (~/.pz/themes/modena-orange) does not exist
+    //      AND ensure file (~/.pz/manifests/modena-orange.MF) does not exist
+    public void testFX_InstallTheme_Success() {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-            chooseFile(PLATFORM, this, plugin);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile(this, Paths.get("src", "test", "resources", "modena-orange.pzax").toAbsolutePath());
 
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            Assertions.assertEquals("Please check the exception stack trace below and ensure the plugin has not been corrupted.",
-                                    dialogPane.getContentText());
-            Assertions.assertTrue(((TextArea)dialogPane.lookup(".text-area"))
-                                          .getText()
-                                          .contains("Exception message: PZAX archive requires a newer version of PearlZip"),
-                                  "Exception message was not as expected");
-        } finally {
-            Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
+        // Then
+        CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "The library .* has been successfully installed.");
 
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // When
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
+
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
+        selectTableViewEntry(this, this.lookup("#tblTheme").queryAs(TableView.class), (r) -> r, "modena-orange");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnSetTheme");
+
+        // Then
+        CommonSpecifications.thenPropertyEqualsValue(System.getProperties(), (p)->p.getProperty("configuration.ntak.pearl-zip.theme-name"), "modena-orange");
+
+        // When
+        CommonSpecifications.whenNodeClickedByName(this, "#tabProviders");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnPurgePlugin");
+        selectTableViewEntry(this, this.lookup("#tblManifests").queryAs(TableView.class), (r) -> r, "modena-orange");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnPurgeSelected");
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.YES);
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
+        CommonSpecifications.whenSubNodeClickedByName(this, () -> this.lookup("#tblManifests").queryAs(TableView.class).getParent(), "#btnCancel");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnOk");
+
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
+
+        // Then
+        CommonSpecifications.thenNotExpectFileExists(STORE_ROOT.resolve(Paths.get("themes", "modena-orange")));
+        CommonSpecifications.thenNotExpectFileExists(STORE_ROOT.resolve(Paths.get("manifests", "modena-orange.pzax.MF")));
     }
 
     @Test
     @DisplayName("Test: Purge all plugins successfully")
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //     AND node (#tabProviders) clicked
+    //     AND node (#btnPurgeAll) double-clicked
+    //     AND click Yes on confirmation dialog
+    // THEN expect (0) files in the folder (~/.pz/providers)
     public void testFX_PurgeAllPlugin_Success() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-        // Backup providers directory
-        // providers...
-        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers");
-        Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"providers-backup");
-        Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(providersDir);
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabProviders");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#btnPurgeAll");
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.YES);
 
-        // manifests...
-        Path manifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"manifests");
-        Path backupManifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"manifests-backup");
-        Files.move(manifestsDir, backupManifestsDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(manifestsDir);
-
-        try {
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30))
-                .clickOn("#tabProviders")
-                .sleep(50, MILLISECONDS)
-                .doubleClickOn("#btnPurgeAll");
-
-            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
-            this.clickOn(dialogPane.lookupButton(ButtonType.YES))
-                .sleep(250, MILLISECONDS);
-
-            Assertions.assertEquals(0,
-                                    (int) Files.list(providersDir)
-                                               .count(),
-                                    "Plugins were not removed");
-        } finally {
-            clearDirectory(providersDir);
-            Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
-            clearDirectory(manifestsDir);
-            Files.move(backupManifestsDir, manifestsDir, StandardCopyOption.REPLACE_EXISTING);
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // Then
+        CommonSpecifications.thenExpectNoFilesInDirectory(STORE_ROOT.resolve(Paths.get("providers")), 0);
     }
 
     @Test
     @DisplayName("Test: Load PZAX package upgrade successfully")
-    public void testFX_LoadPZAXPackage_Upgrade_Success() throws IOException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
-        WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.4.0");
+    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/pearl-zip-archive-zip4j-INITIAL.pzax) selected
+    //      AND License accepted
+    //      AND License accepted
+    //      AND click ok on confirmation dialog
+    // THEN expect (2) files in the folder (~/.pz/providers/zip4j)
+    // WHEN Options dialog opened
+    //      AND node (#tabPluginLoader) clicked
+    //      AND node (#paneDropArea) double-clicked
+    //      AND file (src/test/resources/pearl-zip-archive-zip4j-UPGRADE.pzax) selected
+    //      AND License accepted
+    //      AND License accepted
+    //      AND click ok on confirmation dialog
+    // THEN expect (2) files in the folder (~/.pz/providers/zip4j)
+    //      AND expect file (pearl-zip-archive-zip4j-0.0.0.8.jar) exist in target location
+    //      AND expect file (zip4j-2.10.0.jar) exist in target location
+    public void testFX_LoadPZAXPackage_Upgrade_Success() throws Exception {
+        // Given
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
+        CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
-        // Backup providers & manifests directory
-        // providers...
-        Path providersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"providers", "zip4j");
-        Path backupProvidersDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "providers-backup");
-        if (Files.exists(providersDir)) {
-            Files.move(providersDir, backupProvidersDir, StandardCopyOption.REPLACE_EXISTING);
-            Files.createDirectories(providersDir);
-        }
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile(this, Paths.get("src", "test", "resources", "pearl-zip-archive-zip4j-INITIAL.pzax").toAbsolutePath());
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
 
-        // manifests...
-        Path manifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(),"manifests");
-        Path backupManifestsDir = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(),"manifests-backup");
-        Files.move(manifestsDir, backupManifestsDir, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(manifestsDir);
+        // Then
+        CommonSpecifications.thenExpectNoFilesInDirectory(STORE_ROOT.resolve(Paths.get("providers", "zip4j")), 2);
 
-        // extensions of interest...
-        Path pzaxPackage = Paths.get("src", "test", "resources", "pearl-zip-archive-zip4j-INITIAL.pzax")
-                                .toAbsolutePath();
-        Path pzaxPackageUpgrade = Paths.get("src", "test", "resources", "pearl-zip-archive-zip4j-UPGRADE.pzax")
-                                .toAbsolutePath();
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
+        CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
+        chooseFile(this, Paths.get("src", "test", "resources", "pearl-zip-archive-zip4j-UPGRADE.pzax").toAbsolutePath());
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+        PearlZipSpecifications.whenPZAXLicenseAccepted(this);
+        CommonSpecifications.whenButtonClickedOnDialog(this, ButtonType.OK);
 
-        try {
-            for (Path pzax : List.of(pzaxPackage, pzaxPackageUpgrade)) {
-
-                this.clickOn(Point2D.ZERO.add(160, 10))
-                    .clickOn(Point2D.ZERO.add(160, 30))
-                    .clickOn("#tabPluginLoader")
-                    .sleep(50, MILLISECONDS)
-                    .doubleClickOn("#paneDropArea");
-
-                chooseFile(PLATFORM, this, pzax);
-
-                this.drag("#webLicense", MouseButton.PRIMARY) // First license agreement
-                    .moveBy(0, 400)
-                    .sleep(2500, MILLISECONDS)
-                    .drop()
-                    .clickOn("#btnAccept")
-                    .sleep(150, MILLISECONDS)
-                    .drag("#webLicense", MouseButton.PRIMARY) // Second license agreement
-                    .moveBy(0, 400)
-                    .sleep(2000, MILLISECONDS)
-                    .drop()
-                    .clickOn("#btnAccept")
-                    .sleep(300, MILLISECONDS);
-
-                Set<DialogPane> dialogPanes = lookup(".dialog-pane").queryAllAs(DialogPane.class);
-                Assertions.assertEquals(2,
-                                        (int) Files.list(providersDir)
-                                                   .count(),
-                                        "Unexpected number of plugins found.");
-
-                dialogPanes.forEach(d -> this.sleep(250, MILLISECONDS)
-                                             .clickOn(d.lookupButton(ButtonType.OK)));
-                this.sleep(250, MILLISECONDS);
-            }
-
-            Assertions.assertTrue(Files.list(providersDir)
-                                       .map(p -> p.getFileName()
-                                                  .toString())
-                                       .collect(Collectors.toList())
-                                       .contains("pearl-zip-archive-zip4j-0.0.0.8.jar"),
-                                  "Provider plugin not present as expected");
-            Assertions.assertTrue(Files.list(providersDir)
-                                       .map(p -> p.getFileName()
-                                                  .toString())
-                                       .collect(Collectors.toList())
-                                       .contains("zip4j-2.10.0.jar"),
-                                  "Dependency plugin not present as expected");
-        } finally {
-            clearDirectory(providersDir);
-            if (Files.exists(backupProvidersDir)) {
-                Files.move(backupProvidersDir, providersDir, StandardCopyOption.REPLACE_EXISTING);
-            }
-            clearDirectory(manifestsDir);
-            Files.move(backupManifestsDir, manifestsDir, StandardCopyOption.REPLACE_EXISTING);
-
-            System.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-            WORKING_APPLICATION_SETTINGS.setProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-        }
+        // Then
+        CommonSpecifications.thenExpectNoFilesInDirectory(STORE_ROOT.resolve(Paths.get("providers", "zip4j")), 2);
+        CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve(Paths.get("providers", "zip4j", "pearl-zip-archive-zip4j-0.0.0.8.jar")));
+        CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve(Paths.get("providers", "zip4j", "zip4j-2.10.0.jar")));
     }
 
     @Test
     @DisplayName("Test: Add store repository successfully")
-    public void testFX_AddStore_Success() throws IOException {
-        final var repositoryFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo");
+    // GIVEN Options dialog opened
+    //      AND select additional Option tab (STORE)
+    // WHEN node (#btnAddStore) clicked
+    //      AND node (#txtBoxName) clicked
+    //      AND type "test-repo"
+    //      AND node (#txtBoxURL) clicked
+    //      AND type (system property (CNS_NTAK_PEARL_ZIP_JDBC_URL))
+    //      AND node (#txtBoxUsername) clicked
+    //      AND type (system property (CNS_NTAK_PEARL_ZIP_JDBC_USER))
+    //      AND node (#txtBoxPassword) clicked
+    //      AND type (system property (CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD))
+    //      AND node (#btnAdd) clicked
+    // THEN expect file (test-repo) exist in target location
+    public void testFX_AddStore_Success() {
+        // Given
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
 
-        Properties props = new Properties();
-        props.load(Files.newInputStream(Paths.get("src", "main", "resources", "application.properties")));
+        // When
+        CommonSpecifications.whenNodeClickedByName(this, "#btnAddStore");
+        CommonSpecifications.whenNodeClickedByName(this, "#txtBoxName");
+        TypeUtil.typeString(this, "test-repo");
+        CommonSpecifications.whenNodeClickedByName(this, "#txtBoxURL");
+        TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL));
+        CommonSpecifications.whenNodeClickedByName(this, "#txtBoxUsername");
+        TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER));
+        CommonSpecifications.whenNodeClickedByName(this, "#txtBoxPassword");
+        TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
+        CommonSpecifications.whenNodeClickedByName(this, "#btnAdd");
 
-        try {
-            // Navigate to Store Options...
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
-            // Click to obtain Option tab
-            simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
-
-                // Click on add store
-            this.clickOn("#btnAddStore")
-                .sleep(300, MILLISECONDS);
-
-            // Enter default details
-            this.clickOn("#txtBoxName");
-            TypeUtil.typeString(this, "test-repo");
-            this.clickOn("#txtBoxURL");
-            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL));
-            this.clickOn("#txtBoxUsername");
-            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER));
-            this.clickOn("#txtBoxPassword");
-            TypeUtil.typeString(this, props.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
-            this.clickOn(this.lookup("Add")
-                             .queryButton())
-                .sleep(300, MILLISECONDS);
-
-            // Check file exists in repository folder
-            Assertions.assertTrue(Files.exists(repositoryFile), "Repository file was not created");
-        } finally {
-            Files.deleteIfExists(repositoryFile);
-        }
+        // Then
+        CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve( Paths.get("repository", "test-repo")));
     }
 
     @Test
     @DisplayName("Test: Edit store repository successfully")
+    // GIVEN Copy file (src/test/resources/test-repo) to (~/.pz/repository/test-repo) not using context menu
+    //      AND repo (~/.pz/repository/test-repo) loaded into PearlZip
+    // WHEN Options dialog opened
+    //      AND select additional Option tab (STORE)
+    //     AND select entry (test-repo) from table (#tblStore)
+    //      AND node (#btnEditStore) clicked
+    //      AND node (#txtBoxName) clicked
+    //      AND type "2"
+    //      AND node (#btnEdit) clicked
+    // THEN expect file (test-repo2) exist in target location
     public void testFX_EditStore_Success() throws IOException {
-        // Copy test repository file...
-        final var repositoryFile = Paths.get("src", "test", "resources", "test-repo");
-        final var targetFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo");
-        final var newTargetFile = Paths.get(System.getProperty("user.home"), ".pz", "repository", "test-repo2");
-        Files.copy(repositoryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-
-        // Add repo to in-memory collection
+        // Given
+        Path targetFile = STORE_ROOT.resolve(Paths.get("repository","test-repo"));
+        Files.copy(Paths.get("src","test","resources","test-repo").toAbsolutePath(), targetFile);
         loadStoreRepoDetails(targetFile);
 
-        try {
-            // Navigate to Store Options...
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
+        // When
+        PearlZipSpecifications.whenOptionDialogOpened(this);
+        simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
+        FormUtil.selectTableViewEntry(this, this.lookup("#tblStore").queryTableView(), StoreRepoDetails::name, "test-repo");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnEditStore");
+        CommonSpecifications.whenNodeClickedByName(this, "#txtBoxName");
+        TypeUtil.typeString(this, "2");
+        CommonSpecifications.whenNodeClickedByName(this, "#btnEdit");
 
-            simSelectOptionsAdditionalTab(this, OptionTab.STORE.getIndex());
-
-            // Navigate to appropriate row
-            TableView<StoreRepoDetails> tblRepo = this.lookup("#tblStore").queryTableView();
-            FormUtil.selectTableViewEntry(this, tblRepo, StoreRepoDetails::name, "test-repo");
-
-            // Click on edit store
-            this.clickOn("#btnEditStore")
-                .sleep(300, MILLISECONDS);
-
-            // Edit Name
-            this.clickOn("#txtBoxName");
-            TypeUtil.typeString(this, "2");
-
-            this.clickOn(this.lookup("Edit")
-                             .queryButton())
-                .sleep(300, MILLISECONDS);
-
-            // Check new file exists in repository folder
-            Assertions.assertTrue(Files.exists(newTargetFile), "Repository file was not created");
-        } finally {
-            Files.deleteIfExists(targetFile);
-            Files.deleteIfExists(newTargetFile);
-        }
+        // Then
+        CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve( Paths.get("repository", "test-repo2")));
     }
 }

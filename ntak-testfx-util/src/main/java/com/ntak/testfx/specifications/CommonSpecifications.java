@@ -5,6 +5,7 @@ package com.ntak.testfx.specifications;
 
 import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.internal.TestFXUtil;
+import javafx.collections.ObservableList;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -21,18 +22,59 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.ntak.testfx.TestFXConstants.LONG_PAUSE;
+import static com.ntak.testfx.TestFXConstants.SHORT_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CommonSpecifications {
+
+    public static void givenDirectoryHasBeenCreated(Path directory) throws IOException {
+        if (!Files.exists(directory)) {
+            Files.createDirectories(directory);
+        }
+
+        assertTrue(Files.exists(directory), String.format("%s does not exist", directory));
+        assertTrue(Files.isDirectory(directory), String.format("%s is not a directory", directory));
+    }
+
+    public static <T> T givenFileHasAttribute(Path path, String attribute, Class<T> klass) throws IOException {
+        final Object attributeValue = Files.getAttribute(path, attribute);
+
+        Assertions.assertNotNull(attributeValue, String.format("Attribute %s does not exist in file (%s) metadata", attribute, path));
+        Assertions.assertTrue(klass.isInstance(attributeValue), String.format("Attribute class is not of expected instance type (%s)", klass.getCanonicalName()));
+
+        return klass.cast(attributeValue);
+    }
+
+    public static Properties givenClasspathFileReadIntoSystemProperties(String resource) throws IOException {
+        Properties bootstrap = new Properties();
+        bootstrap.load(CommonSpecifications.class.getResourceAsStream(resource));
+        bootstrap.entrySet().stream().forEach(e->System.setProperty(e.getKey().toString(), e.getValue().toString()));
+
+        return bootstrap;
+    }
+
+    public static void givenPropertySet(String key, String value, Properties properties) {
+        properties.setProperty(key, value);
+    }
+
+    public static <T> void whenTableViewRefreshedWithData(FxRobot robot, String table, ObservableList<T> data) {
+        TableView<T> tbl = robot.lookup(table)
+                                .queryAs(TableView.class);
+        tbl.setItems(data);
+        tbl.refresh();
+    }
 
     public static void whenWindowResized(FxRobot robot, Window window, int xOffset, int yOffset) {
         double x = (window.getX() + window.getWidth());
@@ -53,6 +95,29 @@ public class CommonSpecifications {
         Optional<TableColumn<T,?>> optColumn = fileContentsView.getColumns().stream().filter(c -> c.getText().equals(colName)).findFirst();
         Assertions.assertTrue(optColumn.isPresent());
         return optColumn.get();
+    }
+
+    public static void whenNodeClickedByName(FxRobot robot, String identifier) {
+        robot.clickOn(identifier);
+    }
+
+    public static void whenNodeDoubleClickedByName(FxRobot robot, String identifier) {
+        robot.doubleClickOn(identifier);
+    }
+
+    public static void whenButtonClickedOnDialog(FxRobot robot, ButtonType buttonType) {
+        DialogPane dialogPane = robot.lookup(".dialog-pane").query();
+        robot.clickOn(dialogPane.lookupButton(buttonType));
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
+    }
+
+    public static void whenSubNodeClickedByName(FxRobot robot, Supplier<Node> node, String identifier) {
+        robot.clickOn(node.get().lookup(identifier));
+    }
+
+    public static void thenExpectNoFilesInDirectory(Path directory, int count) throws IOException {
+        Assertions.assertTrue(Files.isDirectory(directory), String.format("%s is not a directory", directory));
+        Assertions.assertEquals(count, Files.list(directory).count(), String.format("%s has %d files. Expecting %s files in folder", directory, Files.list(directory).count(), count));
     }
 
     public static <T,R> void thenPropertyEqualsValue(T objectToTest, Function<T,R> extractor, R expectation) {
@@ -146,6 +211,25 @@ public class CommonSpecifications {
 
     public static void thenExpectFileExists(Path file) {
         Assertions.assertTrue(Files.exists(file), String.format("File %s does not exist", file));
+    }
+
+    public static void thenNotExpectFileExists(Path file) {
+        Assertions.assertFalse(Files.exists(file), String.format("File %s exists unexpectedly", file));
+    }
+
+    public static <T> void thenTableViewHasValuesMatchingExpectation(FxRobot robot, String tableName, Predicate<T> assertionExpression) {
+        TableView<T> rowGrid = robot.lookup(tableName).queryAs(TableView.class);
+        List<T> rows = rowGrid.getItems();
+
+        Assertions.assertTrue(rows.stream().anyMatch(assertionExpression::test), "None of the rows had the expected value.");
+    }
+
+    public static void thenExpectDialogWithMatchingExceptionMessage(FxRobot robot, String regEx) {
+        TextArea textArea = retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> (TextArea)robot.lookup(".dialog-pane").queryAs(DialogPane.class).lookup(".text-area"));
+        Matcher matcher = Pattern.compile(regEx).matcher(textArea.getText());
+
+        Assertions.assertTrue(matcher.find(),
+                              String.format("Exception message was not as expected. Actual: %s; Expected pattern: %s", textArea.getText(), regEx));
     }
 
     public static <T> T retryRetrievalForDuration(long timeoutMillis, Supplier<T> supplier) {

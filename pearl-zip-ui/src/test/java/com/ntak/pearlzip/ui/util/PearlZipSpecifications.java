@@ -3,15 +3,19 @@
  */
 package com.ntak.pearlzip.ui.util;
 
+import com.ntak.pearlzip.archive.pub.ArchiveReadService;
+import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.CompressUtil;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
+import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
@@ -21,8 +25,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Properties;
 
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
@@ -177,6 +184,20 @@ public class PearlZipSpecifications {
         TableView<FileInfo> fileContentsView = robot.lookup("#fileContentsView").queryAs(TableView.class);
         return FormUtil.selectTableViewEntry(robot, fileContentsView, FileInfo::getFileName,
                                              entryName).get();
+    }
+
+    public static void whenOptionDialogOpened(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(160, 10))
+             .clickOn(Point2D.ZERO.add(160, 30));
+    }
+
+    public static void whenPZAXLicenseAccepted(FxRobot robot) {
+        robot.drag("#webLicense", MouseButton.PRIMARY)
+                .moveBy(0, 400)
+                .sleep(2500, MILLISECONDS)
+                .drop()
+                .clickOn("#btnAccept")
+                .sleep(150, MILLISECONDS);
     }
 
     ////////////////
@@ -371,11 +392,43 @@ public class PearlZipSpecifications {
 
     public static void thenExpectFilesInOrderInCurrentWindow(String archiveName, List<String> files) {
         TableView<FileInfo> fileContentsView = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.getTitle()
-                                                                                                                                                                        .contains(archiveName.toString()),
+                                                                                                                                                                        .contains(archiveName),
                                                                                                                                                                   "#fileContentsView"));
         Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
         for (int i = 0; i < fileContentsView.getItems().size(); i++) {
             Assertions.assertEquals(files.get(i), fileContentsView.getItems().get(i).getFileName(), String.format("Expected files were not presented in the anticipated order. Expected: %s; Actual: %s", files.get(i), fileContentsView.getItems().get(i)));
         }
+    }
+
+    public static void thenExpectArchiveNotOpen(Path archive) {
+        Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().noneMatch(v -> v.getTitle().contains(archive.toAbsolutePath().toString())), String.format("File: %s was unexpectedly open in PearlZip", archive));
+    }
+
+    public static void thenExpectArchiveOpen(Path archive) {
+        Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().anyMatch(v -> v.getTitle().contains(archive.toAbsolutePath().toString())), String.format("File: %s was not open in PearlZip", archive));
+    }
+
+    public static void thenExpectActiveWriteService(String canonicalName) {
+        Assertions.assertTrue(
+                ZipState.getWriteProviders()
+                        .stream()
+                        .map(ArchiveWriteService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(canonicalName)),
+                String.format("Active Write Service was not set to %s", canonicalName));
+    }
+
+    public static void thenExpectActiveReadService(String canonicalName) {
+        Assertions.assertTrue(
+                ZipState.getReadProviders()
+                        .stream()
+                        .map(ArchiveReadService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(canonicalName)),
+                String.format("Active Read Service was not set to %s", canonicalName));
+    }
+
+    public static void whenPearlZipLocaleIsRefreshed() {
+        Locale.setDefault(genLocale(new Properties()));
     }
 }
