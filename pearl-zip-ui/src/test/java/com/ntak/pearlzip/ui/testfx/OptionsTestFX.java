@@ -3,11 +3,13 @@
  */
 package com.ntak.pearlzip.ui.testfx;
 
+import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.util.*;
+import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
 import com.ntak.pearlzip.ui.util.internal.QueryResult;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.TypeUtil;
@@ -45,6 +47,7 @@ import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails;
 import static com.ntak.testfx.FormUtil.selectComboBoxEntry;
 import static com.ntak.testfx.FormUtil.selectTableViewEntry;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
+import static com.ntak.testfx.TestFXConstants.LONG_PAUSE;
 import static com.ntak.testfx.TestFXConstants.MEDIUM_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -532,7 +535,8 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Install theme, switch theme and uninstall successfully")
-    // GIVEN system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    // GIVEN reflectively set static field (PLUGINS_METADATA) in class (ModuleUtil)
+    //      AND system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
     //      AND WORKING_APPLICATION_SETTINGS settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
     // WHEN Options dialog opened
     //      AND node (#tabPluginLoader) clicked
@@ -558,8 +562,9 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     // THEN ensure table (#tblTheme) does not contain entry (modena-orange)
     //      AND ensure file (~/.pz/themes/modena-orange) does not exist
     //      AND ensure file (~/.pz/manifests/modena-orange.MF) does not exist
-    public void testFX_InstallTheme_Success() {
+    public void testFX_InstallTheme_Success() throws NoSuchFieldException, IllegalAccessException {
         // Given
+        CommonSpecifications.givenSetPrivateStaticField(ModuleUtil.class, "PLUGINS_METADATA", InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA).get());
         CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", System.getProperties());
         CommonSpecifications.givenPropertySet("configuration.ntak.pearl-zip.version","0.0.4.0", WORKING_APPLICATION_SETTINGS);
 
@@ -568,6 +573,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         CommonSpecifications.whenNodeClickedByName(this, "#tabPluginLoader");
         CommonSpecifications.whenNodeDoubleClickedByName(this, "#paneDropArea");
         chooseFile(this, Paths.get("src", "test", "resources", "modena-orange.pzax").toAbsolutePath());
+        sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
         CommonSpecifications.thenExpectDialogWithMatchingMessage(this, "The library .* has been successfully installed.");
@@ -579,11 +585,13 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
         selectTableViewEntry(this, this.lookup("#tblTheme").queryAs(TableView.class), (r) -> r, "modena-orange");
         CommonSpecifications.whenNodeClickedByName(this, "#btnSetTheme");
+        sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
         CommonSpecifications.thenPropertyEqualsValue(System.getProperties(), (p)->p.getProperty("configuration.ntak.pearl-zip.theme-name"), "modena-orange");
-
         // When
+        CommonSpecifications.whenNodeClickedByName(this, "#btnOk");
+        PearlZipSpecifications.whenOptionDialogOpened(this);
         CommonSpecifications.whenNodeClickedByName(this, "#tabProviders");
         CommonSpecifications.whenNodeClickedByName(this, "#btnPurgePlugin");
         selectTableViewEntry(this, this.lookup("#tblManifests").queryAs(TableView.class), (r) -> r, "modena-orange");
@@ -595,8 +603,10 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
 
         PearlZipSpecifications.whenOptionDialogOpened(this);
         simSelectOptionsAdditionalTab(this, OptionTab.THEMES.getIndex());
+        sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
+        CommonSpecifications.thenTableViewHasValuesNotMatchingExpectation(this, "#tblTheme", (String t) -> t.equals("modena-orange"));
         CommonSpecifications.thenNotExpectFileExists(STORE_ROOT.resolve(Paths.get("themes", "modena-orange")));
         CommonSpecifications.thenNotExpectFileExists(STORE_ROOT.resolve(Paths.get("manifests", "modena-orange.pzax.MF")));
     }
@@ -710,6 +720,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         CommonSpecifications.whenNodeClickedByName(this, "#txtBoxPassword");
         TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
         CommonSpecifications.whenNodeClickedByName(this, "#btnAdd");
+        sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
         CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve( Paths.get("repository", "test-repo")));

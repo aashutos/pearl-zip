@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.testfx.api.FxRobot;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -67,6 +68,12 @@ public class CommonSpecifications {
 
     public static void givenPropertySet(String key, String value, Properties properties) {
         properties.setProperty(key, value);
+    }
+
+    public static <K> void givenSetPrivateStaticField(Class<?> klass, String filedName, K value) throws NoSuchFieldException, IllegalAccessException {
+        Field field = klass.getDeclaredField(filedName);
+        field.setAccessible(true);
+        field.set(null,value);
     }
 
     public static <T> void whenTableViewRefreshedWithData(FxRobot robot, String table, ObservableList<T> data) {
@@ -222,6 +229,13 @@ public class CommonSpecifications {
         List<T> rows = rowGrid.getItems();
 
         Assertions.assertTrue(rows.stream().anyMatch(assertionExpression::test), "None of the rows had the expected value.");
+    }
+
+    public static <T> void thenTableViewHasValuesNotMatchingExpectation(FxRobot robot, String tableName, Predicate<T> assertionExpression) {
+        TableView<T> rowGrid = robot.lookup(tableName).queryAs(TableView.class);
+        List<T> rows = rowGrid.getItems();
+
+        Assertions.assertFalse(rows.stream().anyMatch(assertionExpression::test), "One of the rows had the expected value.");
     }
 
     public static void thenExpectDialogWithMatchingExceptionMessage(FxRobot robot, String regEx) {
