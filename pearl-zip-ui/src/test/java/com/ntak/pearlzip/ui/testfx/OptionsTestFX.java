@@ -309,7 +309,7 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
     //      AND system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService) set to (99999)
     //      AND system property (configuration.ntak.pearl-zip.provider.priority.com.ntak.pearlzip.archive.szjb.pub.SevenZipArchiveService) set to (0)
     //      AND system property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
-    //      AND PearlZip settings (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
+    //      AND WORKING_APPLICATION_SETTINGS property (configuration.ntak.pearl-zip.version) set to (0.0.4.0)
     //      AND delete folder (~/.pz/manifests)
     //      AND create folder (~/.pz/manifests)
     // WHEN Options dialog opened
