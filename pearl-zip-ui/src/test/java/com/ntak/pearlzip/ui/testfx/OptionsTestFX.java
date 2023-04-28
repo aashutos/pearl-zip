@@ -16,10 +16,7 @@ import com.ntak.testfx.TypeUtil;
 import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ComboBoxBase;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -47,8 +44,7 @@ import static com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails;
 import static com.ntak.testfx.FormUtil.selectComboBoxEntry;
 import static com.ntak.testfx.FormUtil.selectTableViewEntry;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
-import static com.ntak.testfx.TestFXConstants.LONG_PAUSE;
-import static com.ntak.testfx.TestFXConstants.MEDIUM_PAUSE;
+import static com.ntak.testfx.TestFXConstants.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class OptionsTestFX extends AbstractPearlZipTestFX {
@@ -719,10 +715,11 @@ public class OptionsTestFX extends AbstractPearlZipTestFX {
         TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER));
         CommonSpecifications.whenNodeClickedByName(this, "#txtBoxPassword");
         TypeUtil.typeString(this, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
-        CommonSpecifications.whenNodeClickedByName(this, "#btnAdd");
+        CommonSpecifications.whenSubNodeClickedByName(this, ()->this.lookup("#lblURL").queryAs(Label.class).getParent(), "#btnAdd");
         sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
+        CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> Files.exists(STORE_ROOT.resolve( Paths.get("repository", "test-repo")))?new Object():null);
         CommonSpecifications.thenExpectFileExists(STORE_ROOT.resolve( Paths.get("repository", "test-repo")));
     }
 
