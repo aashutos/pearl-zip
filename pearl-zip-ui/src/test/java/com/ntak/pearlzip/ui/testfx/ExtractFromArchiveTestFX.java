@@ -4,7 +4,6 @@
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
-import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
 import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
 import com.ntak.testfx.specifications.CommonSpecifications;
@@ -23,7 +22,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_LOCAL_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.TestFXConstants.SHORT_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -42,9 +40,7 @@ public class ExtractFromArchiveTestFX extends AbstractPearlZipTestFX {
 
     @BeforeEach
     public void setUp() {
-        LOCAL_TEMP = ZipConstants.GLOBAL_INTERNAL_CACHE
-                .<Path>getAdditionalConfig(CK_LOCAL_TEMP)
-                .get();
+        LOCAL_TEMP = Path.of(System.getProperty("user.home"), ".pz", "temp");
     }
 
     @AfterEach
