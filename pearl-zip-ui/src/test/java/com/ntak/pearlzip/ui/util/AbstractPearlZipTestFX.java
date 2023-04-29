@@ -50,6 +50,9 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
             Files.move(localWorkspace, backupLocalWorkspace);
         }
 
+        // Purge files...
+        Files.deleteIfExists(localWorkspace.resolve("RF"));
+
         // Initialise PearlZip Application
         PearlZipFXUtil.initialise(stage, List.of(new CommonsCompressArchiveWriteService()), List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService()), Paths.get(STORE_TEMP.toAbsolutePath().toString(), String.format("a%d.zip", System.currentTimeMillis())));
 

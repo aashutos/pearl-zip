@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_TEMP;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
+import static com.ntak.testfx.TestFXConstants.LONG_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Tag("fx-test")
@@ -258,6 +259,7 @@ public class AddToArchiveTestFX extends AbstractPearlZipTestFX {
 
         // When
         simAddFile(this, file, false, archiveName.toString());
+        sleep(LONG_PAUSE, MILLISECONDS);
 
         // Then
         PearlZipSpecifications.thenExpectFileExistsInCurrentWindow(archiveName, file.getFileName().toString());

@@ -35,6 +35,7 @@ public class WindowTestFX extends AbstractPearlZipTestFX {
         file = Paths.get(tempDirRoot.toString(), "temp-file");
         folder = Paths.get(tempDirRoot.toString(), "temp-folder");
         nestedFile = Paths.get(tempDirRoot.toString(), "temp-folder", "sub-temp-file");
+        Files.deleteIfExists(localWorkspace.resolve("RF"));
 
         Files.createFile(file);
         Files.createDirectories(folder);
