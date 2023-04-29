@@ -4,7 +4,14 @@
 package com.ntak.pearlzip.ui.constants;
 
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
+import com.ntak.pearlzip.ui.stages.seed.LogSeedStartupStage;
+import com.ntak.pearlzip.ui.stages.seed.PrimarySeedStartupStage;
+import com.ntak.pearlzip.ui.stages.startup.*;
+import com.ntak.pearlzip.ui.util.AbstractSeedStartupStage;
+import com.ntak.pearlzip.ui.util.AbstractStartupStage;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -446,6 +453,8 @@ public class ZipConstants {
     public static final String CK_REPO_ROOT = "REPO_ROOT";
     public static final String CK_STORE_REPO = "STORE_REPO";
     public static final String CK_SSL_CONTEXT = "SSL_CONTEXT";
+    public static final String CK_STORE_PROVIDERS = "STORE_PROVIDERS";
+    public static final String CK_STORE_THEMES = "STORE_THEMES";
 
 
     ///// GENERAL PEARLZIP CONSTANTS /////
@@ -455,4 +464,16 @@ public class ZipConstants {
     public static final String MANIFEST_FILE_NAME = "MF";
     public static final String KEY_MANIFEST_DELETED= "remove-pattern";
     public static final Set<String> CORE_THEMES = Set.of("modena", "modena-dark");
+
+    public static final List<AbstractSeedStartupStage> SEED_STARTUP_STAGE = Arrays.asList(new PrimarySeedStartupStage(),
+                                                                                          new LogSeedStartupStage());
+    public static final List<AbstractStartupStage> STARTUP_STAGE = Arrays.asList(new WorkspaceStartupStage(),
+                                                                                 new InMemoryCacheStartupStage(),
+                                                                                 new ModuleLoadStartupStage(),
+                                                                                 new KeystoreStartupStage(),
+                                                                                 new QueryStartupStage(),
+                                                                                 new StoreStartupStage(),
+                                                                                 new EventBusStartupStage(),
+                                                                                 new ThreadPoolStartupStage(),
+                                                                                 new LicenseStartupStage());
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util;
 
@@ -11,6 +11,7 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.testfx.api.FxToolkit;
@@ -20,30 +21,68 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_REPO;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_ROOT;
 
 @Tag("fx-test")
 public abstract class AbstractPearlZipTestFX extends ApplicationTest {
 
-    Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
+    public static final Path LOCAL_TEMP = Paths.get(System.getenv("TMPDIR"));
+    public static final Path localWorkspace = Path.of(System.getProperty("user.home"), ".pz");
+    public static final Path applicationProps = localWorkspace.resolve("application.properties");
+    public static final Path backupLocalWorkspace = Path.of(System.getProperty("user.home"), ".pz-backup");
 
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
-        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-        PearlZipFXUtil.initialise(stage,
-                                  List.of(new CommonsCompressArchiveWriteService()),
-                                  List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService())
-        );
-        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT).get();
-        LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                       .orElse(STORE_ROOT.toString()));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
-                                                                            Paths.get(System.getProperty("user.home"), ".pz", "temp"));
+        Path STORE_TEMP = localWorkspace.resolve("temp");
+
+        // Setup workspace prior to launch
+        if (Files.exists(backupLocalWorkspace)) {
+            ArchiveUtil.deleteDirectory(backupLocalWorkspace, (p)->false);
+        }
+        if (Files.exists(localWorkspace)) {
+            Files.move(localWorkspace, backupLocalWorkspace);
+        }
+
+        // Initialise PearlZip Application
+        PearlZipFXUtil.initialise(stage, List.of(new CommonsCompressArchiveWriteService()), List.of(new SevenZipArchiveService(), new CommonsCompressArchiveReadService()), Paths.get(STORE_TEMP.toAbsolutePath().toString(), String.format("a%d.zip", System.currentTimeMillis())));
+
+        // Save Properties...
+        if (!Files.exists(applicationProps)) {
+            Files.createFile(applicationProps);
+        }
+        System.getProperties().store(Files.newBufferedWriter(applicationProps), "PearlZip Automated Test");
+
+        if (Arrays.stream(this.getClass().getAnnotations())
+                  .anyMatch(a -> (Tag.class.isInstance(a)) && ((Tag)a).value().equals("UATExtensionStore"))) {
+            Path repoPath = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                    .get()
+                    .resolve("repository").resolve("default");
+            Path testRepoPath = Paths.get("src", "test", "resources", "default").toAbsolutePath();
+            Files.copy(repoPath, repoPath.getParent().resolve("default_backup"),
+                       StandardCopyOption.REPLACE_EXISTING);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails(testRepoPath);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().get("default"), repoPath);
+        }
+    }
+
+    @AfterAll
+    public static void tearDownLast() throws IOException {
+        // Restore previous workspace
+        if (Files.exists(localWorkspace)) {
+            ArchiveUtil.deleteDirectory(localWorkspace, (p)->false);
+        }
+
+        if (Files.exists(backupLocalWorkspace)) {
+            Files.move(backupLocalWorkspace, localWorkspace);
+        }
     }
 
     @AfterEach
@@ -66,5 +105,18 @@ public abstract class AbstractPearlZipTestFX extends ApplicationTest {
             } catch(IOException e) {
             }
         });
+
+        if (Arrays.stream(this.getClass().getAnnotations())
+                  .anyMatch(a -> (Tag.class.isInstance(a)) && ((Tag)a).value().equals("UATExtensionStore"))) {
+            Path repoPath = InternalContextCache.GLOBAL_CONFIGURATION_CACHE
+                    .<Path>getAdditionalConfig(CK_STORE_ROOT)
+                    .get()
+                    .resolve("repository")
+                    .resolve("default");
+            Files.copy(repoPath.getParent()
+                               .resolve("default_backup"), repoPath, StandardCopyOption.REPLACE_EXISTING);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.loadStoreRepoDetails(repoPath);
+            com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().get("default"), repoPath);
+        }
     }
 }

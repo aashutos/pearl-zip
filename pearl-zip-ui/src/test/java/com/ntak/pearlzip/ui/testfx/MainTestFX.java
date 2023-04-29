@@ -1,16 +1,15 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
-import com.jfoenix.controls.JFXSnackbar;
-import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
-import javafx.scene.control.TableRow;
+import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
-import org.junit.jupiter.api.Assertions;
+import javafx.stage.Window;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.TimeUnit;
 
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simOpenArchive;
-import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.simTraversalArchive;
 
 public class MainTestFX extends AbstractPearlZipTestFX {
 
@@ -34,67 +31,75 @@ public class MainTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Resize main window")
+    // GIVEN resize functionality is enabled
+    // WHEN main dialog resized by (100,100) pixels
+    // THEN main dialog has been resized to the expected dimensions
     public void testFX_ResizeMainWindow_Success() {
-        System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_RESIZEABLE, "true");
+        String resizeableStr = System.getProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_RESIZEABLE);
 
-        VBox wrapper = this.lookup("#wrapper").queryAs(VBox.class);
-        final double origWidth = wrapper.getScene()
-                                    .getWindow()
-                                    .getWidth();
-        final double origHeight = wrapper.getScene()
-                                         .getWindow()
-                                         .getHeight();
+        try {
+            // Given
+            System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_RESIZEABLE, "true");
+            VBox wrapper = this.lookup("#wrapper")
+                               .queryAs(VBox.class);
 
-        double x = (wrapper.getScene().getWindow().getX() + origWidth);
-        double y = (wrapper.getScene().getWindow().getY() + origHeight);
+            // When
+            final Window window = wrapper.getScene().getWindow();
+            final double origWidth = window.getWidth();
+            final double origHeight = window.getHeight();
+            int xOffset = 100;
+            int yOffset = 100;
+            CommonSpecifications.whenWindowResized(this,
+                                                   window,
+                                                   xOffset,
+                                                   yOffset);
 
-        this.moveTo(0,0)
-            .moveTo(x,y)
-            .sleep(300,TimeUnit.MILLISECONDS)
-            .press(MouseButton.PRIMARY)
-            .moveBy(100,100)
-            .sleep(300,TimeUnit.MILLISECONDS)
-            .release(MouseButton.PRIMARY)
-            .sleep(200,TimeUnit.MILLISECONDS);
-
-        Assertions.assertEquals(origWidth + 100, wrapper.getScene().getWindow().getWidth(),
-                                "Width did not change to expected value");
-        Assertions.assertEquals(origHeight + 100, wrapper.getScene().getWindow().getHeight(),
-                                "Height did not change to expected value");
+            // Then
+            CommonSpecifications.thenWindowHasDimensions(window, origWidth + xOffset, origHeight + yOffset);
+        } finally {
+            System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_RESIZEABLE, resizeableStr);
+        }
     }
 
     @Test
     @DisplayName("Test: Check Toast notification appears on navigation to sub-folder in archive")
+    // GIVEN a copy of zip archive (test.zip) is open in PearlZip
+    //     AND property configuration.ntak.pearl-zip.toast-duration set to 100000
+    //     AND snackbar is not visible
+    // WHEN select file (first-folder)
+    // THEN ensure snackbar toast message is visible
     public void testFX_DisplayNotification_DirectoryChange_MatchExpectations() throws IOException {
-        final Path srcArchivePath = Paths.get("src", "test", "resources", "test.zip")
-                                  .toAbsolutePath();
-        final Path archivePath = Files.createTempDirectory("pz")
-                             .resolve(srcArchivePath.getFileName());
-        Files.copy(srcArchivePath,
-                   archivePath,
-                   StandardCopyOption.REPLACE_EXISTING
-        );
+        String origProperty = System.getProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_TOAST_DURATION);
+        try {
+            // Given
+            // Set snack bar timeout to arbitrary long value
+            System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_TOAST_DURATION, "100000");
 
-        // Set snack bar timeout to arbitrary long value
-        System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_TOAST_DURATION, "100000");
+            final Path srcArchivePath = Paths.get("src", "test", "resources", "test.zip")
+                                             .toAbsolutePath();
+            final Path archivePath = Files.createTempDirectory("pz")
+                                          .resolve(srcArchivePath.getFileName());
+            Files.copy(srcArchivePath,
+                       archivePath,
+                       StandardCopyOption.REPLACE_EXISTING
+            );
 
-        // Open test.zip
-        simOpenArchive(this, archivePath, true, false);
+            // Open test.zip
+            simOpenArchive(this, archivePath, true, false);
+            CommonSpecifications.thenExpectNodeVisibility(this, "#toast", false);
 
-        // Initialisation checks...
-        Assertions.assertFalse(this.lookup("#toast").queryAs(JFXSnackbar.class).isVisible(),
-                              "Snackbar notification is not visible");
+            // When
+            PearlZipSpecifications.whenEntrySelectedInCurrentWindow(this, "first-folder");
+            this.doubleClickOn(MouseButton.PRIMARY);
 
-        // Navigate to first-folder
-        TableRow<FileInfo> row = simTraversalArchive(this, archivePath.getFileName().toString(), "#fileContentsView",
-                                                     (r)->{},
-                                                     "first-folder").get();
-
-        this.clickOn(row)
-            .sleep(500, TimeUnit.MILLISECONDS);
-
-        // Check Snack bar displays itself
-        Assertions.assertTrue(this.lookup("#toast").queryAs(JFXSnackbar.class).isVisible(),
-                              "Snackbar notification is not visible");
+            // Then
+            CommonSpecifications.thenExpectNodeVisibility(this, "#toast", true);
+        } finally {
+            if (origProperty != null) {
+                System.setProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_TOAST_DURATION, origProperty);
+            } else {
+                System.clearProperty(ZipConstants.CNS_NTAK_PEARL_ZIP_TOAST_DURATION);
+            }
+        }
     }
 }

@@ -3,14 +3,10 @@
  */
 package com.ntak.pearlzip.ui.util;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.ntak.pearlzip.archive.model.PluginInfo;
 import com.ntak.pearlzip.archive.pub.ArchiveReadService;
 import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
-import com.ntak.pearlzip.archive.pub.CheckManifestRule;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.mac.MacZipConstants;
@@ -18,17 +14,15 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.model.ZipState;
 import com.ntak.pearlzip.ui.pub.FrmAboutController;
 import com.ntak.pearlzip.ui.pub.FrmMainController;
-import com.ntak.pearlzip.ui.pub.PearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
-import com.ntak.pearlzip.ui.rules.*;
-import com.ntak.pearlzip.ui.util.internal.ModuleUtil;
-import com.ntak.pearlzip.ui.util.internal.QueryDefinition;
-import com.ntak.pearlzip.ui.util.internal.QueryResult;
+import com.ntak.pearlzip.ui.stages.jfx.JFXThemesStartupStage;
 import com.ntak.testfx.ExpectationFileVisitor;
 import com.ntak.testfx.FormUtil;
 import com.ntak.testfx.NativeFileChooserUtil;
+import com.ntak.testfx.specifications.CommonSpecifications;
 import de.jangassen.MenuToolkit;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -38,73 +32,62 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.testfx.api.FxRobot;
 import org.testfx.util.WaitForAsyncUtils;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ArchiveConstants.WORKING_SETTINGS;
-import static com.ntak.pearlzip.archive.constants.ConfigurationConstants.*;
-import static com.ntak.pearlzip.archive.constants.LoggingConstants.CUSTOM_BUNDLE;
 import static com.ntak.pearlzip.archive.constants.LoggingConstants.LOG_BUNDLE;
-import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
 import static com.ntak.pearlzip.archive.util.LoggingUtil.resolveTextKey;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
-import static com.ntak.pearlzip.ui.util.internal.ArchiveUtil.initialiseApplicationSettings;
+import static com.ntak.testfx.FormUtil.lookupStage;
 import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
-import static com.ntak.testfx.TestFXConstants.PLATFORM;
+import static com.ntak.testfx.TestFXConstants.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PearlZipFXUtil {
     public static void simUp(FxRobot robot) {
         robot.clickOn("#btnUp", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
     
     public static void simNewArchive(FxRobot robot, Path archive) throws IOException {
         simNewArchive(robot, archive, true);
     }
+
     public static void simNewArchive(FxRobot robot, Path archive, boolean init) throws IOException {
         if (init) {
             robot.clickOn("#btnNew", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
             robot.clickOn("#mnuNewArchive", MouseButton.PRIMARY);
         }
 
         final String[] nameSplit = DSV.split(archive.getFileName()
                                                    .toString());
         final String archiveFormat = nameSplit[nameSplit.length-1];
-        robot.sleep(100, MILLISECONDS);
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
         ComboBox<String> cmbArchiveFormat = FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat");
         FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, archiveFormat);
 
         robot.clickOn("#btnCreate", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         Files.deleteIfExists(archive);
         chooseFile(PLATFORM, robot, archive);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
     }
@@ -112,24 +95,28 @@ public class PearlZipFXUtil {
     public static void simAddFolder(FxRobot robot, Path folder, boolean useContextMenu, String archiveName) {
         if (!useContextMenu) {
             robot.clickOn("#btnAdd", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddDir", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(folder)) {
+                NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         } else {
             TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s->s.getTitle().contains(archiveName),
                                                                        "#fileContentsView");
             robot.clickOn(fileContentsView, MouseButton.SECONDARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddDir");
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(folder)) {
+                NativeFileChooserUtil.chooseFolder(PLATFORM, robot, folder);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         }
     }
 
@@ -144,24 +131,28 @@ public class PearlZipFXUtil {
     public static void simAddFile(FxRobot robot, Path file, boolean useContextMenu, String archiveName) {
         if (!useContextMenu) {
             robot.clickOn("#btnAdd", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddFile", MouseButton.PRIMARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            chooseFile(PLATFORM, robot, file);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(file)) {
+                chooseFile(PLATFORM, robot, file);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         } else {
             TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s->s.getTitle().contains(archiveName),
                                                                        "#fileContentsView");
             robot.clickOn(fileContentsView, MouseButton.SECONDARY);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
             robot.clickOn("#mnuAddFile");
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
-            NativeFileChooserUtil.chooseFile(PLATFORM, robot, file);
-            robot.sleep(50, MILLISECONDS);
+            if (Objects.nonNull(file)) {
+                NativeFileChooserUtil.chooseFile(PLATFORM, robot, file);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
+            }
         }
     }
 
@@ -222,29 +213,42 @@ public class PearlZipFXUtil {
     }
 
     public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
+            String tableName, Consumer<TableRow<FileInfo>> callback, boolean selectLast, String... identifiers) {
+        Optional<TableRow<FileInfo>> row = simTraversalArchive(robot, archiveName, tableName, "", callback, identifiers);
+
+        if (selectLast) {
+            robot.sleep(MEDIUM_PAUSE, MILLISECONDS).doubleClickOn(MouseButton.PRIMARY);
+        }
+
+        return row;
+    }
+
+    public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
             String tableName, Consumer<TableRow<FileInfo>> callback, String... identifiers) {
         return simTraversalArchive(robot, archiveName, tableName, "", callback, identifiers);
     }
 
     public static Optional<TableRow<FileInfo>> simTraversalArchive(FxRobot robot, String archiveName,
             String tableName, String root, Consumer<TableRow<FileInfo>> callback, String... identifiers) {
+        final FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
+        String archivePath = archiveInfo.getArchivePath();
         for (int i = 0; i < identifiers.length; i++) {
             Optional<TableRow<FileInfo>> selectedRow = FormUtil.selectTableViewEntry(robot,
                                                                                      FormUtil.lookupNode((s) -> s.getScene()
-                                                                                                                 .lookup(tableName) != null && s.getTitle().contains(archiveName),
+                                                                                                                 .lookup(tableName) != null && s.getTitle().contains(archivePath),
                                                                                                          tableName),
                                                                                      FileInfo::getFileName,
-                                                                                     String.format("%s%s", root,
+                                                                                     (archiveInfo.getDepth().get() == 0)?identifiers[i]:String.format("%s%s", root,
                                                                                                    identifiers[i]));
             Assertions.assertTrue(selectedRow.isPresent(), "No row was selected");
             if (identifiers.length == i+1) {
-                robot.sleep(50, MILLISECONDS);
+                robot.sleep(SHORT_PAUSE, MILLISECONDS);
                 callback.accept(selectedRow.get());
                 return selectedRow;
             }
             robot.doubleClickOn(selectedRow.get(), MouseButton.PRIMARY);
             root += String.format("%s/",identifiers[i]);
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
         }
 
         return Optional.empty();
@@ -252,24 +256,24 @@ public class PearlZipFXUtil {
 
     public static void simExtractFile(FxRobot robot, Path file) {
         robot.clickOn("#btnExtract", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         robot.clickOn("#mnuExtractSelectedFile", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         chooseFile(PLATFORM, robot, file);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simExtractAll(FxRobot robot, Path targetDir) {
         robot.clickOn("#btnExtract", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         robot.clickOn("#mnuExtractAll", MouseButton.PRIMARY);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         chooseFile(PLATFORM, robot, targetDir);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simCopyFile(FxRobot robot, boolean useContextMenu, String archiveName, String tableName,
@@ -289,9 +293,9 @@ public class PearlZipFXUtil {
             }
 
             FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
-            String root = String.format("%s/", archiveInfo.getPrefix());
 
             for (String transition : transitions) {
+                String root = String.format("%s/", archiveInfo.getPrefix());
                 switch (transition) {
                     case "..":  simUp(robot);
                                 break;
@@ -351,10 +355,14 @@ public class PearlZipFXUtil {
             // Initiate copy
             if (useContextMenu) {
                 robot.clickOn(r, MouseButton.SECONDARY);
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             } else {
                 robot.clickOn("#btnMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMoveSelected");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             }
 
             FXArchiveInfo archiveInfo = lookupArchiveInfo(archiveName).get();
@@ -395,10 +403,14 @@ public class PearlZipFXUtil {
                         ((TableCell)fileContentsView.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
                                                                               fileContentsView.getSelectionModel().getSelectedIndex(), 0)).getTableRow();
                 robot.clickOn(row, MouseButton.SECONDARY);
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             } else {
                 robot.clickOn("#btnMove");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
                 robot.clickOn("#mnuMoveSelected");
+                robot.sleep(LONG_PAUSE, MILLISECONDS);
             }
 
             Assertions.assertTrue(fileContentsView.getItems()
@@ -413,256 +425,79 @@ public class PearlZipFXUtil {
     public static void simOpenArchive(FxRobot robot, Path archive, boolean init, boolean inNewWindow) {
         if (init) {
             robot.clickOn("#btnOpen");
-            robot.sleep(5, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
         }
         chooseFile(PLATFORM, robot, archive);
 
-        Map<Boolean,List<Node>> buttonLookup =
+        Map<Boolean,List<Node>> buttonLookup = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () ->
                 robot.lookup(".button-bar")
                      .queryAs(ButtonBar.class).getButtons()
                      .stream()
-                     .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window")));
+                     .collect(Collectors.partitioningBy((b)->((Button)b).getText().equals("Open in New Window"))));
         Button response = (Button)buttonLookup.get(inNewWindow).get(0);
         robot.clickOn(response);
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
+
+        try {
+            robot.clickOn(robot.lookup(".button-bar")
+                               .queryAs(ButtonBar.class)
+                               .getButtons()
+                               .stream()
+                               .filter(b -> ((Button) b).getText()
+                                                        .equals("No"))
+                               .findFirst()
+                               .get());
+        } catch (Exception e) {
+            // ignore...
+        }
+    }
+
+    public static void simOpenArchiveBySysMenu(FxRobot robot, Path archivePath, boolean inNewWindow) {
+        robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+        simOpenArchive(robot, archivePath, false, inNewWindow);
+    }
+
+    public static void simSaveAsBySysMenu(FxRobot robot, Path archivePath) {
+        robot.clickOn(Point2D.ZERO.add(110, 10))
+             .clickOn(Point2D.ZERO.add(110, 140));
+        chooseFile(PLATFORM, robot, archivePath);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
     }
 
     public static void simTestArchive(FxRobot robot) {
         robot.clickOn("#btnTest");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simDelete(FxRobot robot) {
         robot.clickOn("#btnDelete");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void simFileInfo(FxRobot robot) {
         robot.clickOn("#btnInfo");
-        robot.sleep(5, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
     }
 
     public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
-            List<ArchiveReadService> readServices) throws IOException, TimeoutException {
-        initialise(stage, writeServices, readServices, Paths.get(Files.createTempDirectory("pz").toString(), "temp.zip"));
-    }
+            List<ArchiveReadService> readServices, Path initFile) throws IOException, TimeoutException {
 
-    public static void initialise(Stage stage, List<ArchiveWriteService> writeServices,
-            List<ArchiveReadService> readServices, Path initialFile) throws IOException, TimeoutException {
-
-        // Set properties
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL,"jdbc:postgresql://free-tier5.gcp-europe-west1.cockroachlabs.cloud:26257/ntaknotify_uat?sslmode=verify-full&options=--cluster%3Dmagic-strider-3882");
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER, "APP");
-        System.setProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD, "f50pwWhdYshxT34UuQ0BNg");
-
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,ModuleLayer.Controller>>setAdditionalConfig(CK_MLC_CACHE, new ConcurrentHashMap<>());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP,Mockito.mock(PearlZipApplication.class));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LANG_PACKS, new HashSet<Pair<String,Locale>>());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_JRT_FILE_SYSTEM, FileSystems.getFileSystem(URI.create("jrt:/")));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP_LATCH, new CountDownLatch((1)));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LCK_CLEAR_CACHE, new ReentrantReadWriteLock(true));
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PLUGINS_METADATA, new ConcurrentHashMap<>());
-
-        Path RUNTIME_MODULE_PATH = Paths.get(System.getProperty("user.home"), ".pz", "providers");
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_POST_PZAX_COMPLETION_CALLBACK, (Runnable)()->{});
-        // Set up global constants
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_PRIMARY_EXECUTOR_SERVICE, Executors.newScheduledThreadPool(1));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RECENT_FILE, Paths.get(System.getProperty("user.home"),
-                                                                                  ".pz", "rf"));
-        String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
-        String version = System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0");
-
-        Path APPLICATION_SETTINGS_FILE = Paths.get(System.getProperty("user.home"), ".pz", "application.properties");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
-                                                                            APPLICATION_SETTINGS_FILE);
-        Set<String> RK_KEYS = new HashSet<>();
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, RK_KEYS);
-        RK_KEYS.add("configuration.ntak.pearl-zip.app-name");
-        RK_KEYS.add("configuration.ntak.pearl-zip.version");
-        RK_KEYS.add("configuration.ntak.pearl-zip.copyright");
-        RK_KEYS.add("configuration.ntak.pearl-zip.weblink");
-        RK_KEYS.add("configuration.ntak.pearl-zip.license-location");
-        RK_KEYS.add("configuration.ntak.pearl-zip.license-override-location");
-
-        initialiseApplicationSettings();
-
-        // Set local directories...
-        final Path STORE_ROOT = Paths.get(System.getProperty("user.home"), ".pz");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT);
-        System.setProperty(CNS_NTAK_PEARL_ZIP_NO_FILES_HISTORY, "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService"), "5");
-        System.setProperty(String.format(CNS_PROVIDER_PRIORITY_ROOT_KEY,
-                                         "com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService"), "5");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP,
-                Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                  .orElse(STORE_ROOT.toString()))
-        );
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
-                                                                            Paths.get(STORE_ROOT.toAbsolutePath()
-                                                      .toString(), "temp")
-        );
-
-        // Loading plugin manifests...
-        Path LOCAL_MANIFEST_DIR = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "manifests");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_MANIFEST_DIR, LOCAL_MANIFEST_DIR);
-        if (!Files.exists(LOCAL_MANIFEST_DIR)) {
-            Files.createDirectories(LOCAL_MANIFEST_DIR);
+        for (AbstractSeedStartupStage ss : SEED_STARTUP_STAGE) {
+            ss.execute();
         }
 
-        Files.list(LOCAL_MANIFEST_DIR)
-             .filter(m -> m.getFileName()
-                           .toString()
-                           .toUpperCase()
-                           .endsWith(".MF"))
-             .forEach(m -> {
-                 try {
-                     Optional<PluginInfo> optInfo = ModuleUtil.parseManifest(m);
-                     if (optInfo.isPresent()) {
-                         PluginInfo info = optInfo.get();
-                         Map<String,PluginInfo> PLUGINS_METADATA = InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                                       .<Map<String,PluginInfo>>getAdditionalConfig(CK_PLUGINS_METADATA)
-                                                                                       .get();
-                         synchronized(PLUGINS_METADATA) {
-                             PLUGINS_METADATA.put(info.getName(), info);
-                         }
-                     }
-                 } catch(Exception e) {
-                 }
-             });
-
-        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(STORE_ROOT.toString(),
-                                                                                       "settings.properties").toString()));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
-        if (!Files.exists(SETTINGS_FILE)) {
-            Files.createFile(SETTINGS_FILE);
-        }
-        try(InputStream settingsIStream = Files.newInputStream(SETTINGS_FILE)) {
-            CURRENT_SETTINGS.load(settingsIStream);
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
-
-            WORKING_SETTINGS.load(settingsIStream);
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_SELECTED, "false");
-            CURRENT_SETTINGS.setProperty(CNS_SHOW_TARGET_FOLDER_EXTRACT_ALL, "false");
+        for (AbstractStartupStage ss : STARTUP_STAGE) {
+            ss.execute();
         }
 
-        ////////////////////////////////////////////
-        ///// Named Query Load ////////////////////
-        //////////////////////////////////////////
+        MacPearlZipApplication mockApplication = Mockito.mock(MacPearlZipApplication.class);
+        List<AbstractJFXStartupStage> JFX_STARTUP_STAGE = Arrays.asList(new JFXThemesStartupStage(mockApplication));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APP, mockApplication);
 
-        final var queryDataCache = new ConcurrentHashMap<String,QueryResult>();
-        final var queryDefinitionCache = new ConcurrentHashMap<String,QueryDefinition>();
 
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_RESULT_CACHE, queryDataCache);
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_QUERY_DEFINITION_CACHE, queryDefinitionCache);
-
-        // 1. Extract all files to internal query directory
-        Path defQueryPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                .toString(), "db-cache", ".internal");
-        String resource = "queries";
-        String moduleName = "com.ntak.pearlzip.ui";
-        com.ntak.pearlzip.ui.util.internal.JFXUtil.extractResources(defQueryPath, moduleName, resource);
-
-        // 2. Load query definitions into cache
-        Files.list(defQueryPath).forEach(c -> {
-            XMLInputFactory f = XMLInputFactory.newFactory();
-            try (
-                    InputStream fis = Files.newInputStream(c)
-            ) {
-                XMLStreamReader sr = f.createXMLStreamReader(fis);
-                XmlMapper mapper = new XmlMapper(f);
-                QueryDefinition queryDef = mapper.readValue(sr, QueryDefinition.class);
-                queryDefinitionCache.put(queryDef.getId(), queryDef);
-            } catch(IOException | XMLStreamException e) {
-            }
-        });
-
-        // Themes
-
-        // Copy over and overwrite core themes...
-        for (String theme : CORE_THEMES) {
-            Path defThemePath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                    .toString(), "themes", theme);
-            Files.createDirectories(defThemePath);
-            Stream<Path> themeFiles;
-            try {
-                themeFiles = Files.list(Paths.get(PearlZipFXUtil.class.getClassLoader()
-                                                            .getResource(theme)
-                                                            .getPath()));
-            } catch (Exception e) {
-                try {
-                    themeFiles = Files.list(InternalContextCache.INTERNAL_CONFIGURATION_CACHE
-                                                                .<FileSystem>getAdditionalConfig(CK_JRT_FILE_SYSTEM)
-                                                                .get()
-                                                                .getPath("modules", "com.ntak.pearlzip.ui", theme)
-                                                                .toAbsolutePath());
-                } catch(Exception exc) {
-                    final String themePath = PearlZipFXUtil.class.getClassLoader()
-                                                            .getResource(theme)
-                                                            .getPath();
-                    Path jarArchive =
-                        Paths.get(themePath.substring(0, themePath.indexOf('!'))
-                                        .replaceAll("file:",""));
-
-                    Path tempDir = Files.createTempDirectory("pz");
-                    Path srcThemePath =
-                            Paths.get(tempDir.toAbsolutePath().toString(),
-                                      themePath.substring(themePath.indexOf('!')+1));
-
-                    try (JarFile jar = new JarFile(jarArchive.toFile())) {
-                        for (JarEntry entry : jar.stream().toList()) {
-                            if (entry.isDirectory()) {
-                                Path entryDest = tempDir.resolve(entry.getName());
-
-                                if (entry.isDirectory()) {
-                                    Files.createDirectory(entryDest);
-                                    continue;
-                                }
-
-                                Files.copy(jar.getInputStream(entry), entryDest);
-                            }
-                        }
-                    }
-
-                    themeFiles = Files.list(srcThemePath);
-                }
-            }
-
-            themeFiles.forEach(f -> {
-                                   try {
-                                       Files.copy(f,
-                                                  Paths.get(defThemePath.toAbsolutePath()
-                                                                        .toString(),
-                                                            f.getFileName()
-                                                             .toString()
-                                                  ),
-                                                  StandardCopyOption.REPLACE_EXISTING);
-                                   } catch(IOException e) {
-                                   }
-                               }
-            );
+        for (AbstractJFXStartupStage startupStage : JFX_STARTUP_STAGE) {
+            startupStage.execute();
         }
-
-        // Loading rules...
-        List<CheckManifestRule> MANIFEST_RULES = new CopyOnWriteArrayList<>();
-        MANIFEST_RULES.add(new MinVersionManifestRule());
-        MANIFEST_RULES.add(new MaxVersionManifestRule());
-        MANIFEST_RULES.add(new LicenseManifestRule());
-        MANIFEST_RULES.add(new CheckLibManifestRule());
-        MANIFEST_RULES.add(new RemovePatternManifestRule());
-        MANIFEST_RULES.add(new ThemeManifestRule());
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MANIFEST_RULES, MANIFEST_RULES);
-
-        // Setting Locale
-        Locale.setDefault(genLocale(new Properties()));
-        LOG_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                    System.getProperty(CNS_RES_BUNDLE, "pearlzip"),
-                                                    Locale.getDefault());
-        CUSTOM_BUNDLE = ModuleUtil.loadLangPackDynamic(RUNTIME_MODULE_PATH,
-                                                       System.getProperty(CNS_RES_BUNDLE,"custom"),
-                                                       Locale.getDefault());
 
         // Load services
         for (ArchiveReadService readService : readServices) {
@@ -673,41 +508,7 @@ public class PearlZipFXUtil {
             ZipState.addArchiveProvider(writeService);
         }
 
-        initialiseMenu();
-
-        ////////////////////////////////////////////
-        ///// Store Repository Load ///////////////
-        //////////////////////////////////////////
-
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>setAdditionalConfig(CK_STORE_REPO, new ConcurrentHashMap<>());
-
-        Path repoPath = STORE_ROOT.toAbsolutePath().resolve("repository");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                .setAdditionalConfig(CK_REPO_ROOT, repoPath);
-
-        if (!Files.exists(repoPath)) {
-            Files.createDirectories(repoPath);
-        }
-
-        // Load default repository and overwrite file
-        Path defaultRepoFile = repoPath.resolve("default");
-
-        StoreRepoDetails storeRepoDetails = new StoreRepoDetails(ResourceConstants.DEFAULT, System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_URL), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_USER), System.getProperty(CNS_NTAK_PEARL_ZIP_JDBC_PASSWORD));
-        com.ntak.pearlzip.ui.util.internal.JFXUtil.persistStoreRepoDetails(storeRepoDetails, defaultRepoFile);
-
-        // Load persisted repository files
-        Files.list(repoPath).filter(p -> {
-                 try {
-                     return !Files.isHidden(p);
-                 } catch(IOException e) {
-                     return false;
-                 }
-             })
-             .forEach(com.ntak.pearlzip.ui.util.internal.JFXUtil::loadStoreRepoDetails);
-
-        // Read in repository files into in-memory map
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Map<String,StoreRepoDetails>>getAdditionalConfig(CK_STORE_REPO).get().put(ResourceConstants.DEFAULT, storeRepoDetails);
-
+        PearlZipFXUtil.initialiseMenu();
         // Load main form
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(MacPearlZipApplication.class.getResource("/frmMain.fxml"));
@@ -719,15 +520,22 @@ public class PearlZipFXUtil {
         FrmMainController controller = loader.getController();
 
         // Set up initial archive
-        FXArchiveInfo fxArchiveInfo = initFxArchiveInfo(initialFile);
+        FXArchiveInfo fxArchiveInfo = initFxArchiveInfo(initFile);
         controller.initData(stage, fxArchiveInfo);
         fxArchiveInfo.setMainController(controller);
-        stage.setTitle(resolveTextKey(TITLE_FILE_PATTERN, appName, version,
+        stage.setTitle(resolveTextKey(TITLE_FILE_PATTERN, "PearlZip", "0.0.0.0",
                                       fxArchiveInfo.getArchivePath()));
         stage.show();
         stage.toFront();
 
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, stage.showingProperty());
+
+        Path STORE_ROOT = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_ROOT).get();
+        Path LOCAL_TEMP = Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
+                                       .orElse(STORE_ROOT.toString()));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, LOCAL_TEMP);
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                            Paths.get(System.getProperty("user.home"), ".pz", "temp"));
     }
 
     public static void initialiseMenu() throws IOException {
@@ -842,14 +650,41 @@ public class PearlZipFXUtil {
                                                .findFirst()
                                                .orElse(""));
         if (index >= 0) {
+            System.out.println(String.format("Clicking on file: %s. Index = %d...", archive.getFileName().toString(), index));
+            TableView view = FormUtil.lookupNode(s->s.getTitle().contains(archive.toString()),
+                                                 "#fileContentsView");
             robot.clickOn(200, 0)
-                 .sleep(100, MILLISECONDS)
-                 .clickOn(200,
-                          ((1 + index) * 30));
-            robot.sleep(250, MILLISECONDS);
+                 .sleep(MEDIUM_PAUSE, MILLISECONDS)
+                 .moveTo(200,
+                          (25 + ((index+1) * 17)))
+                .sleep(LONG_PAUSE, MILLISECONDS)
+                .clickOn(MouseButton.PRIMARY)
+                .clickOn(view);
+
             return true;
         } else {
+            System.out.println("Index < 0...");
             return false;
         }
+    }
+
+    public static Stage lookupStageChecked(String regExPattern) {
+        Optional<Stage> optStage = lookupStage(regExPattern);
+        Assertions.assertTrue(optStage.isPresent(), String.format("Dialog matching %s not found", regExPattern));
+
+        return optStage.get();
+    }
+
+    public static void simSelectOptionsAdditionalTab(FxRobot fxRobot, int i) {
+        Stage frmOptions = lookupStageChecked("PearlZip Options");
+
+        double x = frmOptions.getX();
+        double y = frmOptions.getY();
+        double width = frmOptions.getWidth();
+
+        fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + 50));
+
+        fxRobot.clickOn(Point2D.ZERO.add(x + width - 10, y + (22 * (i)) + 62))
+                     .sleep(MEDIUM_PAUSE, MILLISECONDS);
     }
 }

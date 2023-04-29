@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.archive.constants;
 
@@ -39,6 +39,10 @@ public class LoggingConstants {
 
     public static final String LOG_ARCHIVE_INFO_ASSERT_PATH = "logging.ntak.pearl-zip.archive-info.assert.path";
     public static final String LOG_ARCHIVE_INFO_ASSERT_READ_SERVICE = "logging.ntak.pearl-zip.archive-info.assert.read-service";
+
+    public static final String LOG_START_STAGE = "logging.ntak.pearl-zip.stage.start-stage";
+    public static final String LOG_END_STAGE = "logging.ntak.pearl-zip.stage.end-stage";
+    public static final String LOG_ISSUE_STAGE = "logging.ntak.pearl-zip.stage.issue-stage";
 
     public static final String LOG_ARCHIVE_SERVICE_EXTRACT_EXCEPTION = "logging.ntak.pearl-zip.archive-service.extract.exception";
     public static final String TITLE_ARCHIVE_SERVICE_EXTRACT_EXCEPTION = "title.ntak.pearl-zip.archive-service.extract.exception";

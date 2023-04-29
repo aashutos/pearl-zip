@@ -3,6 +3,7 @@
  */
 module ntak.testfx.util {
     exports com.ntak.testfx;
+    exports com.ntak.testfx.specifications;
 
     requires javafx.graphics;
     requires org.testfx;
@@ -10,4 +11,5 @@ module ntak.testfx.util {
     requires com.ntak.pearlzip.archive;
     requires org.mockito;
     requires java.desktop;
+    requires org.junit.jupiter.api;
 }

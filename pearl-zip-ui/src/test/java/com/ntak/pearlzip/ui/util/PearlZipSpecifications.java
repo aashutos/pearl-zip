@@ -1,0 +1,470 @@
+/*
+ * Copyright © 2023 92AK
+ */
+package com.ntak.pearlzip.ui.util;
+
+import com.ntak.pearlzip.archive.pub.ArchiveReadService;
+import com.ntak.pearlzip.archive.pub.ArchiveWriteService;
+import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.util.CompressUtil;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
+import com.ntak.pearlzip.ui.model.FXArchiveInfo;
+import com.ntak.pearlzip.ui.model.ZipState;
+import com.ntak.testfx.FormUtil;
+import com.ntak.testfx.TestFXConstants;
+import com.ntak.testfx.specifications.CommonSpecifications;
+import javafx.geometry.Point2D;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.util.Pair;
+import org.junit.jupiter.api.Assertions;
+import org.testfx.api.FxRobot;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Properties;
+
+import static com.ntak.pearlzip.archive.util.LoggingUtil.genLocale;
+import static com.ntak.pearlzip.ui.constants.ResourceConstants.SSV;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_WINDOW_MENU;
+import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
+import static com.ntak.testfx.NativeFileChooserUtil.chooseFile;
+import static com.ntak.testfx.TestFXConstants.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class PearlZipSpecifications {
+
+    /////////////////
+    ///// GIVEN /////
+    /////////////////
+
+    // CLAUSE: a new ($ARCHIVE_EXTENSION) archive has been created in PearlZip
+    public static Path givenCreateNewArchive(FxRobot robot, String extension) {
+        return givenCreateNewArchive(robot, extension, null);
+    }
+
+    // CLAUSE: a new ($ARCHIVE_EXTENSION) archive has been created in PearlZip with name ($NAME)
+    public static Path givenCreateNewArchive(FxRobot robot, String extension, String name) {
+        return givenCreateNewArchive(robot, extension, name, false);
+    }
+
+    // CLAUSE: a new ($ARCHIVE_EXTENSION) archive has been created in PearlZip WITH NAME ($NAME) (via system menu)
+    public static Path givenCreateNewArchive(FxRobot robot, String extension, String name, boolean useSystemMenu) {
+        String fileName;
+        if (!Objects.isNull(name)) {
+            fileName = String.format("%s.%s", name, extension);
+        } else {
+            fileName = String.format("test%s.%s", extension, extension);
+        }
+
+        try {
+            final var archiveName = Files.createTempDirectory("pz")
+                                         .resolve(fileName);
+
+            if (!useSystemMenu) {
+                simNewArchive(robot, archiveName);
+            } else {
+                robot.clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
+                PearlZipFXUtil.simNewArchive(robot, archiveName, false);
+            }
+
+            Assertions.assertTrue(lookupArchiveInfo(fileName).isPresent(), "Archive is not open in PearlZip");
+
+            return archiveName;
+        } catch(IOException e) {
+            fail(String.format("Could not create archive: %s", fileName));
+            return null;
+        }
+    }
+
+    // CLAUSE: the default archive in PearlZip
+    public static String givenDefaultArchiveDetails() {
+        String archiveName = JFXUtil.getMainStageInstances().stream().findFirst().map(s -> (FXArchiveInfo)s.getUserData()).map(FXArchiveInfo::getArchivePath).orElse(null);
+
+        if (Objects.isNull(archiveName)) {
+            fail("No open archives!");
+        }
+
+        return archiveName;
+    }
+
+    // CLAUSE: extension store is open
+    public static void givenExtensionStoreOpened(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(160, 10))
+             .clickOn(Point2D.ZERO.add(160, 60))
+             .sleep(LONG_PAUSE, MILLISECONDS);
+    }
+
+    // CLAUSE: files ($ARCHIVE_FILE) have been created
+    public static Path givenNewSingleFileCompressorArchive(FxRobot robot, String format, Path nestedFile, Path targetDir, boolean useMainMenu) {
+        // New single file compressor archive
+        if (useMainMenu) {
+            robot.clickOn(Point2D.ZERO.add(110, 10))
+                 .clickOn(Point2D.ZERO.add(110, 60));
+        } else {
+            robot.clickOn("#btnNew").clickOn("#mnuNewSingleFileCompressor");
+        }
+
+        // Set archive format
+        ComboBox<String> cmbArchiveFormat = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.isShowing() && s.getTitle().equals("Create new archive..."), "#comboArchiveFormat"));
+        FormUtil.selectComboBoxEntry(robot, cmbArchiveFormat, format);
+
+        // Select file to archive
+        robot.clickOn("#btnSelectFile");
+        simOpenArchive(robot, nestedFile, false, false);
+        robot.clickOn("#btnCreate").sleep(SHORT_PAUSE, MILLISECONDS);
+        Path pathArchive = targetDir.toAbsolutePath().resolve(String.format("arbitrary-file.txt.%s", format));
+        chooseFile(PLATFORM, robot, pathArchive.getParent().toAbsolutePath());
+
+        // Check archive exists
+        Assertions.assertTrue(Files.exists(pathArchive), String.format("Path: %s does not exist", pathArchive));
+
+        return pathArchive;
+    }
+
+    ////////////////
+    ///// WHEN /////
+    ////////////////
+
+    // CLAUSE: nested file ($NESTED_ARCHIVE) opened from PearlZip
+    public static void whenOpenNestedEntry(FxRobot robot, String archiveName, String... nestedArchivePath) {
+        TableRow row = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> PearlZipFXUtil.simTraversalArchive(robot, archiveName, "#fileContentsView", (r) -> {}, nestedArchivePath).get());
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
+        robot.doubleClickOn(row);
+        robot.sleep(LONG_PAUSE, MILLISECONDS);
+    }
+
+    // CLAUSE: close nested archive and save = ($SAVE_FILE)
+    public static void whenCloseNestedArchive(FxRobot robot, boolean saveArchive) {
+        whenCloseArchive(robot);
+        DialogPane dialogPane = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> robot.lookup(".dialog-pane").query());
+        Assertions.assertTrue(dialogPane.getContentText()
+                                        .startsWith(
+                                                "Please specify if you wish to persist the changes of the nested archive"));
+        robot.clickOn(dialogPane.lookupButton(saveArchive? ButtonType.YES:ButtonType.NO));
+        robot.sleep(MEDIUM_PAUSE, MILLISECONDS);
+    }
+
+    // CLAUSE: close current archive
+    public static void whenCloseArchive(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 160));
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
+    }
+
+    // CLAUSE: delete file ($FILE)
+    public static void whenDeleteFromArchive(FxRobot robot, Path archive, Path file) {
+        PearlZipFXUtil.simTraversalArchive(robot, archive.toString(),"#fileContentsView", (r)->{}, SSV.split(file.toString()));
+        PearlZipFXUtil.simDelete(robot);
+    }
+
+    // CLAUSE: Copy file ($SOURCE_FILE) to ($TARGET_FILE) (not) using context menu
+    public static void whenFileCopiedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simCopyFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
+    // CLAUSE: Move file ($SOURCE_FILE) to ($TARGET_FILE) (not) using context menu
+    public static void whenFileMovedWithinArchive(FxRobot robot, Path archive, Path from, Path to, boolean useContextMenu) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+
+        while (info.getDepth().get() > 0) {
+            simUp(robot);
+        }
+
+        simMoveFile(robot, useContextMenu, archive.toString(), "#fileContentsView", from, SSV.split(from.getParent().relativize(to.getParent()).toString()));
+    }
+
+    // CLAUSE: selected file is extracted from archive to ($TARGET_LOCATION) location
+    public static void whenFileExtracted(FxRobot robot, Path targetLocation) throws IOException {
+        if (Files.isRegularFile(targetLocation)) {
+            Files.deleteIfExists(targetLocation);
+        }
+        simExtractFile(robot, targetLocation);
+    }
+
+    // CLAUSE: entry ($ENTRY_NAME) is selected in the current archive
+    public static TableRow<FileInfo> whenEntrySelectedInCurrentWindow(FxRobot robot, String entryName) {
+        TableView<FileInfo> fileContentsView = robot.lookup("#fileContentsView").queryAs(TableView.class);
+        return FormUtil.selectTableViewEntry(robot, fileContentsView, FileInfo::getFileName,
+                                             entryName).get();
+    }
+
+    // CLAUSE: Options dialog opened
+    public static void whenOptionDialogOpened(FxRobot robot) {
+        robot.clickOn(Point2D.ZERO.add(160, 10))
+             .clickOn(Point2D.ZERO.add(160, 30));
+    }
+
+    // CLAUSE: License accepted
+    public static void whenPZAXLicenseAccepted(FxRobot robot) {
+        robot.drag("#webLicense", MouseButton.PRIMARY)
+                .moveBy(0, 400)
+                .sleep(2500, MILLISECONDS)
+                .drop()
+                .clickOn("#btnAccept")
+                .sleep(150, MILLISECONDS);
+    }
+
+    // CLAUSE: refresh Locale
+    public static void whenPearlZipLocaleIsRefreshed() {
+        Locale.setDefault(genLocale(new Properties()));
+    }
+
+    ////////////////
+    ///// THEN /////
+    ////////////////
+
+    // CLAUSE: ensure expected file ($FILE_ENTRY_NAME) exists in archive ($ARCHIVE_NAME)
+    public static void thenExpectFileExistsInCurrentWindow(Path archiveName, String fileInArchive) {
+        String archivePath = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> lookupArchiveInfo(archiveName.toString()).get().getArchivePath());
+        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
+                                                                         .contains(archivePath),
+                                                                   "#fileContentsView");
+        Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertEquals(fileInArchive,
+                                fileContentsView.getItems()
+                                                .stream()
+                                                .filter(f -> f.getFileName().equals(fileInArchive))
+                                                .findFirst()
+                                                .get()
+                                                .getFileName(),
+                                String.format("File %s was not found in archive", fileInArchive));
+    }
+
+    // CLAUSE: ensure file ($FILE_ENTRY_NAME) is not included in archive ($ARCHIVE_NAME)
+    public static void thenExpectFileNotExistsInCurrentWindow(Path archiveName, String fileInArchive) {
+        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
+                                                                         .contains(archiveName.toString()),
+                                                                   "#fileContentsView");
+        Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertFalse(fileContentsView.getItems()
+                                                .stream()
+                                                .filter(f -> f.getFileName().equals(fileInArchive))
+                                                .findFirst()
+                                                .isPresent(),
+                                String.format("File %s was found in archive unexpectedly", fileInArchive));
+    }
+
+    // CLAUSE: ensure the number of files in current archive = ($COUNT)
+    public static void thenExpectNumberOfFilesInCurrentWindow(Path archiveName, int expectedCount) {
+        TableView<FileInfo> fileContentsView = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.getTitle()
+                                                                                                                                                                        .contains(archiveName.toString()),
+                                                                                                                                                                  "#fileContentsView"));
+        Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertEquals(expectedCount,
+                                fileContentsView.getItems()
+                                                .size(),
+                                String.format("Expected number of files (%d) was not found in archive %s", expectedCount, archiveName));
+    }
+
+    // CLAUSE: ensure file ($FILE) does not exist in archive ($ARCHIE_NAME) at depth ($DEPTH)
+    public static void thenExpectFileNotExistsInArchive(Path archiveName, int depth, String fileName) {
+        FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(archiveName.toString()).orElse(null);
+        Assertions.assertNotNull(archiveInfo, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertFalse(archiveInfo.getFiles().stream().filter(e -> e.getLevel() == depth && Objects.equals(e.getFileName(), fileName)).findFirst().isPresent(),
+                                String.format("Expected file %s (at depth %d) was unexpectedly found in archive %s", fileName, depth, archiveName));
+    }
+
+    // CLAUSE: ensure file ($FILE) does exist in archive ($ARCHIE_NAME) at depth ($DEPTH)
+    public static void thenExpectFileExistsInArchive(Path archiveName, int depth, String fileName) {
+        FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(archiveName.toString()).orElse(null);
+        Assertions.assertNotNull(archiveInfo, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertEquals(fileName,
+                                archiveInfo.getFiles().stream().filter(e -> e.getLevel() == depth && Objects.equals(e.getFileName(), fileName)).findFirst().map(FileInfo::getFileName).orElse(""),
+                                String.format("Expected file %s (at depth %d) was not found in archive %s", fileName, depth, archiveName));
+    }
+
+    // CLAUSE: ensure the number of files in archive ($ARCHIVE_NAME) metadata has ($COUNT)
+    public static void thenExpectNumberOfFilesInArchive(Path archiveName, int expectedCount) {
+        FXArchiveInfo archiveInfo = PearlZipFXUtil.lookupArchiveInfo(archiveName.toString()).orElse(null);
+        Assertions.assertNotNull(archiveInfo, "Expected archive was not found and so no metadata could be retrieved");
+        Assertions.assertEquals(expectedCount,
+                                archiveInfo.getFiles().size(),
+                                String.format("Expected number of files (%d) was not found in archive %s", expectedCount, archiveName));
+    }
+
+    // CLAUSE: hash is consistent for extracted file ($FILE_ENTRY) from archive ($ARCHIVE_NAME)
+    public static void thenExpectCRCHashFileEntryMatches(FxRobot robot, long expectedHash, Path archiveName, Path fileToExtract) throws IOException {
+        Path tempDir = Files.createTempDirectory("pz");
+
+        TableView<FileInfo> fileContentsView = FormUtil.lookupNode(s -> s.getTitle()
+                                                                         .contains(archiveName.toString()),
+                                                                   "#fileContentsView");
+        FormUtil.selectTableViewEntry(robot,
+                                      fileContentsView,
+                                      FileInfo::getFileName,
+                                      fileToExtract.toString());
+        simExtractFile(robot, tempDir.resolve(fileToExtract.getFileName()));
+        final long targetHash = CompressUtil.crcHashFile(tempDir.resolve(fileToExtract.getFileName()).toFile());
+
+        Assertions.assertEquals(expectedHash, targetHash, "File hashes were not identical");
+    }
+
+    // CLAUSE: ensure files are stored in the archive ($ARCHIVE_NAME) and integrity has been maintained
+    public static void thenCheckIntegrityOfExpectedFiles(FxRobot robot, Path[] referenceFiles, Path archiveName, Path[] entries) throws IOException {
+        if (referenceFiles.length != entries.length) {
+            fail("Parameters not set up correctly on expectations");
+        }
+
+        for (int i = 0; i < referenceFiles.length; i++) {
+            final long sourceHash = CompressUtil.crcHashFile(referenceFiles[i].toFile());
+            thenExpectFileExistsInCurrentWindow(archiveName, entries[i].toString());
+            thenExpectCRCHashFileEntryMatches(robot, sourceHash, archiveName, entries[i]);
+        }
+    }
+
+    // CLAUSE: ensure only ($COUNT) main stage instances are open
+    public static void thenExpectNumberOfMainInstances(int expectedInstances) {
+        Assertions.assertEquals(expectedInstances,
+                                JFXUtil.getMainStageInstances()
+                                       .size(),
+                                String.format("New main windows instance unexpectedly created. Only expected %d instances", expectedInstances));
+    }
+
+    // CLAUSE: window menu contains entry for archive(s) ($ARCHIVE_NAME)
+    public static void thenMainInstanceExistsWithName(String archiveName) {
+        Assertions.assertTrue(lookupArchiveInfo(archiveName).isPresent());
+    }
+
+    // CLAUSE: ensure archive ($ARCHIVE_NAME) is focused
+    public static void thenExpectedArchiveWindowIsSelected(String archiveName) {
+        String value = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> InternalContextCache.INTERNAL_CONFIGURATION_CACHE
+                .<Menu>getAdditionalConfig(CK_WINDOW_MENU)
+                .get().getItems()
+                .stream()
+                .filter(s -> s.getText()
+                                .contains(String.format("%s%s", archiveName, " • "))
+                ).findFirst().map(MenuItem::getText).orElse(""));
+        Assertions.assertFalse(value.isEmpty(), String.format("Expected archive path %s not found as active.", archiveName));
+    }
+
+    // CLAUSE: expect files ($FILES[]) in target folder ($TARGET_FOLDER)
+    public static void thenExpectFileHierarchyInTargetDirectory(Path tempDir, Path... files) {
+        for (Path file : files) {
+            Assertions.assertTrue(Files.exists(tempDir.resolve(file)), String.format("File: %s does not exist.", file.toAbsolutePath()));
+        }
+    }
+
+    // CLAUSE: ensure the number of files in archive = ($COUNT) with filename matching '$PATTERN'
+    public static void thenExpectNumberOfFileMatchingPattern(Path archive, int count, String regEx) {
+        FXArchiveInfo info = lookupArchiveInfo(archive.toString()).get();
+        Assertions.assertEquals(count, info.getFiles().stream().filter(f -> f.getFileName().matches(regEx)).count());
+    }
+
+    // CLAUSE: ensure currently displayed FileInfo details ($FILE_ENTRY) match expectations
+    public static void thenFileInfoScreenContentsMatchesFileMetaData(FxRobot robot, FileInfo fileInfo) {
+        Label lblIndexValue = robot.lookup("#lblIndexValue").queryAs(Label.class);
+        Label lblLevelValue = robot.lookup("#lblLevelValue").queryAs(Label.class);
+        Label lblFilenameValue = robot.lookup("#lblFilenameValue").queryAs(Label.class);
+        Label lblHashValue = robot.lookup("#lblHashValue").queryAs(Label.class);
+        Label lblRawSizeValue = robot.lookup("#lblRawSizeValue").queryAs(Label.class);
+        Label lblPackedSizeValue = robot.lookup("#lblPackedSizeValue").queryAs(Label.class);
+        Label lblFolderValue = robot.lookup("#lblFolderValue").queryAs(Label.class);
+        Label lblEncryptValue = robot.lookup("#lblEncryptValue").queryAs(Label.class);
+        Label lblCommentsValue = robot.lookup("#lblCommentsValue").queryAs(Label.class);
+        Label lblLastWriteTimeValue = robot.lookup("#lblLastWriteTimeValue").queryAs(Label.class);
+        Label lblLastAccessTimeValue = robot.lookup("#lblLastAccessTimeValue").queryAs(Label.class);
+        Label lblCreateTimeValue = robot.lookup("#lblCreateTimeValue").queryAs(Label.class);
+        Label lblUserValue = robot.lookup("#lblUserValue").queryAs(Label.class);
+        Label lblGroupValue = robot.lookup("#lblGroupValue").queryAs(Label.class);
+
+        robot.clickOn("#tpGeneral");
+        robot.sleep(5, MILLISECONDS);
+        Assertions.assertEquals(String.valueOf(fileInfo.getIndex()), lblIndexValue.getText(), "Index does not match");
+        Assertions.assertEquals(String.valueOf(fileInfo.getLevel()), lblLevelValue.getText(), "Level does not match");
+        Assertions.assertEquals(String.valueOf(fileInfo.getFileName()), lblFilenameValue.getText(),
+                                "Filename does not match");
+        Assertions.assertEquals(String.format("0x%s",Long.toHexString(fileInfo.getCrcHash()).toUpperCase()), lblHashValue.getText(),
+                                "Hash does not match");
+        Assertions.assertEquals(String.valueOf(fileInfo.getRawSize()), lblRawSizeValue.getText(),
+                                "Raw size does not match");
+        Assertions.assertEquals(String.valueOf(fileInfo.getPackedSize()), lblPackedSizeValue.getText(),
+                                "Packed size does not match");
+        Assertions.assertEquals(fileInfo.isFolder()?"folder":"file", lblFolderValue.getText(),
+                                "Is Folder does not match");
+        Assertions.assertEquals(fileInfo.isEncrypted()?"encrypted":"plaintext", lblEncryptValue.getText(),
+                                "Is Encrypted does not match");
+        Assertions.assertEquals(fileInfo.getComments(), lblCommentsValue.getText(),
+                                "Comments does not match");
+
+        robot.clickOn("#tpTimestamps");
+        robot.sleep(5, MILLISECONDS);
+        Assertions.assertEquals(Objects.isNull(fileInfo.getLastWriteTime())?"-":fileInfo.getLastWriteTime()
+                                                                                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), lblLastWriteTimeValue.getText(),
+                                "Last Write Timestamp does not match");
+        Assertions.assertEquals(Objects.isNull(fileInfo.getLastAccessTime())?"-":fileInfo.getLastAccessTime()
+                                                                                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), lblLastAccessTimeValue.getText(),
+                                "Last Access Timestamp does not match");
+        Assertions.assertEquals(Objects.isNull(fileInfo.getCreationTime())?"-":fileInfo.getCreationTime()
+                                                                                         .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), lblCreateTimeValue.getText(),
+                                "Creation Timestamp does not match");
+
+        robot.clickOn("#tpOwnership");
+        robot.sleep(5, MILLISECONDS);
+        Assertions.assertEquals(fileInfo.getUser(), lblUserValue.getText(), "User does not match");
+        Assertions.assertEquals(fileInfo.getGroup(), lblGroupValue.getText(), "Group does not match");
+
+        robot.clickOn("#tpOther");
+        robot.sleep(5, MILLISECONDS);
+        TableView<Pair<String,String>> props = robot.lookup("#tblOtherInfo").queryAs(TableView.class);
+        List<Pair<String,String>> propList = props.getItems();
+        propList.stream().forEach(p->Assertions.assertEquals(fileInfo.getAdditionalInfoMap().get(p.getKey()),
+                                                             p.getValue(),
+                                                             String.format("Property (%s,%s) did not match",
+                                                                           p.getKey(), p.getValue())));
+    }
+
+    // CLAUSE: expect files in the following order ($FILES[])
+    public static void thenExpectFilesInOrderInCurrentWindow(String archiveName, List<String> files) {
+        TableView<FileInfo> fileContentsView = CommonSpecifications.retryRetrievalForDuration(TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS, () -> FormUtil.lookupNode(s -> s.getTitle()
+                                                                                                                                                                        .contains(archiveName),
+                                                                                                                                                                  "#fileContentsView"));
+        Assertions.assertNotNull(fileContentsView, "Expected archive was not found and so no metadata could be retrieved");
+        for (int i = 0; i < fileContentsView.getItems().size(); i++) {
+            Assertions.assertEquals(files.get(i), fileContentsView.getItems().get(i).getFileName(), String.format("Expected files were not presented in the anticipated order. Expected: %s; Actual: %s", files.get(i), fileContentsView.getItems().get(i)));
+        }
+    }
+
+    // CLAUSE: expect archive ($ARCHIVE_NAME) is not open in PearlZip
+    public static void thenExpectArchiveNotOpen(Path archive) {
+        Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().noneMatch(v -> v.getTitle().contains(archive.toAbsolutePath().toString())), String.format("File: %s was unexpectedly open in PearlZip", archive));
+    }
+
+    // CLAUSE: expect archive ($ARCHIVE_NAME) is open in PearlZip
+    public static void thenExpectArchiveOpen(Path archive) {
+        Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().anyMatch(v -> v.getTitle().contains(archive.toAbsolutePath().toString())), String.format("File: %s was not open in PearlZip", archive));
+    }
+
+    // CLAUSE: write archive provider is set to ($PROVIDER) for zip files
+    public static void thenExpectActiveWriteService(String canonicalName) {
+        Assertions.assertTrue(
+                ZipState.getWriteProviders()
+                        .stream()
+                        .map(ArchiveWriteService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(canonicalName)),
+                String.format("Active Write Service was not set to %s", canonicalName));
+    }
+
+    // CLAUSE: read archive provider is set to ($PROVIDER) for zip files
+    public static void thenExpectActiveReadService(String canonicalName) {
+        Assertions.assertTrue(
+                ZipState.getReadProviders()
+                        .stream()
+                        .map(ArchiveReadService::getClass)
+                        .anyMatch(k -> k.getCanonicalName()
+                                        .equals(canonicalName)),
+                String.format("Active Read Service was not set to %s", canonicalName));
+    }
+}

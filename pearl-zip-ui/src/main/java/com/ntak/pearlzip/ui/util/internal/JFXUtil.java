@@ -286,36 +286,17 @@ public class JFXUtil {
         return results;
     }
 
-    public static Properties initialiseBootstrapProperties() throws IOException {
+    public static Properties initialiseBootstrapProperties(Path storeRoot, Path bootstrapPropertiesFile) throws IOException {
         Properties props = new Properties();
         props.load(MacPearlZipApplication.class.getClassLoader()
                                                .getResourceAsStream("application.properties"));
-        final Path STORE_ROOT = Paths.get(System.getProperty(CNS_STORE_ROOT,
-                                                             String.format("%s/.pz",
-                                                                      System.getProperty("user.home"))));
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                .setAdditionalConfig(CK_STORE_ROOT, STORE_ROOT
-                );
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE
-                            .setAdditionalConfig(CK_LOCAL_TEMP,
-                                    Paths.get(Optional.ofNullable(System.getenv("TMPDIR"))
-                                                      .orElse(STORE_ROOT.toString())
-                                    )
-        );
-        Path APPLICATION_SETTINGS_FILE = Paths.get(STORE_ROOT.toString(), "application.properties");
-        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_APPLICATION_SETTINGS_FILE,
-                                                                            APPLICATION_SETTINGS_FILE);
-        initialiseApplicationSettings();
 
-        String defaultModulePath = Path.of(STORE_ROOT.toAbsolutePath().toString(), "providers").toString();
-        Path RUNTIME_MODULE_PATH =
-                Paths.get(System.getProperty(CNS_NTAK_PEARL_ZIP_MODULE_PATH, defaultModulePath)).toAbsolutePath();
-        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RUNTIME_MODULE_PATH, RUNTIME_MODULE_PATH);
+        initialiseApplicationSettings();
 
         // Overwrite with external properties file
         // Reserved properties are kept as per internal key definition
         Map<String,String> reservedKeyMap = new HashMap<>();
-        Path tmpRK = Paths.get(STORE_ROOT.toString(), "rk");
+        Path tmpRK = Paths.get(storeRoot.toString(), "rk");
         try (FileOutputStream fileOutputStream = new FileOutputStream(tmpRK.toString());
              FileChannel channel = fileOutputStream.getChannel();
              FileLock lock = channel.lock()) {
@@ -349,8 +330,8 @@ public class JFXUtil {
                  .forEach(k -> reservedKeyMap.put(k, props.getProperty(k)));
         }
 
-        if (Files.exists(APPLICATION_SETTINGS_FILE)) {
-            props.load(Files.newBufferedReader(APPLICATION_SETTINGS_FILE));
+        if (Files.exists(bootstrapPropertiesFile)) {
+            props.load(Files.newBufferedReader(bootstrapPropertiesFile));
         }
 
         InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_RK_KEYS, reservedKeyMap.keySet());

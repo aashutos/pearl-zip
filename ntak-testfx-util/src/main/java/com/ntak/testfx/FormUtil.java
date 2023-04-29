@@ -3,6 +3,7 @@
  */
 package com.ntak.testfx;
 
+import com.ntak.testfx.specifications.CommonSpecifications;
 import javafx.collections.ObservableList;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
@@ -10,24 +11,28 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.testfx.api.FxRobot;
 
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.ntak.testfx.TestFXConstants.RETRIEVAL_TIMEOUT_MILLIS;
+import static com.ntak.testfx.TestFXConstants.SHORT_PAUSE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class FormUtil {
     public static <T,R> Optional<TableRow<T>> selectTableViewEntry(FxRobot robot, TableView<T> table,
             Function<T,R> extractor, R option) {
         robot.clickOn(String.format("#%s", table.getId()), new MouseButton[]{MouseButton.PRIMARY});
-        robot.sleep(50, MILLISECONDS);
+        robot.sleep(SHORT_PAUSE, MILLISECONDS);
 
         for (int i = 0; i < table.getItems().size(); i++) {
             final String rowId = String.format("%s-%d", table.getId(), i);
-            TableRow<T> row = ((TableCell<T,T>)table.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
-                                                                                  i, 0)).getTableRow();
+            int index = i;
+            TableRow<T> row = CommonSpecifications.retryRetrievalForDuration(RETRIEVAL_TIMEOUT_MILLIS, () -> ((TableCell<T,T>)table.queryAccessibleAttribute(AccessibleAttribute.CELL_AT_ROW_COLUMN,
+                                                                                                  index, 0)).getTableRow());
             synchronized(row) {
                 row.setId(rowId);
                 System.out.printf("Clicking on: %s%n", rowId);
@@ -37,7 +42,7 @@ public class FormUtil {
             if (extractor.apply(row.getItem()).equals(option)) {
                 return Optional.of(row);
             }
-            robot.sleep(50, MILLISECONDS);
+            robot.sleep(SHORT_PAUSE, MILLISECONDS);
         }
 
         return Optional.empty();
@@ -102,5 +107,9 @@ public class FormUtil {
                     .get()
                     .getScene()
                     .lookup(id);
+    }
+
+    public static Optional<Stage> lookupStage(String regExPattern) {
+        return Window.getWindows().stream().map(Stage.class::cast).filter(s -> s.getTitle().matches(regExPattern)).findFirst();
     }
 }

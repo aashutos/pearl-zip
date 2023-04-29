@@ -1,21 +1,16 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.testfx;
 
 import com.ntak.pearlzip.ui.UITestSuite;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
-import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
-import javafx.geometry.Point2D;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.ntak.pearlzip.ui.util.PearlZipSpecifications;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 @Tag("fx-test")
@@ -47,121 +42,146 @@ public class NewArchiveTestFX extends AbstractPearlZipTestFX {
 
     @Test
     @DisplayName("Test: Create new zip archive successfully from the main window")
-    public void testFX_CreateNewZipArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "zip";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new zip archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewZipArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "zip", "testzip");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new tar archive successfully from the main window")
-    public void testFX_CreateNewTarArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "tar";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new tar archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewTarArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "tar", "testtar");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new jar archive successfully from the main window")
-    public void testFX_CreateNewJarArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "jar";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new jar archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewJarArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "jar", "testjar");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new xz tarball archive successfully from the main window")
-    public void testFX_CreateNewXzArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "tar.xz";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testxz.%s",
-                                                                                                        archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new xz archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewXzArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "xz", "testxz.tar");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new bzip tarball archive successfully from the main window")
-    public void testFX_CreateNewBzipArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "tar.bz2";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testbz2.%s",
-                                                                                                        archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new bz2 archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewBzipArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "bz2", "testbz2.tar");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new gzip tarball archive successfully from the main window")
-    public void testFX_CreateNewGzipArchiveMainWindow_Success() throws IOException {
-        final String archiveFormat = "tar.gz";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testgz.%s",
-                                                                                                        archiveFormat));
-        PearlZipFXUtil.simNewArchive(this, fileToSave);
+    // GIVEN a new gz archive has been created in PearlZip
+    // THEN ensure file exists
+    public void testFX_CreateNewGzipArchiveMainWindow_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "gz", "testgz.tar");
+
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new zip archive successfully from the system menu")
-    public void testFX_CreateNewZipArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "zip";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
+    // GIVEN a new zip archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewZipArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "zip", "testzip", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new jar archive successfully from the system menu")
-    public void testFX_CreateNewJarArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "jar";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
+    // GIVEN a new jar archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewJarArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "jar", "testjar", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new tar archive successfully from the system menu")
-    public void testFX_CreateNewTarArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "tar";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("test%s.%s", archiveFormat, archiveFormat));
+    // GIVEN a new tar archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewTarArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "tar", "testtar", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new Gzip archive successfully from the system menu")
-    public void testFX_CreateNewGzipArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "tar.gz";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testGz.%s",
-                                                                                                        archiveFormat));
+    // GIVEN a new gz archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewGzipArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "gz", "testgz.tar", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
+
 
     @Test
     @DisplayName("Test: Create new xz archive successfully from the system menu")
-    public void testFX_CreateNewXzArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "tar.xz";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testXz.%s",
-                                                                                                        archiveFormat));
+    // GIVEN a new xz archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewXzArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "xz", "testxz.tar", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 
     @Test
     @DisplayName("Test: Create new Bzip archive successfully from the system menu")
-    public void testFX_CreateNewBzipArchiveSystemMenu_Success() throws IOException {
-        final String archiveFormat = "tar.bz2";
-        final Path fileToSave = Paths.get(System.getProperty("user.home"), ".pz", "temp", String.format("testBz2.%s",
-                                                                                                        archiveFormat));
+    // GIVEN a new bz2 archive has been created in PearlZip (via system menu)
+    // THEN ensure file exists
+    public void testFX_CreateNewBzipArchiveSystemMenu_Success() {
+        // Given
+        Path archive = PearlZipSpecifications.givenCreateNewArchive(this, "bz2", "testbz2.tar", true);
 
-        // Hard coded movement to new MenuItem
-        clickOn(Point2D.ZERO.add(110,10)).clickOn(Point2D.ZERO.add(110,30));
-        PearlZipFXUtil.simNewArchive(this, fileToSave, false);
+        // Then
+        Assertions.assertTrue(Files.exists(archive), String.format("File %s does not exist.", archive));
     }
 }

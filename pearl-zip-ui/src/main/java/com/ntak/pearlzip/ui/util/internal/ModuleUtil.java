@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 92AK
+ * Copyright © 2023 92AK
  */
 package com.ntak.pearlzip.ui.util.internal;
 
@@ -333,8 +333,7 @@ public class ModuleUtil {
                                   .stream()
                                   .map(l -> Paths.get(targetDir.toAbsolutePath().toString(), l))
                                   .collect(Collectors.toList());
-            Path moduleDirectory = Path.of(STORE_ROOT.toAbsolutePath()
-                                                     .toString(), "providers");
+            Path moduleDirectory = STORE_ROOT.toAbsolutePath().resolve("providers");
             Files.createDirectories(moduleDirectory);
 
             for (Path lib : libs) {
@@ -369,7 +368,7 @@ public class ModuleUtil {
 
             // Copy themes to local directory
             for (String theme : info.getThemes()) {
-                Path localThemeDir = Paths.get(STORE_ROOT.toAbsolutePath().toString(), "themes");
+                Path localThemeDir = STORE_ROOT.toAbsolutePath().resolve("themes");
                 if (Files.exists(localThemeDir.resolve(theme))) {
                     Files.walkFileTree(localThemeDir.resolve(theme), new SimpleFileVisitor<>() {
                         @Override
@@ -533,11 +532,9 @@ public class ModuleUtil {
 
                                     // Remove themes by unique key...
                                     for (String theme : m.getThemes()) {
-                                        Path themePath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                                                             .toString(),
-                                                                   "themes",
-                                                                   theme
-                                        );
+                                        Path themePath = STORE_ROOT.toAbsolutePath()
+                                                                   .resolve("themes")
+                                                                   .resolve(theme);
 
                                         deleteDirectory(themePath, (p) -> false);
                                         deleteDirectory(Paths.get(moduleDirectory, m.getName()), f -> false);
@@ -573,22 +570,17 @@ public class ModuleUtil {
                 .<Path>getAdditionalConfig(CK_LOCAL_MANIFEST_DIR)
                 .get();
 
-        Files.list(Path.of(STORE_ROOT.toAbsolutePath()
-                                     .toString(), "providers"))
+        Files.list(STORE_ROOT.toAbsolutePath().resolve("providers"))
              .filter(Files::isDirectory)
              .forEach(d -> ArchiveUtil.deleteDirectory(d, p -> false));
 
-        Files.list(Path.of(STORE_ROOT.toAbsolutePath()
-                                     .toString(), "providers"))
+        Files.list(STORE_ROOT.toAbsolutePath().resolve("providers"))
              .forEach(ModuleUtil::safeDeletePath);
 
         Files.list(LOCAL_MANIFEST_DIR)
              .forEach(ModuleUtil::safeDeletePath);
 
-        Path themesPath = Paths.get(STORE_ROOT.toAbsolutePath()
-                                             .toString(),
-                                   "themes"
-        );
+        Path themesPath = STORE_ROOT.toAbsolutePath().resolve("themes");
 
         Files.list(themesPath)
              .filter(d -> Files.isDirectory(d) && !CORE_THEMES.contains(d.getFileName().toString()))

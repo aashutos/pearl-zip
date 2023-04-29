@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2023 92AK
  */
 
 package com.ntak.testfx;
@@ -11,9 +11,14 @@ import org.testfx.api.FxRobot;
 
 import java.nio.file.Path;
 
+import static com.ntak.testfx.TestFXConstants.PLATFORM;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class NativeFileChooserUtil {
+
+    public static void chooseFile(FxRobot robot, Path filePath) {
+        chooseFile(PLATFORM, robot, filePath);
+    }
 
     public static void chooseFile(TestFXConstants.Platform platform, FxRobot robot, Path filePath) {
         switch (platform) {
