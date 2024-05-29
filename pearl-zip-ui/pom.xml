@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2023 92AK
+  ~ Copyright © 2024 92AK
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
+            <version>42.7.3</version>
         </dependency>
         <!--<dependency>
             <groupId>com.oracle.database.jdbc</groupId>
