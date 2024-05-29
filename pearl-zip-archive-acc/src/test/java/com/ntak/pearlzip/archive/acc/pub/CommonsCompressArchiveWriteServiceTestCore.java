@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2024 92AK
  */
 package com.ntak.pearlzip.archive.acc.pub;
 
@@ -226,7 +226,7 @@ public abstract class CommonsCompressArchiveWriteServiceTestCore {
         service.createArchive(sessionId, archive.toAbsolutePath().toString(), tfFileInfo);
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
         final byte[] bytes = Files.readAllBytes(archive);
-        Assertions.assertEquals(186, bytes.length, "File failed to create in the expected manner");
+        Assertions.assertEquals(284, bytes.length, "File failed to create in the expected manner");
         // Zip magic number
         Assertions.assertEquals((byte)0x50, bytes[0], "first byte");
         Assertions.assertEquals((byte)0x4b, bytes[1], "second byte issue");
@@ -243,7 +243,7 @@ public abstract class CommonsCompressArchiveWriteServiceTestCore {
         service.createArchive(sessionId, archive.toAbsolutePath().toString(), tfFileInfo);
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
         final byte[] bytes = Files.readAllBytes(archive);
-        Assertions.assertEquals(1536, bytes.length, "File failed to create in the expected manner");
+        Assertions.assertEquals(2560, bytes.length, "File failed to create in the expected manner");
         // Tar magic number
         Assertions.assertEquals('u', bytes[257], "first byte");
         Assertions.assertEquals('s', bytes[258], "second byte issue");
@@ -266,7 +266,7 @@ public abstract class CommonsCompressArchiveWriteServiceTestCore {
 
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
         final byte[] bytes = Files.readAllBytes(archive);
-        Assertions.assertEquals(382, bytes.length, "File failed to create in the expected manner");
+        Assertions.assertEquals(578, bytes.length, "File failed to create in the expected manner");
 
         // Zip magic number
         Assertions.assertEquals((byte)0x50, bytes[0], "first byte");
@@ -287,7 +287,7 @@ public abstract class CommonsCompressArchiveWriteServiceTestCore {
 
         Assertions.assertTrue(Files.exists(archive), "Archive was not created");
         final byte[] bytes = Files.readAllBytes(archive);
-        Assertions.assertEquals(2048, bytes.length, "File failed to create in the expected manner");
+        Assertions.assertEquals(4096, bytes.length, "File failed to create in the expected manner");
         // Tar magic number
         Assertions.assertEquals('u', bytes[257], "first byte");
         Assertions.assertEquals('s', bytes[258], "second byte issue");
