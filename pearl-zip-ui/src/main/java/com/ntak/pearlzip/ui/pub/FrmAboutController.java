@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 92AK
+ * Copyright © 2024 92AK
  */
 package com.ntak.pearlzip.ui.pub;
 
@@ -55,11 +55,9 @@ public class FrmAboutController {
     public void initialize() {
         lblAppName.setText(System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip"));
         lblVersion.setText(System.getProperty(CNS_NTAK_PEARL_ZIP_VERSION, "0.0.0.0"));
-        lblCopyright.setText(System.getProperty(CNS_NTAK_PEARL_ZIP_COPYRIGHT,
-                                                String.format("© %s 92AK\nProgram written by Aashutos Kakshepati",
+        lblCopyright.setText(String.format(System.getProperty(CNS_NTAK_PEARL_ZIP_COPYRIGHT, "© %s 92AK\nProgram written by Aashutos Kakshepati"),
                                                               LocalDate.now().format(
-                                                                      DTF_YYYY)))
-        );
+                                                                      DTF_YYYY)));
         lblWeblink.setText(System.getProperty(CNS_NTAK_PEARL_ZIP_WEBLINK, "https://pearlzip.92ak.co.uk"));
     }
 
